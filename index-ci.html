@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Mint Money — Design System CI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: 'Sarabun', -apple-system, system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="tokens.js"></script>
+<script type="text/babel" src="primitives.jsx"></script>
+<script type="text/babel" src="v2-primitives.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+const M = window.MINT;
+
+// ─── Design System Layout ─────────────────────────────────
+function DSLayout({ children }) {
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Sidebar */}
+      <div style={{
+        width: 260, background: '#1A1A1A', color: '#fff',
+        padding: '32px 24px', position: 'fixed', height: '100vh', overflowY: 'auto',
+      }}>
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 11, color: '#888', letterSpacing: 2, marginBottom: 4 }}>MINT MONEY</div>
+          <div style={{ fontSize: 22, fontWeight: 700 }}>Design System</div>
+          <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>v1.0.0</div>
+        </div>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {['Colors', 'Transaction Colors', 'Typography', 'Components', 'Icons', 'Shells'].map(section => (
+            <a key={section} href={`#${section.toLowerCase()}`} style={{
+              color: '#aaa', textDecoration: 'none', fontSize: 14, padding: '8px 12px',
+              borderRadius: 8, display: 'block',
+            }}
+            onMouseEnter={e => e.target.style.background = '#333'}
+            onMouseLeave={e => e.target.style.background = 'transparent'}
+            >{section}</a>
+          ))}
+        </nav>
+      </div>
+
+      {/* Main content */}
+      <div style={{ marginLeft: 260, flex: 1, padding: '48px 56px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─── Section ──────────────────────────────────────────────
+function DSSection({ title, id, children }) {
+  return (
+    <section id={id} style={{ marginBottom: 64 }}>
+      <h2 style={{ fontSize: 11, color: '#888', letterSpacing: 2, marginBottom: 8, marginTop: 0 }}>{title.toUpperCase()}</h2>
+      <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 32px', color: '#1A1A1A' }}>{title}</h1>
+      {children}
+    </section>
+  );
+}
+
+// ─── Color Swatch ─────────────────────────────────────────
+function ColorSwatch({ name, hex, textColor = '#fff' }) {
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div style={{
+        width: 80, height: 80, borderRadius: 16, background: hex,
+        margin: '0 auto 12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      }} />
+      <div style={{ fontSize: 11, color: '#666', marginBottom: 2 }}>{name}</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{hex}</div>
+    </div>
+  );
+}
+
+// ─── Color Row ────────────────────────────────────────────
+function ColorRow({ title, colors }) {
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <h3 style={{ fontSize: 14, fontWeight: 600, color: '#333', marginBottom: 16 }}>{title}</h3>
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+        {Object.entries(colors).map(([name, hex]) => (
+          <ColorSwatch key={name} name={name} hex={hex} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Component Card ───────────────────────────────────────
+function ComponentCard({ title, description, children, code }) {
+  const [showCode, setShowCode] = useState(false);
+  return (
+    <div style={{
+      background: '#fff', borderRadius: 16, padding: 24, marginBottom: 20,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+        <div>
+          <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 4px', color: '#1A1A1A' }}>{title}</h3>
+          {description && <p style={{ fontSize: 13, color: '#666', margin: 0 }}>{description}</p>}
+        </div>
+        <button onClick={() => setShowCode(!showCode)} style={{
+          background: showCode ? M.primary100 : '#f0f0f0',
+          border: 'none', borderRadius: 8, padding: '6px 12px', fontSize: 12,
+          cursor: 'pointer', color: M.primary600, fontWeight: 500,
+        }}>{showCode ? 'Hide Code' : 'Show Code'}</button>
+      </div>
+      <div style={{ background: '#f7f7fa', borderRadius: 12, padding: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        {children}
+      </div>
+      {showCode && (
+        <pre style={{ background: '#1A1A1A', color: '#a8f0c6', padding: 16, borderRadius: 12, marginTop: 16, fontSize: 12, overflow: 'auto' }}>
+          {code}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+// ─── Phone Preview ────────────────────────────────────────
+function PhonePreview({ children }) {
+  return (
+    <div style={{
+      width: 220, height: 476, borderRadius: 28, overflow: 'hidden',
+      background: '#F7F7FA', position: 'relative',
+      boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+    }}>
+      <div style={{
+        position: 'absolute', top: 6, left: '50%', transform: 'translateX(-50%)',
+        width: 70, height: 21, borderRadius: 14, background: '#000', zIndex: 50,
+      }} />
+      {children}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 20,
+        background: 'rgba(255,255,255,0.96)', borderTop: '0.5px solid #E9E9E9',
+      }} />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════════════════
+function App() {
+  return (
+    <DSLayout>
+      {/* ─── Colors ─────────────────────────────────── */}
+      <DSSection title="Colors" id="colors">
+        <ColorRow title="Primary" colors={{
+          primary100: M.primary100,
+          primary200: M.primary200,
+          primary300: M.primary300,
+          primary400: M.primary400,
+          primary500: M.primary500,
+          primary600: M.primary600,
+        }} />
+        <ColorRow title="Error" colors={{
+          error100: M.error100,
+          error200: M.error200,
+          error300: M.error300,
+          error400: M.error400,
+          error500: M.error500,
+        }} />
+        <ColorRow title="Warning & Info" colors={{
+          warning400: M.warning400,
+          info100: M.info100,
+          info200: M.info200,
+          info400: M.info400,
+        }} />
+        <ColorRow title="Neutral" colors={{
+          n100: M.n100,
+          n200: M.n200,
+          n300: M.n300,
+          n400: M.n400,
+          n500: M.n500,
+          n600: M.n600,
+          n700: M.n700,
+          n800: M.n800,
+          n900: M.n900,
+        }} />
+        <ColorRow title="Gradients" colors={{
+          'Background': `linear-gradient(135deg, ${M.gradStart} 0%, ${M.gradMid} 50%, ${M.gradEnd} 100%)`,
+        }} />
+        <ColorRow title="Wallet Colors" colors={{
+          walletRed: M.walletRed,
+          walletRed100: M.walletRed100,
+          walletGreen: M.walletGreen,
+          walletGreen100: M.walletGreen100,
+          walletViolet: M.walletViolet,
+          walletViolet100: M.walletViolet100,
+          walletPink: M.walletPink,
+          walletPink100: M.walletPink100,
+          walletBrown: M.walletBrown,
+          walletBrown100: M.walletBrown100,
+        }} />
+
+        {/* Transaction Category Colors */}
+        <ColorRow title="Transaction Category Colors" colors={{
+          'แดง': '#FEE2E2',
+          'ส้ม': '#FED7AA',
+          'เหลือง': '#FEF3C7',
+          'เขียว': '#DCFCE7',
+          'ฟ้า': '#DBEAFE',
+          'ม่วง': '#E9D5FF',
+          'ชมพู': '#FCE7F3',
+          'เทา': '#F4F4F5',
+          'เขียวมิ้นต์': '#B2F5EA',
+          'น้ำตาล': '#EBDBD3',
+        }} />
+        <div style={{ marginBottom: 32 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: '#333', marginBottom: 16 }}>Transaction Category Icon Colors</h3>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            {[
+              { label: 'แดง', ic: '#EF4444' },
+              { label: 'ส้ม', ic: '#F97316' },
+              { label: 'เหลือง', ic: '#F59E0B' },
+              { label: 'เขียว', ic: '#22C55E' },
+              { label: 'ฟ้า', ic: '#3B82F6' },
+              { label: 'ม่วง', ic: '#9333EA' },
+              { label: 'ชมพู', ic: '#EC4899' },
+              { label: 'เทา', ic: '#52525B' },
+              { label: 'เขียวมิ้นต์', ic: '#319795' },
+              { label: 'น้ำตาล', ic: '#CCB0A4' },
+            ].map(c => (
+              <div key={c.label} style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 12,
+                  background: c.ic, margin: '0 auto 8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                }} />
+                <div style={{ fontSize: 11, color: '#666' }}>{c.label}</div>
+                <div style={{ fontSize: 10, color: '#aaa' }}>{c.ic}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </DSSection>
+
+      {/* ─── Typography ──────────────────────────────── */}
+      <DSSection title="Typography" id="typography">
+        <div style={{ background: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+          {[
+            { size: 32, weight: 800, label: 'Heading 1' },
+            { size: 24, weight: 700, label: 'Heading 2' },
+            { size: 20, weight: 600, label: 'Heading 3' },
+            { size: 17, weight: 600, label: 'Subtitle' },
+            { size: 15, weight: 500, label: 'Body' },
+            { size: 13, weight: 400, label: 'Caption' },
+            { size: 11, weight: 400, label: 'Overline' },
+          ].map(t => (
+            <div key={t.label} style={{ display: 'flex', alignItems: 'baseline', gap: 24, marginBottom: 16 }}>
+              <span style={{ width: 80, fontSize: 11, color: '#888' }}>{t.label}</span>
+              <span style={{ fontSize: t.size, fontWeight: t.weight, color: '#1A1A1A' }}>
+                กขคงไปยาวนาน Abc 123
+              </span>
+              <span style={{ fontSize: 11, color: '#aaa', marginLeft: 'auto' }}>{t.size}px / {t.weight}</span>
+            </div>
+          ))}
+        </div>
+      </DSSection>
+
+      {/* ─── Components ──────────────────────────────── */}
+      <DSSection title="Components" id="components">
+        <ComponentCard title="MintStatusBar" description="iOS-style status bar with time, signal, wifi, battery" code={`<MintStatusBar time="21:29" />`}>
+          <MintStatusBar time="21:29" />
+        </ComponentCard>
+
+        <ComponentCard title="DynamicIsland" description="iPhone 14 Pro dynamic island pill" code={`<DynamicIsland />`}>
+          <div style={{ position: 'relative', width: 120, height: 50 }}>
+            <DynamicIsland />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard title="HomeIndicator" description="iOS home indicator bar" code={`<HomeIndicator />`}>
+          <div style={{ position: 'relative', width: 120, height: 40 }}>
+            <HomeIndicator />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard title="PhoneFrame" description="Device shell wrapping content" code={`<PhoneFrame><YourContent /></PhoneFrame>`}>
+          <PhoneFrame>
+            <div style={{ padding: 40, textAlign: 'center', color: M.n500 }}>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>PhoneFrame</div>
+              <div style={{ fontSize: 12, color: M.n400 }}>Content goes here</div>
+            </div>
+          </PhoneFrame>
+        </ComponentCard>
+
+        <ComponentCard title="MintFab" description="Floating action button (teal add)" code={`<MintFab bottom={100} right={20} />`}>
+          <div style={{ position: 'relative', width: 100, height: 140 }}>
+            <MintFab bottom={16} right={16} />
+          </div>
+        </ComponentCard>
+
+        <ComponentCard title="BottomNav" description="Bottom navigation with 5 tabs" code={`<BottomNav active="home" />`}>
+          <PhonePreview>
+            <div style={{ paddingTop: 40 }}>
+              <BottomNav active="home" />
+            </div>
+          </PhonePreview>
+        </ComponentCard>
+
+        <ComponentCard title="PiggyAvatar" description="Family piggy emoji avatar" code={`<PiggyAvatar size={48} />`}>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <PiggyAvatar size={32} />
+            <PiggyAvatar size={48} />
+            <PiggyAvatar size={64} />
+          </div>
+        </ComponentCard>
+
+        <h3 style={{ fontSize: 16, fontWeight: 600, margin: '32px 0 20px', color: '#333' }}>V2 Components</h3>
+
+        <ComponentCard title="PhoneFrameV2" description="Refined device shell" code={`<PhoneFrameV2><YourContent /></PhoneFrameV2>`}>
+          <PhoneFrameV2>
+            <div style={{ padding: 40, textAlign: 'center', color: M.n500 }}>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>PhoneFrameV2</div>
+            </div>
+          </PhoneFrameV2>
+        </ComponentCard>
+
+        <ComponentCard title="BottomNavV2" description="V2 bottom nav — Home / Wallets / Activity / Insights / More" code={`<BottomNavV2 active="home" />`}>
+          <PhonePreview>
+            <div style={{ paddingTop: 40 }}>
+              <BottomNavV2 active="home" />
+            </div>
+          </PhonePreview>
+        </ComponentCard>
+
+        <ComponentCard title="MintFabV2" description="V2 FAB (same styling)" code={`<MintFabV2 bottom={16} right={16} />`}>
+          <div style={{ position: 'relative', width: 100, height: 140 }}>
+            <MintFabV2 bottom={16} right={16} />
+          </div>
+        </ComponentCard>
+      </DSSection>
+
+      {/* ─── Icons ───────────────────────────────────── */}
+      <DSSection title="Icons" id="icons">
+        <ComponentCard title="Navigation Icons" description="Home, Finance, Transaction, Report, More">
+          <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <HomeIcon active={true} />
+              <div style={{ fontSize: 10, color: '#666', marginTop: 4 }}>Active</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <HomeIcon active={false} />
+              <div style={{ fontSize: 10, color: '#666', marginTop: 4 }}>Inactive</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <FinanceIcon active={true} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <FinanceIcon active={false} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <TransactionIcon active={true} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <ReportIcon active={true} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <MoreIcon active={false} />
+            </div>
+          </div>
+        </ComponentCard>
+
+        <ComponentCard title="Category Icons (CatIcon)" description="coffee, movie, bill, cart, gas, game, plane, home, piggy, card, wallet, japan, budget">
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {['coffee', 'movie', 'bill', 'cart', 'gas', 'game', 'plane', 'home', 'piggy', 'card', 'wallet', 'japan', 'budget'].map(kind => (
+              <div key={kind} style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 12, background: M.primary500,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <CatIcon kind={kind} size={24} color="#fff" />
+                </div>
+                <div style={{ fontSize: 9, color: '#888', marginTop: 4 }}>{kind}</div>
+              </div>
+            ))}
+          </div>
+        </ComponentCard>
+      </DSSection>
+
+      {/* ─── Shells ──────────────────────────────────── */}
+      <DSSection title="Shells" id="shells">
+        <ComponentCard title="Full Phone Shell (primitives.jsx)" description="Complete iPhone frame with status bar, dynamic island, home indicator">
+          <div style={{ transform: 'scale(0.55)', transformOrigin: 'center' }}>
+            <PhoneFrame bg={M.n200}>
+              <div style={{ paddingTop: 50, textAlign: 'center' }}>
+                <MintStatusBar />
+                <div style={{ padding: 20 }}>
+                  <h3 style={{ margin: '40px 0 10px', color: M.n800 }}>Screen Title</h3>
+                  <p style={{ color: M.n400, fontSize: 14 }}>Content area</p>
+                </div>
+              </div>
+              <BottomNav active="home" />
+            </PhoneFrame>
+          </div>
+        </ComponentCard>
+
+        <ComponentCard title="Full Phone Shell (v2-primitives.jsx)" description="V2 version with refined components">
+          <div style={{ transform: 'scale(0.55)', transformOrigin: 'center' }}>
+            <PhoneFrameV2 bg={M.n200}>
+              <div style={{ paddingTop: 50, textAlign: 'center' }}>
+                <MintStatusBarV2 />
+                <div style={{ padding: 20 }}>
+                  <h3 style={{ margin: '40px 0 10px', color: M.n800 }}>Screen Title</h3>
+                  <p style={{ color: M.n400, fontSize: 14 }}>Content area</p>
+                </div>
+              </div>
+              <BottomNavV2 active="home" />
+            </PhoneFrameV2>
+          </div>
+        </ComponentCard>
+      </DSSection>
+
+    </DSLayout>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
