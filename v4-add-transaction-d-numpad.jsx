@@ -40,21 +40,6 @@ function CatChipIcon({ cat, size = 36 }) {
   );
 }
 
-function MetaCell({ icon, label, value, sep }) {
-  return (
-    <div style={{
-      padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8,
-      borderLeft: sep ? `1px solid ${TC.n300}` : 'none',
-    }}>
-      {icon}
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 9, color: TC.n400 }}>{label}</div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: TC.n900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Design Panel Component ──────────────────────────────────
 function DesignPanel({ visible, onClose }) {
   if (!visible) return null;
@@ -327,22 +312,6 @@ function DSheetShell({ children, txns = [] }) {
       {designPanelVisible && (
         <DesignPanel visible={true} onClose={() => setDesignPanelVisible(false)} />
       )}
-      <div
-        onClick={() => setDesignPanelVisible(true)}
-        style={{
-          position: 'fixed', bottom: 24, right: 24, zIndex: 9998,
-          width: 56, height: 56, borderRadius: 16,
-          background: TC.primary500, color: '#fff',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-          cursor: 'pointer',
-        }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="3" stroke="#fff" strokeWidth="2"/>
-          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-      </div>
 
       <div style={{
         background: TC.n200,
@@ -372,7 +341,21 @@ function DSheetShell({ children, txns = [] }) {
             padding: '6px 18px 12px', flexShrink: 0,
           }}>
             <div style={{ fontSize: 17, fontWeight: 700, color: TC.n900 }}>เพิ่มธุรกรรม</div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div
+                onClick={() => setDesignPanelVisible(true)}
+                style={{
+                  width: 32, height: 32, borderRadius: 10,
+                  background: TC.n200, color: TC.n600,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="3" stroke={TC.n600} strokeWidth="2"/>
+                  <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke={TC.n600} strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
               <div style={{
                 padding: '6px 12px', borderRadius: 999, background: '#fff',
                 border: `1px solid ${TC.n300}`, display: 'flex', alignItems: 'center', gap: 5,
@@ -476,7 +459,7 @@ function DTabs({ active, sub, subOptions }) {
 }
 
 // ─── Amount + Category Card (Variation C style) ────
-function DAmountCard({ amount = '0', sign = '-', signColor, hint, selectedCat }) {
+function DAmountCard({ amount = '0', sign = '-', hint, selectedCat }) {
   const cat = selectedCat || CATEGORY_COLORS[0];
   return (
     <div style={{
@@ -485,18 +468,27 @@ function DAmountCard({ amount = '0', sign = '-', signColor, hint, selectedCat })
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, color: TC.n400, fontWeight: 600, letterSpacing: 0.4 }}>จำนวน · THB</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+            <div style={{ fontSize: 11, color: TC.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase' }}>จำนวนเงิน</div>
+            <div style={{
+              fontSize: 11, fontWeight: 700, color: TC.n600,
+              background: TC.n200, padding: '3px 8px', borderRadius: 8,
+              cursor: 'pointer'
+            }}>THB ▾</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 4 }}>
             <span style={{ fontSize: 36, fontWeight: 800, color: TC.n900, letterSpacing: -1, fontVariantNumeric: 'tabular-nums', lineHeight: 1.05 }}>
               {sign}{Number(amount.replace(/,/g,'')).toLocaleString('en-US')}
             </span>
-            <span style={{ fontSize: 16, fontWeight: 600, color: TC.n400 }}>.00</span>
+            {amount && !amount.includes('.') && (
+              <span style={{ fontSize: 16, fontWeight: 600, color: TC.n400 }}>.00</span>
+            )}
           </div>
         </div>
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
           padding: '8px 4px',
-          borderLeft: `1px dashed ${TC.n300}`,
+          borderLeft: `1px solid ${TC.n300}`,
           paddingLeft: 14, minWidth: 70,
         }}>
           <CatChipIcon cat={cat} size={36} />
@@ -504,7 +496,7 @@ function DAmountCard({ amount = '0', sign = '-', signColor, hint, selectedCat })
           <div style={{ fontSize: 10, color: TC.primary500 }}>เปลี่ยน ▾</div>
         </div>
       </div>
-      {hint && <div style={{ fontSize: 11, color: TC.n400, marginTop: 6 }}>{hint}</div>}
+      {hint && <div style={{ fontSize: 11, color: TC.n600, marginTop: 6 }}>{hint}</div>}
     </div>
   );
 }
@@ -546,41 +538,15 @@ function DArrowConnector() {
   );
 }
 
-// Smart suggestions chips
-function DSuggestions({ items }) {
-  return (
-    <div style={{ padding: '0 16px 10px' }}>
-      <div style={{ fontSize: 11, color: TC.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', padding: '0 4px', marginBottom: 8 }}>
-        ที่คุณเลือกบ่อย
-      </div>
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: 2 }}>
-        {items.map((s, i) => (
-          <div key={i} style={{
-            background: '#fff', borderRadius: 12, padding: '7px 10px',
-            display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
-            border: s.on ? `1.5px solid ${TC.primary500}` : `1px solid ${TC.n300}`,
-          }}>
-            <CatChipIcon cat={s.cat} size={26} />
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: TC.n900 }}>{s.name}</div>
-              <div style={{ fontSize: 10, color: TC.n400 }}>{s.sub}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // Quick amount chips row
 function DQuickChips({ items }) {
   return (
-    <div style={{ padding: '0 16px 10px', display: 'flex', gap: 6, overflowX: 'auto' }}>
+    <div style={{ padding: '8px 16px 4px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
       {items.map((item, i) => (
         <div key={i} style={{
-          padding: '7px 14px', borderRadius: 999, background: item.active ? TC.primary500 : '#fff',
+          padding: '8px 16px', borderRadius: 999, background: item.active ? TC.primary500 : '#fff',
           color: item.active ? '#fff' : TC.n600, fontSize: 12, fontWeight: 600,
-          border: item.active ? 'none' : `1px solid ${TC.n300}`, flexShrink: 0, cursor: 'pointer',
+          border: item.active ? 'none' : `1px solid ${TC.n300}`, cursor: 'pointer',
         }}>
           {item.label}
         </div>
@@ -589,48 +555,73 @@ function DQuickChips({ items }) {
   );
 }
 
-// Compact meta row (date / tag / wallet) — Variation C style 3-col grid
-function DMetaRow({ showNote = true }) {
+// Compact meta row — consistent with CI design language
+function DMetaRow() {
   return (
-    <>
-      <div style={{ padding: '0 16px 10px' }}>
-        <div style={{
-          background: '#fff', borderRadius: 14, padding: '4px 4px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-          display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
-        }}>
-          <MetaCell
-            icon={<div style={{ width: 22, height: 22, borderRadius: 7, background: TC.walletPink100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CatIcon kind="piggy" size={12} color={TC.walletPink} />
-            </div>}
-            label="กระเป๋า" value="ครอบครัว" />
-          <MetaCell
-            icon={<CatIcon kind="budget" size={14} color={TC.primary500} />}
-            label="วันที่" value="วันนี้" sep />
-          <MetaCell
-            icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M3 12V4h8l10 10-8 8L3 12z" stroke={TC.primary500} strokeWidth="1.8" strokeLinejoin="round"/>
-              <circle cx="7.5" cy="7.5" r="1.2" fill={TC.primary500}/>
-            </svg>}
-            label="แท็ก" value="+ เพิ่ม" sep />
-        </div>
-      </div>
-      {showNote && (
-        <div style={{ padding: '0 16px 12px' }}>
+    <div style={{ padding: '0 16px 10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      {/* Date cell */}
+      <div style={{
+        background: '#fff', borderRadius: 12, padding: '6px 8px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <div style={{
-            background: '#fff', borderRadius: 14, padding: '12px 14px',
-            display: 'flex', alignItems: 'center', gap: 10,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+            width: 10, height: 10, borderRadius: 2,
+            background: TC.primary100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M5 4h11l3 3v13H5V4z" stroke={TC.n400} strokeWidth="1.6"/>
-              <path d="M9 10h7M9 13h7" stroke={TC.n400} strokeWidth="1.4" strokeLinecap="round"/>
+            <CatIcon kind="budget" size={7} color={TC.primary500} />
+          </div>
+          <div style={{ fontSize: 9, fontWeight: 600, color: TC.n700 }}>วันที่</div>
+        </div>
+        <div style={{ borderTop: `1px solid ${TC.n200}`, marginTop: 4, paddingTop: 4 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ cursor: 'pointer' }}>
+              <path d="M15 18l-6-6 6-6" stroke={TC.n500} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <div style={{ fontSize: 13, color: TC.n900, flex: 1 }}>กาแฟลาเต้ ร้านที่ทำงาน</div>
+            <div style={{
+              fontSize: 11, fontWeight: 600, color: TC.n900, minWidth: 80, textAlign: 'center',
+            }}>
+              01/05/2026
+            </div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ cursor: 'pointer' }}>
+              <path d="M9 18l6-6-6-6" stroke={TC.n500} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
-      )}
-    </>
+      </div>
+
+      {/* Note cell */}
+      <div style={{
+        background: '#fff', borderRadius: 12, padding: '6px 8px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{
+            width: 10, height: 10, borderRadius: 2,
+            background: TC.primary100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <svg width="7" height="7" viewBox="0 0 24 24" fill="none">
+              <path d="M5 4h11l3 3v13a1 1 0 01-1 1H5V4z" stroke={TC.primary500} strokeWidth="2" strokeLinejoin="round"/>
+              <path d="M9 10h7M9 13h7M9 16h4" stroke={TC.primary500} strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 9, fontWeight: 600, color: TC.n700 }}>บันทึก</div>
+        </div>
+        <div style={{ borderTop: `1px solid ${TC.n200}`, marginTop: 4, paddingTop: 4 }}>
+          <div style={{
+            fontSize: 11, fontWeight: 500, color: TC.n400,
+          }}>
+            + เพิ่มบันทึก…
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -672,14 +663,7 @@ function AddTxnD_Expense() {
   return (
     <DSheetShell txns={txns}>
       <DTabs active="expense" />
-      <DAmountCard amount="85" sign="-" signColor={TC.error400} hint="หมวด: อาหาร · กระเป๋า: ครอบครัว" selectedCat={CATEGORY_COLORS[0]} />
-
-      <DSuggestions items={[
-        { name: 'กาแฟร้านประจำ', sub: '85 ฿', cat: CATEGORY_COLORS[0], on: true },
-        { name: 'ข้าวกลางวัน',   sub: '120 ฿', cat: CATEGORY_COLORS[0] },
-        { name: 'BTS',           sub: '44 ฿',  cat: CATEGORY_COLORS[4] },
-        { name: '7-11',          sub: '—',     cat: CATEGORY_COLORS[1] },
-      ]} />
+      <DAmountCard amount="85" sign="-" hint="หมวด: อาหาร · กระเป๋า: ครอบครัว" selectedCat={CATEGORY_COLORS[0]} />
 
       <div style={{ padding: '0 16px 10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <DAccountRow
@@ -716,13 +700,7 @@ function AddTxnD_Income() {
   return (
     <DSheetShell txns={txns}>
       <DTabs active="income" />
-      <DAmountCard amount="35,000" sign="+" signColor={TC.primary500} hint="หมวด: เงินเดือน · เข้า: ครอบครัว" selectedCat={CATEGORY_COLORS[0]} />
-
-      <DSuggestions items={[
-        { name: 'เงินเดือน', sub: '35,000 ฿ · ทุก 25', cat: CATEGORY_COLORS[0], on: true },
-        { name: 'งาน Freelance', sub: 'ครั้งล่าสุด 8,500 ฿', cat: CATEGORY_COLORS[1] },
-        { name: 'ปันผล', sub: 'ครั้งล่าสุด 1,200 ฿', cat: CATEGORY_COLORS[2] },
-      ]} />
+      <DAmountCard amount="35,000" sign="+" hint="หมวด: เงินเดือน · เข้า: ครอบครัว" selectedCat={CATEGORY_COLORS[0]} />
 
       <div style={{ padding: '0 16px 10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <DAccountRow
@@ -817,7 +795,7 @@ function AddTxnD_CreditCashback() {
         { key: 'cashback', label: 'รับ Cashback' },
         { key: 'withdraw', label: 'กดเงินสด' },
       ]} />
-      <DAmountCard amount="240" sign="+" signColor={TC.primary500} hint="Cashback ลดค้างชำระ Kbank Credit" />
+      <DAmountCard amount="240" sign="+" hint="Cashback ลดค้างชำระ Kbank Credit" />
 
       <div style={{ padding: '0 16px 10px' }}>
         <DAccountRow
@@ -1075,7 +1053,7 @@ function AddTxnD_SavingDeposit() {
         </div>
       </div>
 
-      <DAmountCard amount="7,161" sign="+" signColor={TC.primary500} selectedCat={{ label: 'ออมเงิน', icon: 'saving', bg: TC.primary100, ic: TC.primary500 }} />
+      <DAmountCard amount="7,161" sign="+" selectedCat={{ label: 'ออมเงิน', icon: 'saving', bg: TC.primary100, ic: TC.primary500 }} />
 
       <div style={{ padding: '0 16px 10px' }}>
         <DAccountRow
@@ -1084,6 +1062,8 @@ function AddTxnD_SavingDeposit() {
           name="ครอบครัว"
           sub="คงเหลือ 34,368 ฿" />
       </div>
+
+      <DMetaRow />
     </DSheetShell>
   );
 }
@@ -1175,7 +1155,7 @@ function AddTxnD_SavingWithdraw() {
         </div>
       </div>
 
-      <DAmountCard amount="5,000" sign="−" signColor={TC.error400} selectedCat={{ label: 'ออมเงิน', icon: 'saving', bg: TC.primary100, ic: TC.primary500 }} />
+      <DAmountCard amount="5,000" sign="−" selectedCat={{ label: 'ออมเงิน', icon: 'saving', bg: TC.primary100, ic: TC.primary500 }} />
 
       <div style={{ padding: '0 16px 10px' }}>
         <DAccountRow
