@@ -154,20 +154,6 @@ function ESheetShell({ children, txns = [] }) {
             <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 500 }}>· 85฿</span>
           </button>
           {/* Split chevron — reveals "& เพิ่มอีก" */}
-          <button
-            onClick={() => setSplitOpen(!splitOpen)}
-            style={{
-              width: 50, height: 50, borderRadius: 14, border: 'none',
-              background: TE.primary600, color: '#fff',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 6px 14px rgba(44,122,123,0.3)',
-            }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ transform: splitOpen ? 'rotate(180deg)' : 'none' }}>
-              <path d="M6 9l6 6 6-6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
-            </svg>
-          </button>
-
           {/* Reveal: บันทึก & เพิ่มอีก */}
           {splitOpen && (
             <div style={{
@@ -750,7 +736,7 @@ function ECategoryPicker({ step2Cat, onBack, onClose, onPickCategory, onPickSub,
                   width: 32, height: 32, borderRadius: 10, background: '#fff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <CatIcon kind={step2Cat.icon} size={16} color={step2Cat.ic} />
+                  <CatIcon kind={step2Cat.icon} containerSize={32} color={step2Cat.ic} />
                 </div>
                 <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: step2Cat.ic }}>
                   ใช้ {step2Cat.label} (ไม่ระบุหมวดย่อย)
@@ -776,7 +762,7 @@ function ECategoryPicker({ step2Cat, onBack, onClose, onPickCategory, onPickSub,
                       width: 32, height: 32, borderRadius: 10, background: step2Cat.bg,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <CatIcon kind={step2Cat.icon} size={16} color={step2Cat.ic} />
+                      <CatIcon kind={step2Cat.icon} containerSize={32} color={step2Cat.ic} />
                     </div>
                     <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: TE.n900 }}>{s.label}</div>
                     {on && (
@@ -1255,7 +1241,7 @@ function AddTxnE_Expense() {
             width: 36, height: 36, borderRadius: 12, background: TE.walletPink100,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <CatIcon kind="piggy" size={18} color={TE.walletPink} />
+            <CatIcon kind="piggy" containerSize={36} color={TE.walletPink} />
           </div>}
           label="กระเป๋า"
           value="ครอบครัว"

@@ -39,10 +39,11 @@ const CAT_ICON_ASSETS = {
 };
 
 // Custom category icons — PNG asset for size >= 16; SVG below that (raster smear at small sizes)
-function CatIcon({ kind, size = 20, color = '#fff' }) {
-  const s = { width: size, height: size, display: 'block' };
+function CatIcon({ kind, containerSize, color = '#fff' }) {
+  const iconSize = containerSize ? containerSize / 1.7 : 20;
+  const s = { width: iconSize, height: iconSize, display: 'block' };
   const assetName = CAT_ICON_ASSETS[kind];
-  if (assetName && size >= 16) {
+  if (assetName && iconSize >= 16) {
     return (
       <img
         src={`assets/cetegory_icons/${assetName}.png`}
