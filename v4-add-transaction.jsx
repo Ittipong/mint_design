@@ -176,7 +176,7 @@ function AddTxnA() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: on ? `0 0 0 2px ${T.primary500}, 0 4px 10px rgba(56,178,172,0.25)` : 'none',
                   }}>
-                    <CatIcon kind={c.icon} size={26} color={c.ic} />
+                    <CatIcon kind={c.icon} size={22} color={c.ic} />
                   </div>
                   <div style={{ fontSize: 11, fontWeight: on ? 700 : 500, color: on ? T.n900 : T.n600 }}>{c.label}</div>
                 </div>
@@ -409,7 +409,7 @@ function AddTxnB() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
               <div style={{ width: 22, height: 22, borderRadius: 8, background: T.walletPink100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CatIcon kind="piggy" size={13} color={T.walletPink} />
+                <CatIcon kind="piggy" size={14} color={T.walletPink} />
               </div>
               <div style={{ fontSize: 12, color: T.n900, fontWeight: 600 }}>ครอบครัว</div>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke={T.n400} strokeWidth="2" strokeLinecap="round"/></svg>
@@ -607,7 +607,7 @@ function AddTxnC() {
           }}>
             <MetaCell
               icon={<div style={{ width: 22, height: 22, borderRadius: 7, background: T.walletPink100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CatIcon kind="piggy" size={12} color={T.walletPink} />
+                <CatIcon kind="piggy" size={14} color={T.walletPink} />
               </div>}
               label="กระเป๋า" value="ครอบครัว" />
             <MetaCell
@@ -696,9 +696,9 @@ function AddTxnOriginal() {
       </div>
       <div style={{ padding: '0 16px' }}>
         {/* tabs row 1 */}
-        <div style={{ background: '#fff', padding: 4, borderRadius: 12, display: 'flex', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', marginBottom: 6 }}>
-          <div style={{ flex: 1, padding: '8px', textAlign: 'center', borderRadius: 9, background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', fontSize: 13, fontWeight: 700 }}>รายจ่าย</div>
-          <div style={{ flex: 1, padding: '8px', textAlign: 'center', fontSize: 13, color: T2.n600 }}>รายรับ</div>
+        <div style={{ background: T2.n200, padding: 4, borderRadius: 12, display: 'flex', gap: 2, marginBottom: 6 }}>
+          <div style={{ flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 10, background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.08)', fontSize: 13, fontWeight: 700, color: T2.n900 }}>รายจ่าย</div>
+          <div style={{ flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 10, fontSize: 13, fontWeight: 500, color: T2.n400 }}>รายรับ</div>
         </div>
         {/* tabs row 2 */}
         <div style={{ display: 'flex', justifyContent: 'space-around', padding: '6px 4px 14px', fontSize: 12, color: T2.n600 }}>

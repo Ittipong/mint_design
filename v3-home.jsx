@@ -170,7 +170,7 @@ function HomeV3() {
           borderLeft: `3px solid ${H3.warning400}`,
         }}>
           <div style={{ width: 30, height: 30, borderRadius: 10, background: H3.walletPink100, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <CatIcon kind="movie" size={15} color={H3.walletPink} />
+            <CatIcon kind="movie" size={16} color={H3.walletPink} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, color: H3.warning400, fontWeight: 600 }}>⚑ ต้องจ่ายใน 2 วัน</div>

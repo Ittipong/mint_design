@@ -124,7 +124,7 @@ function AIChatScreen() {
                     width: 30, height: 30, borderRadius: 8, background: c.bg,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <CatIcon kind={c.ic} size={15} color="#fff"/>
+                    <CatIcon kind={c.ic} size={16} color="#fff"/>
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>

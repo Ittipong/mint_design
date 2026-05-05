@@ -157,13 +157,14 @@ function WalletsV2() {
           <svg width="18" height="22" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8" fill={V.n700}/><circle cx="12" cy="12" r="1.8" fill={V.n700}/><circle cx="12" cy="19" r="1.8" fill={V.n700}/></svg>
         </div>
       </div>
-      <div style={{ margin: '0 16px', padding: 4, background: V.n300, borderRadius: 12, display: 'flex' }}>
+      <div style={{ margin: '0 16px', padding: 4, background: V.n200, borderRadius: 12, display: 'flex', gap: 2 }}>
         {tabs.map((t, i) => (
           <div key={t} style={{
-            flex: 1, textAlign: 'center', padding: '8px', borderRadius: 10,
+            flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 10,
             fontSize: 13, fontWeight: i === 0 ? 700 : 500,
-            color: i === 0 ? V.n900 : V.n600,
+            color: i === 0 ? V.n900 : V.n400,
             background: i === 0 ? '#fff' : 'transparent',
+            boxShadow: i === 0 ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
           }}>{t}</div>
         ))}
       </div>
@@ -199,7 +200,7 @@ function WalletsV2() {
         ].map((w, i) => (
           <div key={i} style={{ margin: '8px 16px 0', ...card(1), padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, background: w.bg, display: 'flex', alignItems:'center', justifyContent:'center' }}>
-              <CatIcon kind={w.icon} size={20} color={w.ic} />
+              <CatIcon kind={w.icon} size={18} color={w.ic} />
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: V.n900 }}>{w.name}</div>

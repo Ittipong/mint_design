@@ -37,8 +37,8 @@
 <script type="text/babel" src="v3-home-temp.jsx"></script>
 <script type="text/babel" src="v3-wallets.jsx"></script>
 <script type="text/babel" src="v4-add-transaction.jsx"></script>
-<script type="text/babel" src="v4-add-transaction-c-types.jsx"></script>
 <script type="text/babel" src="v4-add-transaction-d-numpad.jsx"></script>
+<script type="text/babel" src="v4-add-transaction-e-improved.jsx"></script>
 
 <script type="text/babel">
 const TWEAKS = /*EDITMODE-BEGIN*/{
@@ -203,41 +203,11 @@ function App() {
         </DCSection>
 
         <DCSection
-          title="v4 — Option C · ครบทุก Type"
-          subtitle="Smart Bottom Sheet pattern ครบทุก transaction type · 2-tier tabs · smart suggestions · From→To flow · goal progress bar"
-        >
-          <DCArtboard label="01 · รายจ่าย" width={390} height={844}>
-            <AddTxnC_Expense />
-          </DCArtboard>
-          <DCArtboard label="02 · รายรับ" width={390} height={844}>
-            <AddTxnC_Income />
-          </DCArtboard>
-          <DCArtboard label="03 · บัตรเครดิต · จ่ายบัตร" width={390} height={844}>
-            <AddTxnC_CreditPay />
-          </DCArtboard>
-          <DCArtboard label="04 · บัตรเครดิต · รับ Cashback" width={390} height={844}>
-            <AddTxnC_CreditCashback />
-          </DCArtboard>
-          <DCArtboard label="05 · บัตรเครดิต · กดเงินสด" width={390} height={844}>
-            <AddTxnC_CreditWithdraw />
-          </DCArtboard>
-          <DCArtboard label="06 · โอนเงิน" width={390} height={844}>
-            <AddTxnC_Transfer />
-          </DCArtboard>
-          <DCArtboard label="07 · ออมเงิน · ออม" width={390} height={844}>
-            <AddTxnC_SavingDeposit />
-          </DCArtboard>
-          <DCArtboard label="08 · ออมเงิน · ถอน" width={390} height={844}>
-            <AddTxnC_SavingWithdraw />
-          </DCArtboard>
-        </DCSection>
-
-        <DCSection
-          title="v4 — Variation D · Smart Bottom Sheet"
+          title="Add Transaction Bottom Sheet"
           subtitle="Smart Bottom Sheet theme แบบ Variation C · ครบทุก transaction type 8 หน้าจอ"
         >
-          <DCArtboard label="01 · รายจ่าย" width={390} height={844}>
-            <AddTxnD_Expense />
+<DCArtboard label="01′ · รายจ่าย (improved)" width={390} height={844}>
+            <AddTxnE_Expense />
           </DCArtboard>
           <DCArtboard label="02 · รายรับ" width={390} height={844}>
             <AddTxnD_Income />

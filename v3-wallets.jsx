@@ -1,9 +1,7 @@
-// Wallets v3 — เรียบง่ายเหมือน v2 + improvements รอบ 2
-// Improvements (รอบ 2):
-//   • กระเป๋า: sign logic ถูก (savings = +, debt = -), chevron, currency hint แปลงเป็น ฿
-//   • บัตรเครดิต: status pill เปลี่ยนสีตาม utilization, countdown วันตัดรอบ, ขั้นต่ำต้องจ่าย
-//   • เป้าหมาย: "ออมเดือนละ X ฿" suggestion, on-track badge (เร็ว/ตามแผน/ช้า)
-//   • งบประมาณ: "เหลือใช้วันละ X" hint, sub-category mini bars, days left
+// Wallets v3 — Money Map redesign
+//   Single scrollable "Money Map" replaces the 4-tab segment.
+//   Each section drills into a focused detail page (Accounts / Credit / Goals / Budget).
+//   The shared belief: users open Finance to answer "Am I OK this month?", not to navigate four ledgers.
 const W3 = window.MINT;
 
 const w3card = (elev = 1) => ({
@@ -13,677 +11,469 @@ const w3card = (elev = 1) => ({
     : '0 1px 2px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.03)',
 });
 
-// — Shared header (title + actions + segmented tabs)
-function WalletsV3Header({ active = 0 }) {
-  const tabs = ['กระเป๋า', 'บัตรเครดิต', 'เป้าหมาย', 'งบประมาณ'];
+// ────────────────────────────────────────────────
+// Mock data — one source for the Map and all drill-downs
+// ────────────────────────────────────────────────
+const MM = {
+  monthLabel: 'พฤษภาคม 2026',
+  daysInMonth: 31,
+  daysLeft: 12,
+
+  // Budgets — user-named jars (like goals), each with own icon. Not tied to category names.
+  budgets: [
+    { icon: 'budget', bg: W3.walletViolet100, ic: W3.walletViolet, name: 'งบใช้จ่ายรายเดือน', spent: 13800, limit: 20000 },
+    { icon: 'plane',  bg: W3.walletGreen100,  ic: W3.walletGreen,  name: 'งบเที่ยวสุดสัปดาห์', spent: 3400,  limit: 8000 },
+    { icon: 'coffee', bg: W3.walletPink100,   ic: W3.walletPink,   name: 'งบกาแฟ+ขนม',       spent: 1040,  limit: 4000 },
+  ],
+
+  accounts: [
+    { icon: 'piggy', bg: W3.walletPink100, ic: W3.walletPink, name: 'ครอบครัว', sub: 'บัญชีออมทรัพย์', amt: 180600 },
+    { icon: 'wallet', bg: W3.walletGreen100, ic: W3.walletGreen, name: 'TrueMoney', sub: 'e-Wallet', amt: 45200 },
+    { icon: 'piggy', bg: W3.walletBrown100, ic: W3.walletBrown, name: 'เงินสด', sub: 'พกติดตัว', amt: 20000 },
+  ],
+
+  credits: [
+    { icon: 'card', bg: W3.walletGreen100,  ic: W3.walletGreen,  name: 'KTC Visa',     statement: 4200,  limit: 30000,  used: 4200,  minPay: 420,  dueDate: '15 พ.ค.', daysUntilDue: 4 },
+    { icon: 'card', bg: W3.walletViolet100, ic: W3.walletViolet, name: 'KBank Credit', statement: 18000, limit: 80000,  used: 56000, minPay: 1800, dueDate: '25 พ.ค.', daysUntilDue: 14 },
+    { icon: 'card', bg: W3.walletPink100,   ic: W3.walletPink,   name: 'SCB M Visa',   statement: 7800,  limit: 50000,  used: 12300, minPay: 780,  dueDate: '20 พ.ค.', daysUntilDue: 9 },
+  ],
+
+  goals: [
+    { icon: 'plane', bg: W3.walletPink100, ic: W3.walletPink, name: 'เที่ยวญี่ปุ่น',  saved: 62000, target: 100000, monthsLeft: 4,  pct: 62, track: 'on' },
+    { icon: 'home',  bg: W3.walletViolet100, ic: W3.walletViolet, name: 'เงินดาวน์รถ', saved: 27000, target: 150000, monthsLeft: 14, pct: 18, track: 'behind' },
+  ],
+
+  // monthly net flows
+  savedThisMonth: 8000,
+};
+
+// ────────────────────────────────────────────────
+// Headers
+// ────────────────────────────────────────────────
+function MoneyMapHeader({ alerts = 3 }) {
   return (
     <>
       <MintStatusBarV2 time="08:23" />
-      <div style={{ padding: '4px 20px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ padding: '4px 20px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: 24, fontWeight: 700, color: W3.n900, letterSpacing: -0.3 }}>การเงิน</div>
-        <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
-          <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke={W3.n700} strokeWidth="2.2" strokeLinecap="round"/></svg>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          {/* Alerts bell with badge */}
+          <div style={{ position: 'relative' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M6 17V11a6 6 0 0112 0v6l1.5 2H4.5L6 17z" stroke={W3.n700} strokeWidth="1.8" strokeLinejoin="round"/>
+              <path d="M10 21h4" stroke={W3.n700} strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+            {alerts > 0 && (
+              <div style={{
+                position: 'absolute', top: -2, right: -3,
+                minWidth: 14, height: 14, borderRadius: 7, padding: '0 3px',
+                background: W3.error400, color: '#fff',
+                fontSize: 9, fontWeight: 700, lineHeight: '14px', textAlign: 'center',
+              }}>{alerts}</div>
+            )}
+          </div>
+          {/* Settings */}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" stroke={W3.n700} strokeWidth="1.8"/>
-            <path d="M12 7v5l3 2" stroke={W3.n700} strokeWidth="1.8" strokeLinecap="round"/>
+            <circle cx="12" cy="12" r="3" stroke={W3.n700} strokeWidth="1.8"/>
+            <path d="M19 12a7 7 0 00-.1-1.2l2-1.6-2-3.4-2.4.9a7 7 0 00-2-1.2L14 3h-4l-.5 2.5a7 7 0 00-2 1.2l-2.4-.9-2 3.4 2 1.6A7 7 0 005 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-.9c.6.5 1.3.9 2 1.2L10 21h4l.5-2.5c.7-.3 1.4-.7 2-1.2l2.4.9 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z" stroke={W3.n700} strokeWidth="1.6" strokeLinejoin="round"/>
           </svg>
-          <svg width="18" height="22" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8" fill={W3.n700}/><circle cx="12" cy="12" r="1.8" fill={W3.n700}/><circle cx="12" cy="19" r="1.8" fill={W3.n700}/></svg>
         </div>
-      </div>
-      <div style={{ margin: '0 16px 14px', padding: 4, background: W3.n300, borderRadius: 12, display: 'flex' }}>
-        {tabs.map((t, i) => (
-          <div key={t} style={{
-            flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 10,
-            fontSize: 13, fontWeight: i === active ? 700 : 500,
-            color: i === active ? W3.n900 : W3.n600,
-            background: i === active ? '#fff' : 'transparent',
-            boxShadow: i === active ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
-          }}>{t}</div>
-        ))}
       </div>
     </>
   );
 }
 
-const Chevron = ({ color }) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ marginLeft: 4, flexShrink: 0 }}>
-    <path d="M9 6l6 6-6 6" stroke={color || W3.n400} strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-const CalIcon = ({ color }) => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-    <rect x="3" y="5" width="18" height="16" rx="2" stroke={color || W3.n400} strokeWidth="1.8"/>
-    <path d="M3 9h18M8 3v4M16 3v4" stroke={color || W3.n400} strokeWidth="1.8" strokeLinecap="round"/>
-  </svg>
-);
-
-// ═══════════════════════════════════════════════════════════════
-// TAB 1 — กระเป๋า
-// ═══════════════════════════════════════════════════════════════
-function WalletsV3_Accounts() {
-  // sign: +1 = positive (savings/cash), -1 = debt
-  // foreignAmt: optional original-currency amount; amt is THB-equivalent
-  const accounts = [
-    { icon: 'piggy', bg: W3.walletPink100, ic: W3.walletPink, name: 'ครอบครัว', sub: 'บัญชีออมทรัพย์', amt: 34368.77, cur: '฿', sign: +1 },
-    { icon: 'wallet', bg: W3.walletGreen100, ic: W3.walletGreen, name: 'TrueMoney', sub: 'e-Wallet', amt: 17300.50, cur: '฿', sign: +1 },
-    { icon: 'piggy', bg: W3.walletGreen100, ic: W3.walletGreen, name: 'Pad shop', sub: 'บัญชีขายของ', amt: 7800.00, cur: '$', signCur: '$', foreignAmt: 216.50, sign: +1 },
-    { icon: 'card', bg: W3.walletViolet100, ic: W3.walletViolet, name: 'Kbank Credit', sub: 'บัตรเครดิต', amt: 116547.11, cur: '฿', sign: -1 },
-  ];
-
-  const positive = accounts.filter(a => a.sign > 0).reduce((s, a) => s + a.amt, 0);
-  const negative = accounts.filter(a => a.sign < 0).reduce((s, a) => s + a.amt, 0);
-  const total = positive - negative;
-  const posPct = (positive / (positive + negative)) * 100;
-
+function DrillHeader({ title, onBack, action }) {
   return (
-    <div style={{ background: W3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <WalletsV3Header active={0} />
-
-      <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        {/* Summary — v2 style: label + big number + count, then two pills */}
-        <div style={{ margin: '0 16px 16px', ...w3card(2), padding: '16px 18px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: 12, color: W3.n400 }}>ยอดสุทธิ</div>
-              <div style={{ fontSize: 26, fontWeight: 700, color: W3.n900, letterSpacing: -0.5, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>
-                {total < 0 ? '฿ -' : '฿ '}{Math.abs(total).toLocaleString('en-US', { maximumFractionDigits: 0 })}
-              </div>
-            </div>
-            <div style={{ fontSize: 12, color: W3.n400, marginTop: 2 }}>{accounts.length} กระเป๋า</div>
-          </div>
-          <div style={{ fontSize: 10, color: W3.n400, marginTop: 12, marginBottom: 6, fontWeight: 500, letterSpacing: 0.3, textTransform: 'uppercase' }}>เดือนนี้</div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1, padding: '8px 10px', background: W3.primary100, borderRadius: 10 }}>
-              <div style={{ fontSize: 10, color: W3.n600 }}>รายรับ</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: W3.primary600, fontVariantNumeric: 'tabular-nums' }}>
-                + ฿ 51,885
-              </div>
-            </div>
-            <div style={{ flex: 1, padding: '8px 10px', background: W3.error100, borderRadius: 10 }}>
-              <div style={{ fontSize: 10, color: W3.n600 }}>รายจ่าย</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: W3.error400, fontVariantNumeric: 'tabular-nums' }}>
-                - ฿ 116,547
-              </div>
-            </div>
-          </div>
+    <>
+      <MintStatusBarV2 time="08:23" />
+      <div style={{ padding: '4px 16px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div onClick={onBack} style={{ width: 36, height: 36, borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M15 6l-6 6 6 6" stroke={W3.n800} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </div>
-
-        {/* Section header */}
-        <div style={{ margin: '0 16px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900 }}>บัญชีทั่วไป</div>
-          <div style={{
-            background: W3.n300, color: W3.n600, fontSize: 11, fontWeight: 600,
-            padding: '1px 7px', borderRadius: 8, minWidth: 18, textAlign: 'center',
-          }}>{accounts.length}</div>
-        </div>
-
-        {/* Account list — no bar; just balance (matches v2) */}
-        {accounts.map((w, i) => (
-          <div key={i} style={{ margin: '0 16px 8px', ...w3card(1), padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: 12, background: w.bg,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}>
-              <CatIcon kind={w.icon} size={20} color={w.ic} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: W3.n900 }}>{w.name}</div>
-              <div style={{ fontSize: 11, color: W3.n400, marginTop: 1 }}>{w.sub}</div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: w.sign < 0 ? W3.error400 : W3.n900, fontVariantNumeric: 'tabular-nums' }}>
-                {w.sign < 0 ? '- ' : ''}{w.amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿
-              </div>
-              <div style={{ fontSize: 10.5, color: W3.n400, marginTop: 1 }}>
-                {w.foreignAmt ? `≈ ${w.foreignAmt.toLocaleString()} ${w.signCur}` : 'ยอดคงเหลือ'}
-              </div>
-            </div>
-          </div>
-        ))}
-
-        <div style={{
-          margin: '8px 16px 0', padding: '14px',
-          border: `1.5px dashed ${W3.n400}`, borderRadius: 14,
-          textAlign: 'center', color: W3.primary500, fontSize: 14, fontWeight: 600,
-        }}>+ สร้างกระเป๋าใหม่</div>
+        <div style={{ flex: 1, fontSize: 18, fontWeight: 700, color: W3.n900, letterSpacing: -0.2 }}>{title}</div>
+        {action}
       </div>
+    </>
+  );
+}
 
-      <MintFabV2 />
-      <BottomNavV2 active="wallets" />
+const PlusBtn = () => (
+  <div style={{
+    width: 36, height: 36, borderRadius: 18,
+    background: W3.primary500, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer', boxShadow: '0 2px 6px rgba(56,178,172,0.30)',
+  }}>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M12 5v14M5 12h14" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"/>
+    </svg>
+  </div>
+);
+
+// ────────────────────────────────────────────────
+// Section primitives
+// ────────────────────────────────────────────────
+function SectionShell({ title, summary, children }) {
+  return (
+    <div style={{ margin: '0 16px 12px', ...w3card(1), padding: '14px 16px', cursor: 'pointer' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900 }}>{title}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: W3.n400, fontVariantNumeric: 'tabular-nums' }}>{summary}</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M9 6l6 6-6 6" stroke={W3.n400} strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </div>
+      </div>
+      {children}
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// TAB 2 — บัตรเครดิต
-// ═══════════════════════════════════════════════════════════════
-function WalletsV3_Credit() {
-  // util level: low (<30%), med (30-70%), high (>70%)
-  const cards = [
-    {
-      icon: 'card', bg: W3.walletGreen100, ic: W3.walletGreen,
-      name: 'CardX', used: 3000, limit: 50000, minPay: 300,
-      cycle: 25, daysUntilCycle: 5,
-    },
-    {
-      icon: 'card', bg: W3.walletViolet100, ic: W3.walletViolet,
-      name: 'Kbank Credit', used: 56000, limit: 80000, minPay: 5600,
-      cycle: 1, daysUntilCycle: 12,
-    },
-  ];
+function MiniBar({ pct, color }) {
+  const clamped = Math.min(100, Math.max(0, pct));
+  return (
+    <div style={{ height: 5, borderRadius: 3, background: W3.n300, overflow: 'hidden' }}>
+      <div style={{ width: `${clamped}%`, height: '100%', background: color || W3.primary500, borderRadius: 3 }} />
+    </div>
+  );
+}
 
-  const totalUsed = cards.reduce((s, c) => s + c.used, 0);
-  const totalLimit = cards.reduce((s, c) => s + c.limit, 0);
-  const totalAvailable = totalLimit - totalUsed;
-  const totalPct = (totalUsed / totalLimit) * 100;
-  const totalMinPay = cards.reduce((s, c) => s + c.minPay, 0);
+// ────────────────────────────────────────────────
+// PAGE 1 — Money Map (formerly WalletsV3_Accounts)
+// ────────────────────────────────────────────────
+function WalletsV3_Accounts() {
+  const totalBudgetSpent = MM.budgets.reduce((s, x) => s + x.spent, 0);
+  const totalBudgetLimit = MM.budgets.reduce((s, x) => s + x.limit, 0);
+  const usedPct = (totalBudgetSpent / totalBudgetLimit) * 100;
 
-  const utilStatus = (pct) => {
-    if (pct < 30) return { label: 'วงเงินเหลือเยอะ', color: W3.primary500, dot: W3.primary400, bg: 'transparent' };
-    if (pct < 70) return { label: 'ใช้พอดี', color: W3.n600, dot: W3.n500 || W3.n400, bg: 'transparent' };
-    return { label: 'ใกล้เต็มวงเงิน', color: W3.warning400, dot: W3.warning400, bg: 'transparent' };
-  };
+  const accountsTotal = MM.accounts.reduce((s, a) => s + a.amt, 0);
+  const creditUsed = MM.credits.reduce((s, c) => s + c.used, 0);
+  const creditLimit = MM.credits.reduce((s, c) => s + c.limit, 0);
+  const nextDueCard = MM.credits.slice().sort((a, b) => a.daysUntilDue - b.daysUntilDue)[0];
 
   return (
     <div style={{ background: W3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <WalletsV3Header active={1} />
+      <MoneyMapHeader />
+
+      <div style={{ flex: 1, overflow: 'auto', paddingBottom: 110, paddingTop: 4 }}>
+        {/* SECTION — บัญชี */}
+        <SectionShell title="บัญชี" summary={`฿ ${accountsTotal.toLocaleString()}`}>
+          {MM.accounts.slice(0, 3).map((a, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderTop: i === 0 ? 'none' : `1px solid ${W3.n200}` }}>
+              <div style={{ width: 30, height: 30, borderRadius: 9, background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CatIcon kind={a.icon} size={16} color={a.ic} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: W3.n900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
+                <div style={{ fontSize: 10.5, color: W3.n400 }}>{a.sub}</div>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>
+                ฿ {a.amt.toLocaleString()}
+              </div>
+            </div>
+          ))}
+        </SectionShell>
+
+        {/* SECTION — บัตรเครดิต */}
+        <SectionShell title="บัตรเครดิต" summary={`ใช้ ฿ ${creditUsed.toLocaleString()} / ${(creditLimit / 1000).toFixed(0)}k`}>
+          {MM.credits.map((c, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderTop: i === 0 ? 'none' : `1px solid ${W3.n200}` }}>
+              <div style={{ width: 30, height: 30, borderRadius: 9, background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CatIcon kind="card" size={16} color={c.ic} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: W3.n900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                <div style={{ fontSize: 10.5, color: W3.n400 }}>ครบกำหนด {c.dueDate} · อีก {c.daysUntilDue} วัน</div>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>
+                ฿ {c.statement.toLocaleString()}
+              </div>
+            </div>
+          ))}
+        </SectionShell>
+
+        {/* SECTION — เป้าหมาย */}
+        <SectionShell title="เป้าหมาย" summary={`+ ฿ ${MM.savedThisMonth.toLocaleString()} เดือนนี้`}>
+          {MM.goals.slice(0, 2).map((g, i) => (
+            <div key={i} style={{ padding: '7px 0', borderTop: i === 0 ? 'none' : `1px solid ${W3.n200}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 9, background: g.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CatIcon kind={g.icon} size={16} color={g.ic} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: W3.n900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.name}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>{g.pct}%</div>
+                </div>
+                <div style={{ fontSize: 10.5, color: W3.n400 }}>อีก {g.monthsLeft}ด.</div>
+              </div>
+              <div style={{ marginTop: 5, marginLeft: 40 }}>
+                <MiniBar pct={g.pct} color={W3.primary500} />
+              </div>
+            </div>
+          ))}
+        </SectionShell>
+
+        {/* SECTION — งบประมาณ (jars) */}
+        <SectionShell title="งบประมาณ" summary={`ใช้แล้ว ${usedPct.toFixed(0)}%`}>
+          {MM.budgets.slice(0, 2).map((bg, i) => {
+            const pct = (bg.spent / bg.limit) * 100;
+            return (
+              <div key={i} style={{ padding: '7px 0', borderTop: i === 0 ? 'none' : `1px solid ${W3.n200}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: 9, background: bg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CatIcon kind={bg.icon} size={16} color={bg.ic} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 12.5, fontWeight: 600, color: W3.n900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{bg.name}</div>
+                  <div style={{ fontSize: 11, color: W3.n400, fontVariantNumeric: 'tabular-nums' }}>
+                    <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {bg.spent.toLocaleString()}</span>
+                    <span> / {bg.limit.toLocaleString()}</span>
+                  </div>
+                </div>
+                <div style={{ marginTop: 5, marginLeft: 40 }}>
+                  <MiniBar pct={pct} color={W3.primary500} />
+                </div>
+              </div>
+            );
+          })}
+          {MM.budgets.length > 2 && (
+            <div style={{ marginTop: 8, fontSize: 11, color: W3.n400 }}>+ อีก {MM.budgets.length - 2} งบ</div>
+          )}
+        </SectionShell>
+      </div>
+
+<BottomNavV2 active="wallets" />
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────
+// DRILL — บัตรเครดิต
+// ────────────────────────────────────────────────
+function WalletsV3_Credit() {
+  const dueWithin30 = MM.credits.reduce((s, c) => s + c.statement, 0);
+  const totalMin = MM.credits.reduce((s, c) => s + c.minPay, 0);
+  const totalUsed = MM.credits.reduce((s, c) => s + c.used, 0);
+  const totalLimit = MM.credits.reduce((s, c) => s + c.limit, 0);
+
+  return (
+    <div style={{ background: W3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <DrillHeader title="บัตรเครดิต" />
 
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        <div style={{ margin: '0 16px 16px', ...w3card(2), padding: '16px 18px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: 12, color: W3.n400 }}>วงเงินคงเหลือ</div>
-              <div style={{ fontSize: 26, fontWeight: 700, color: W3.n900, letterSpacing: -0.5, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {totalAvailable.toLocaleString()}
-              </div>
-              <div style={{ fontSize: 11, color: W3.n400, marginTop: 2 }}>
-                จากวงเงินรวม <span style={{ color: W3.n700, fontWeight: 600 }}>฿ {totalLimit.toLocaleString()}</span>
-              </div>
-            </div>
-            <div style={{ fontSize: 12, color: W3.n400, marginTop: 2 }}>{cards.length} บัตร</div>
+        {/* HERO — total due within 30 days */}
+        <div style={{ margin: '0 16px 14px', ...w3card(2), padding: '18px 20px' }}>
+          <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ยอดที่ต้องจ่ายภายใน 30 วัน</div>
+          <div style={{ fontSize: 32, fontWeight: 700, color: W3.n900, marginTop: 4, letterSpacing: -0.5, fontVariantNumeric: 'tabular-nums' }}>
+            ฿ {dueWithin30.toLocaleString()}
           </div>
-          <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1, padding: '8px 10px', background: W3.primary100, borderRadius: 10 }}>
-              <div style={{ fontSize: 10, color: W3.n600 }}>ใช้ไป {totalPct.toFixed(0)}%</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: W3.primary600, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {totalUsed.toLocaleString()}
-              </div>
-            </div>
-            <div style={{ flex: 1, padding: '8px 10px', background: W3.n300, borderRadius: 10 }}>
-              <div style={{ fontSize: 10, color: W3.n600 }}>ขั้นต่ำงวดนี้</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: W3.n800, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {totalMinPay.toLocaleString()}
-              </div>
-            </div>
+          <div style={{ fontSize: 11, color: W3.n400, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+            ใช้ <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {totalUsed.toLocaleString()}</span> / {totalLimit.toLocaleString()} · ขั้นต่ำรวม <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {totalMin.toLocaleString()}</span>
           </div>
         </div>
 
-        <div style={{ margin: '0 16px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900 }}>ใช้งาน</div>
-          <div style={{ background: W3.n300, color: W3.n600, fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 8, minWidth: 18, textAlign: 'center' }}>{cards.length}</div>
-        </div>
-
-        {cards.map((c, i) => {
+        {/* LIST */}
+        {MM.credits.map((c, i) => {
           const pct = (c.used / c.limit) * 100;
-          const balance = c.limit - c.used;
-          const status = utilStatus(pct);
-          const pctColor = pct < 70 ? W3.n800 : W3.warning400;
-          const soon = c.daysUntilCycle <= 7;
           return (
             <div key={i} style={{ margin: '0 16px 10px', ...w3card(1), padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: 12, background: c.bg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <CatIcon kind={c.icon} size={20} color={c.ic} />
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CatIcon kind="card" size={18} color={c.ic} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: W3.n900 }}>{c.name}</div>
-                </div>
-                <div style={{
-                  fontSize: 11, color: status.color, fontWeight: 600,
-                  background: status.bg,
-                  padding: status.bg !== 'transparent' ? '3px 9px' : '0',
-                  borderRadius: 10,
-                  display: 'flex', alignItems: 'center', gap: 5,
-                }}>
-                  <span style={{ width: 6, height: 6, borderRadius: 3, background: status.dot }}/>
-                  {status.label}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, alignItems: 'flex-end' }}>
-                <div>
-                  <div style={{ fontSize: 12, color: W3.n400 }}>วงเงินคงเหลือ</div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: W3.primary600, fontVariantNumeric: 'tabular-nums', marginTop: 1 }}>
-                    ฿ {balance.toLocaleString()}
-                  </div>
-                  <div style={{ fontSize: 11, color: W3.n400, marginTop: 1, fontVariantNumeric: 'tabular-nums' }}>
-                    ใช้ไป {c.used.toLocaleString()} / {c.limit.toLocaleString()}
-                  </div>
+                  <div style={{ fontSize: 11, color: W3.n400, marginTop: 2 }}>ครบกำหนด {c.dueDate} · อีก {c.daysUntilDue} วัน</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: pctColor }}>{pct.toFixed(0)}%</div>
-                  <div style={{ fontSize: 11, color: soon ? W3.warning400 : W3.n400, marginTop: 1, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end', fontWeight: soon ? 600 : 400 }}>
-                    <CalIcon color={soon ? W3.warning400 : W3.n400}/>
-                    ตัดรอบ {c.cycle} · อีก {c.daysUntilCycle} วัน
-                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>฿ {c.statement.toLocaleString()}</div>
+                  <div style={{ fontSize: 10.5, color: W3.n400, marginTop: 1 }}>ยอดบิล</div>
                 </div>
               </div>
-
-              {/* min payment row + CTA */}
-              <div style={{
-                marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n300}`,
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
-                <div style={{ fontSize: 11, color: W3.n400 }}>
-                  ขั้นต่ำ <span style={{ color: W3.n700, fontWeight: 600 }}>{c.minPay.toLocaleString()}.00 ฿</span>
+              {/* utilization */}
+              <div style={{ marginTop: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: W3.n400, marginBottom: 5 }}>
+                  <span>ใช้ไป <span style={{ color: W3.n900, fontWeight: 700 }}>{pct.toFixed(0)}%</span></span>
+                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>{c.used.toLocaleString()} / {c.limit.toLocaleString()}</span>
                 </div>
-                <button style={{
-                  background: '#fff', color: W3.primary500,
-                  border: `1px solid ${W3.primary300}`, borderRadius: 18,
-                  fontSize: 12, fontWeight: 600, padding: '6px 16px',
-                  fontFamily: 'inherit', cursor: 'pointer',
-                }}>จ่ายบัตร</button>
+                <MiniBar pct={pct} color={W3.primary500} />
+              </div>
+              {/* min row + cta */}
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: 11, color: W3.n400 }}>ขั้นต่ำ <span style={{ color: W3.n900, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>฿ {c.minPay.toLocaleString()}</span></div>
+                <button style={{ background: 'rgb(205, 236, 234)', color: 'rgb(39, 125, 120)', border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>จ่ายบัตรนี้</button>
               </div>
             </div>
           );
         })}
-
-        <div style={{
-          margin: '6px 16px 0', padding: '14px',
-          border: `1.5px dashed ${W3.n400}`, borderRadius: 14,
-          textAlign: 'center', color: W3.primary500, fontSize: 14, fontWeight: 600,
-        }}>+ เพิ่มบัตรเครดิตใหม่</div>
       </div>
 
-      <MintFabV2 />
       <BottomNavV2 active="wallets" />
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// TAB 3 — เป้าหมาย
-// ═══════════════════════════════════════════════════════════════
+// ────────────────────────────────────────────────
+// DRILL — เป้าหมาย
+// ────────────────────────────────────────────────
 function WalletsV3_Goals() {
-  // monthsLeft used to compute "ออมเดือนละ X" + on-track status
-  const goals = [
-    {
-      icon: 'plane', bg: W3.primary100, ic: W3.primary500,
-      name: 'เที่ยวอังกฤษ', saved: 41900, target: 100000, by: 'ธ.ค. 2569', monthsLeft: 8,
-      pct: 42, track: 'ahead', // ahead | on | behind
-    },
-    {
-      icon: 'japan', bg: W3.walletPink100, ic: W3.walletPink,
-      name: 'Japan', saved: 2000, target: 10000, by: 'ส.ค. 2569', monthsLeft: 4,
-      pct: 20, track: 'behind',
-    },
-  ];
-
-  const totalSaved = goals.reduce((s, g) => s + g.saved, 0);
-  const totalTarget = goals.reduce((s, g) => s + g.target, 0);
-  const totalPct = (totalSaved / totalTarget) * 100;
-
-  const trackInfo = (t) => {
-    if (t === 'ahead') return { label: 'เร็วกว่ากำหนด', color: W3.primary500, dot: W3.primary400, bg: 'transparent' };
-    if (t === 'on') return { label: 'ตามแผน', color: W3.primary500, dot: W3.primary400, bg: 'transparent' };
-    return { label: 'ช้ากว่าแผน', color: W3.warning400, dot: W3.warning400, bg: 'transparent' };
-  };
+  // Monthly target — ideal pace = remaining ÷ monthsLeft
+  const monthlyTarget = MM.goals.reduce((s, g) => s + Math.ceil((g.target - g.saved) / Math.max(1, g.monthsLeft)), 0);
+  const ratio = MM.savedThisMonth / monthlyTarget;
+  const ratioPct = Math.round(ratio * 100);
+  const delta = MM.savedThisMonth - monthlyTarget;
 
   return (
     <div style={{ background: W3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <WalletsV3Header active={2} />
+      <DrillHeader title="เป้าหมาย" />
 
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        <div style={{ margin: '0 16px 16px', ...w3card(2), padding: '16px 18px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: 12, color: W3.n400 }}>ยอดออมรวม</div>
-              <div style={{ fontSize: 26, fontWeight: 700, color: W3.n900, letterSpacing: -0.5, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {totalSaved.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-              </div>
+        {/* HERO — saved this month vs plan */}
+        <div style={{ margin: '0 16px 14px', ...w3card(2), padding: '18px 20px' }}>
+          <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ออมเดือนนี้</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: W3.n900, letterSpacing: -0.5, fontVariantNumeric: 'tabular-nums' }}>
+              ฿ {MM.savedThisMonth.toLocaleString()}
             </div>
-            <div style={{ fontSize: 12, color: W3.n400, marginTop: 2 }}>{goals.length} เป้าหมาย</div>
+            <div style={{ fontSize: 13, color: W3.n900, fontWeight: 700 }}>
+              {delta >= 0 ? '+' : ''}{delta.toLocaleString()} จากแผน
+            </div>
           </div>
-          <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1, padding: '8px 10px', background: W3.primary100, borderRadius: 10 }}>
-              <div style={{ fontSize: 10, color: W3.n600 }}>เป้ารวม</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: W3.primary600, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {totalTarget.toLocaleString()}
-              </div>
-            </div>
-            <div style={{ flex: 1, padding: '8px 10px', background: W3.n300, borderRadius: 10 }}>
-              <div style={{ fontSize: 10, color: W3.n600 }}>คืบหน้า {totalPct.toFixed(0)}%</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: W3.n700, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {(totalTarget - totalSaved).toLocaleString()}
-              </div>
-            </div>
+          <div style={{ fontSize: 11, color: W3.n400, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+            แผน <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {monthlyTarget.toLocaleString()} / เดือน</span> · ทำได้ <span style={{ color: W3.n900, fontWeight: 700 }}>{ratioPct}%</span>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <MiniBar pct={Math.min(120, ratioPct)} color={W3.primary500} />
           </div>
         </div>
 
-        <div style={{ margin: '0 16px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900 }}>กำลังออม</div>
-          <div style={{ background: W3.n300, color: W3.n600, fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 8, minWidth: 18, textAlign: 'center' }}>{goals.length}</div>
-        </div>
-
-        {goals.map((g, i) => {
+        {/* LIST */}
+        {MM.goals.map((g, i) => {
           const remain = g.target - g.saved;
-          const monthly = Math.ceil(remain / g.monthsLeft);
-          const track = trackInfo(g.track);
+          const monthly = Math.ceil(remain / Math.max(1, g.monthsLeft));
+          const trackLabel = g.track === 'behind' ? 'ช้ากว่าแผน' : g.track === 'ahead' ? 'เร็วกว่ากำหนด' : 'ตามแผน';
           return (
             <div key={i} style={{ margin: '0 16px 10px', ...w3card(1), padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: 12, background: g.bg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <CatIcon kind={g.icon} size={20} color={g.ic} />
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: g.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CatIcon kind={g.icon} size={18} color={g.ic} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: W3.n900 }}>{g.name}</div>
-                </div>
-                <div style={{
-                  fontSize: 11, color: track.color, fontWeight: 600,
-                  display: 'flex', alignItems: 'center', gap: 5,
-                }}>
-                  <span style={{ width: 6, height: 6, borderRadius: 3, background: track.dot }}/>
-                  {track.label}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, alignItems: 'flex-end' }}>
-                <div>
-                  <div style={{ fontSize: 12, color: W3.n700, fontVariantNumeric: 'tabular-nums' }}>
-                    <span style={{ fontWeight: 700, color: W3.n900 }}>฿{g.saved.toLocaleString()}</span>
-                    <span style={{ color: W3.n400 }}> / ฿{g.target.toLocaleString()}</span>
-                  </div>
-                  <div style={{ fontSize: 11, color: W3.n400, marginTop: 1 }}>
-                    เหลืออีก ฿{remain.toLocaleString()}
-                  </div>
+                  <div style={{ fontSize: 11, color: W3.n400, fontWeight: 500, marginTop: 2 }}>{trackLabel}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: W3.primary500 }}>{g.pct}%</div>
-                  <div style={{ fontSize: 11, color: W3.n400, marginTop: 1, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
-                    <CalIcon/>{g.by}
-                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>{g.pct}%</div>
+                  <div style={{ fontSize: 10.5, color: W3.n400, marginTop: 1 }}>อีก {g.monthsLeft} เดือน</div>
                 </div>
               </div>
 
-              {/* Progress bar */}
-              <div style={{ marginTop: 10, position: 'relative' }}>
-                <div style={{
-                  height: 8, borderRadius: 4, background: W3.n300,
-                  overflow: 'hidden', position: 'relative',
-                }}>
-                  <div style={{
-                    width: `${Math.min(100, g.pct)}%`, height: '100%',
-                    background: g.track === 'behind'
-                      ? `linear-gradient(90deg, ${W3.warning400}, ${W3.warning400})`
-                      : `linear-gradient(90deg, ${W3.primary300}, ${W3.primary500})`,
-                    borderRadius: 4,
-                  }} />
-                </div>
-                {/* expected pace marker */}
-                {(() => {
-                  // expected pace = months elapsed / total months
-                  // assume total months = saved/(target/totalMonths). We have monthsLeft.
-                  // approximate: expected pct based on monthly contribution needed vs already saved
-                  const totalMonthsAssumed = g.monthsLeft + Math.round(g.saved / Math.max(1, Math.ceil(g.target / (g.monthsLeft + Math.round(g.saved/(g.target/12) || 1)))));
-                  const expectedPct = g.track === 'ahead' ? Math.max(15, g.pct - 12)
-                                    : g.track === 'behind' ? Math.min(95, g.pct + 18)
-                                    : g.pct;
-                  return (
-                    <div style={{
-                      position: 'absolute', left: `${expectedPct}%`, top: -2, bottom: -2,
-                      width: 2, background: W3.n600, transform: 'translateX(-1px)',
-                    }} title="เป้าหมาย ณ วันนี้" />
-                  );
-                })()}
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  marginTop: 6, fontSize: 10, color: W3.n400,
-                }}>
-                  <span>เริ่ม</span>
-                  <span style={{ color: W3.n600 }}>เป้า ณ วันนี้</span>
-                  <span>฿{(g.target/1000).toFixed(0)}k</span>
+              <div style={{ marginTop: 12 }}>
+                <MiniBar pct={g.pct} color={W3.primary500} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, fontSize: 11, color: W3.n400, fontVariantNumeric: 'tabular-nums' }}>
+                  <span><span style={{ color: W3.n900, fontWeight: 700 }}>฿ {g.saved.toLocaleString()}</span> / {g.target.toLocaleString()}</span>
+                  <span>เหลือ ฿ {remain.toLocaleString()}</span>
                 </div>
               </div>
 
-              {/* monthly suggestion + CTA */}
-              <div style={{
-                marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n300}`,
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
-                <div style={{ fontSize: 11, color: W3.n400 }}>
-                  ออมเดือนละ <span style={{ color: W3.n700, fontWeight: 600 }}>{monthly.toLocaleString()} ฿</span> เพื่อให้ทันกำหนด
-                </div>
-                <button style={{
-                  background: '#fff', color: W3.primary500,
-                  border: `1px solid ${W3.primary300}`, borderRadius: 18,
-                  fontSize: 12, fontWeight: 600, padding: '6px 16px',
-                  fontFamily: 'inherit', cursor: 'pointer',
-                }}>ออมเงิน</button>
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: 11, color: W3.n400 }}>ออมเดือนละ <span style={{ color: W3.n900, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>฿ {monthly.toLocaleString()}</span></div>
+                <button style={{ background: 'rgb(205, 236, 234)', color: 'rgb(39, 125, 120)', border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>+ ฝาก</button>
               </div>
             </div>
           );
         })}
-
-        <div style={{
-          margin: '6px 16px 0', padding: '14px',
-          border: `1.5px dashed ${W3.n400}`, borderRadius: 14,
-          textAlign: 'center', color: W3.primary500, fontSize: 14, fontWeight: 600,
-        }}>+ สร้างเป้าหมายใหม่</div>
       </div>
 
-      <MintFabV2 />
       <BottomNavV2 active="wallets" />
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// TAB 4 — งบประมาณ
-// ═══════════════════════════════════════════════════════════════
+// ────────────────────────────────────────────────
+// DRILL — งบประมาณ
+// ────────────────────────────────────────────────
 function WalletsV3_Budget() {
-  // budget with sub-categories (mini-bars)
-  const budgets = [
-    {
-      icon: 'budget', bg: W3.walletViolet100, ic: W3.walletViolet,
-      name: 'งบใช้จ่ายรายเดือน', spent: 11200, limit: 15000, period: 'พ.ค. 2569',
-      subs: [
-        { name: 'อาหาร', spent: 6200, limit: 7000, color: W3.warning400 },
-        { name: 'เดินทาง', spent: 3500, limit: 4000, color: W3.walletViolet },
-        { name: 'บันเทิง', spent: 1500, limit: 4000, color: W3.walletPink },
-      ],
-    },
-  ];
-
-  const totalSpent = budgets.reduce((s, b) => s + b.spent, 0);
-  const totalLimit = budgets.reduce((s, b) => s + b.limit, 0);
-  const totalPct = (totalSpent / totalLimit) * 100;
-
-  // pacing: day 18 of 30
-  const monthPct = 60;
-  const daysLeft = 12;
+  const totalBudgetSpent = MM.budgets.reduce((s, x) => s + x.spent, 0);
+  const totalBudgetLimit = MM.budgets.reduce((s, x) => s + x.limit, 0);
+  const usedPct = (totalBudgetSpent / totalBudgetLimit) * 100;
+  const remaining = totalBudgetLimit - totalBudgetSpent;
+  const monthPct = Math.round(((MM.daysInMonth - MM.daysLeft) / MM.daysInMonth) * 100);
+  const dailyLeft = Math.max(0, Math.round(remaining / Math.max(1, MM.daysLeft)));
 
   return (
     <div style={{ background: W3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <WalletsV3Header active={3} />
+      <DrillHeader title="งบประมาณ" />
 
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        <div style={{ margin: '0 16px 16px', ...w3card(2), padding: '16px 18px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: 12, color: W3.n400 }}>ใช้ไปแล้ว</div>
-              <div style={{ fontSize: 26, fontWeight: 700, color: totalPct > 100 ? W3.error400 : W3.n900, letterSpacing: -0.5, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {totalSpent.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-              </div>
+        {/* HERO — daily allowance + dual progress (used vs month elapsed) */}
+        <div style={{ margin: '0 16px 14px', ...w3card(2), padding: '18px 20px' }}>
+          <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ใช้ได้ต่อวัน</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
+            <div style={{ fontSize: 32, fontWeight: 700, color: W3.n900, letterSpacing: -0.5, fontVariantNumeric: 'tabular-nums' }}>
+              ฿ {dailyLeft.toLocaleString()}
             </div>
-            <div style={{ fontSize: 12, color: W3.n400, marginTop: 2 }}>เหลือ {daysLeft} วัน</div>
+            <div style={{ fontSize: 13, color: W3.n400, fontWeight: 500 }}>/ วันที่เหลือ</div>
           </div>
-          <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1, padding: '8px 10px', background: W3.primary100, borderRadius: 10 }}>
-              <div style={{ fontSize: 10, color: W3.n600 }}>งบรวม</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: W3.primary600, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {totalLimit.toLocaleString()}
-              </div>
+          <div style={{ fontSize: 11, color: W3.n400, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+            งบเหลือ <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {remaining.toLocaleString()}</span> · เหลือ <span style={{ color: W3.n900, fontWeight: 700 }}>{MM.daysLeft} วัน</span>
+          </div>
+          {/* dual progress: budget used vs month elapsed marker */}
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: W3.n400, marginBottom: 4 }}>
+              <span>งบใช้ไป {usedPct.toFixed(0)}%</span>
+              <span>เดือนผ่านไป {monthPct}%</span>
             </div>
-            <div style={{ flex: 1, padding: '8px 10px', background: W3.error100, borderRadius: 10 }}>
-              <div style={{ fontSize: 10, color: W3.n600 }}>{totalPct > 100 ? `เกินงบ ${totalPct.toFixed(0)}%` : `ใช้ไป ${totalPct.toFixed(0)}%`}</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: W3.error400, fontVariantNumeric: 'tabular-nums' }}>
-                ฿ {Math.abs(totalLimit - totalSpent).toLocaleString()}
-              </div>
+            <div style={{ height: 8, borderRadius: 4, background: W3.n300, overflow: 'hidden', position: 'relative' }}>
+              <div style={{ width: `${Math.min(100, usedPct)}%`, height: '100%', background: W3.primary500, borderRadius: 4 }} />
+              <div style={{ position: 'absolute', left: `${monthPct}%`, top: -3, bottom: -3, width: 2, background: W3.n700, transform: 'translateX(-1px)' }} />
             </div>
           </div>
         </div>
 
-        <div style={{ margin: '0 16px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900 }}>กำลังใช้งาน</div>
-          <div style={{ background: W3.n300, color: W3.n600, fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 8, minWidth: 18, textAlign: 'center' }}>{budgets.length}</div>
-        </div>
-
-        {budgets.map((b, i) => {
-          const pct = (b.spent / b.limit) * 100;
-          const remain = b.limit - b.spent;
-          const dailyLeft = Math.max(0, Math.floor(remain / daysLeft));
+        {/* LIST — budget jars (each with own icon + name, like goals) */}
+        {MM.budgets.map((bg, i) => {
+          const pct = (bg.spent / bg.limit) * 100;
           const over = pct > 100;
-          const onPace = pct <= monthPct + 5;
-          const status = over
-            ? { label: 'เกินงบ', color: W3.error400, dot: W3.error400, bg: W3.error100 }
-            : onPace
-              ? { label: 'ตามจังหวะ', color: W3.primary500, dot: W3.primary400, bg: 'transparent' }
-              : { label: 'ใช้เร็วกว่าแผน', color: W3.warning400, dot: W3.warning400, bg: 'transparent' };
+          const dailyLeftJar = Math.max(0, Math.round((bg.limit - bg.spent) / Math.max(1, MM.daysLeft)));
           return (
             <div key={i} style={{ margin: '0 16px 10px', ...w3card(1), padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: 12, background: b.bg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <CatIcon kind={b.icon} size={20} color={b.ic} />
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: bg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CatIcon kind={bg.icon} size={18} color={bg.ic} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: W3.n900 }}>{b.name}</div>
-                </div>
-                <div style={{
-                  fontSize: 11, color: status.color, fontWeight: 600,
-                  background: status.bg,
-                  padding: status.bg !== 'transparent' ? '3px 9px' : '0',
-                  borderRadius: 10,
-                  display: 'flex', alignItems: 'center', gap: 5,
-                }}>
-                  <span style={{ width: 6, height: 6, borderRadius: 3, background: status.dot }}/>
-                  {status.label}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, alignItems: 'flex-end' }}>
-                <div>
-                  <div style={{ fontSize: 12, color: W3.n700, fontVariantNumeric: 'tabular-nums' }}>
-                    <span style={{ fontWeight: 700, color: over ? W3.error400 : W3.n900 }}>฿{b.spent.toLocaleString()}</span>
-                    <span style={{ color: W3.n400 }}> / ฿{b.limit.toLocaleString()}</span>
-                  </div>
-                  <div style={{ fontSize: 11, color: over ? W3.error400 : W3.n400, marginTop: 1, fontWeight: over ? 600 : 400 }}>
-                    {over
-                      ? `เกินงบ ฿${(b.spent - b.limit).toLocaleString()}`
-                      : `เหลือใช้วันละ ฿${dailyLeft.toLocaleString()} · ${daysLeft} วัน`}
-                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: W3.n900, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{bg.name}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: over ? W3.error400 : (onPace ? W3.primary500 : W3.warning400) }}>{pct.toFixed(0)}%</div>
-                  <div style={{ fontSize: 11, color: W3.n400, marginTop: 1, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
-                    <CalIcon/>{b.period}
-                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>{pct.toFixed(0)}%</div>
+                  <div style={{ fontSize: 10.5, color: W3.n400, marginTop: 1 }}>ใช้ไป</div>
                 </div>
               </div>
 
-              {/* Progress bar with pace marker */}
-              <div style={{ marginTop: 10, position: 'relative' }}>
-                <div style={{
-                  height: 8, borderRadius: 4, background: W3.n300,
-                  overflow: 'hidden', position: 'relative',
-                }}>
-                  <div style={{
-                    width: `${Math.min(100, pct)}%`, height: '100%',
-                    background: over
-                      ? W3.error400
-                      : onPace
-                        ? `linear-gradient(90deg, ${W3.primary300}, ${W3.primary500})`
-                        : `linear-gradient(90deg, ${W3.warning400}, ${W3.warning400})`,
-                    borderRadius: 4,
-                  }} />
+              <div style={{ marginTop: 12 }}>
+                <MiniBar pct={pct} color={W3.primary500} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, fontSize: 11, color: W3.n400, fontVariantNumeric: 'tabular-nums' }}>
+                  <span><span style={{ color: W3.n900, fontWeight: 700 }}>฿ {bg.spent.toLocaleString()}</span> / {bg.limit.toLocaleString()}</span>
+                  <span>{over ? `เกิน ฿ ${(bg.spent - bg.limit).toLocaleString()}` : `เหลือ ฿ ${(bg.limit - bg.spent).toLocaleString()}`}</span>
                 </div>
-                {/* "today" pace marker */}
-                <div style={{
-                  position: 'absolute', left: `${monthPct}%`, top: -2, bottom: -2,
-                  width: 2, background: W3.n700, transform: 'translateX(-1px)',
-                }} />
-                <div style={{
-                  position: 'absolute', left: `${monthPct}%`, top: 12,
-                  transform: 'translateX(-50%)',
-                  fontSize: 9, color: W3.n600, fontWeight: 600,
-                  background: '#fff', padding: '0 4px',
-                }}>วันนี้</div>
               </div>
 
-              {/* Sub-category breakdown WITH bars */}
-              {b.subs && (
-                <div style={{ marginTop: 22, paddingTop: 12, borderTop: `1px solid ${W3.n300}` }}>
-                  <div style={{ fontSize: 10, color: W3.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 8 }}>หมวดย่อย</div>
-                  {b.subs.map((s, j) => {
-                    const sp = (s.spent / s.limit) * 100;
-                    const subOver = sp > 100;
-                    const subRemain = s.limit - s.spent;
-                    return (
-                      <div key={j} style={{ marginTop: j === 0 ? 0 : 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                            <span style={{ width: 8, height: 8, borderRadius: 4, background: subOver ? W3.error400 : s.color }}/>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: W3.n900 }}>{s.name}</div>
-                            <div style={{ fontSize: 11, color: subOver ? W3.error400 : W3.n400, fontWeight: subOver ? 600 : 400 }}>
-                              {subOver ? `เกิน ฿${Math.abs(subRemain).toLocaleString()}` : `เหลือ ฿${subRemain.toLocaleString()}`}
-                            </div>
-                          </div>
-                          <div style={{ fontSize: 11, color: W3.n700, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-                            ฿{s.spent.toLocaleString()} / ฿{s.limit.toLocaleString()}
-                          </div>
-                        </div>
-                        <div style={{ position: 'relative' }}>
-                          <div style={{
-                            height: 6, borderRadius: 3, background: W3.n300, overflow: 'hidden',
-                          }}>
-                            <div style={{
-                              width: `${Math.min(100, sp)}%`, height: '100%',
-                              background: subOver ? W3.error400 : s.color,
-                              borderRadius: 3,
-                            }} />
-                          </div>
-                          {/* pace marker on sub-bar */}
-                          <div style={{
-                            position: 'absolute', left: `${monthPct}%`, top: -1, bottom: -1,
-                            width: 1.5, background: W3.n600, transform: 'translateX(-1px)',
-                          }} />
-                        </div>
-                      </div>
-                    );
-                  })}
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: 11, color: W3.n400 }}>
+                  {over
+                    ? <span style={{ color: W3.n900, fontWeight: 700 }}>เกินงบแล้ว</span>
+                    : <>ใช้ต่อวัน <span style={{ color: W3.n900, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>฿ {dailyLeftJar.toLocaleString()}</span></>}
                 </div>
-              )}
+                <button style={{ background: 'rgb(205, 236, 234)', color: 'rgb(39, 125, 120)', border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>ปรับงบ</button>
+              </div>
             </div>
           );
         })}
-
-        <div style={{
-          margin: '6px 16px 0', padding: '14px',
-          border: `1.5px dashed ${W3.n400}`, borderRadius: 14,
-          textAlign: 'center', color: W3.primary500, fontSize: 14, fontWeight: 600,
-        }}>+ สร้างงบประมาณใหม่</div>
       </div>
 
-      <MintFabV2 />
       <BottomNavV2 active="wallets" />
     </div>
   );

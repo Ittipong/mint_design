@@ -231,7 +231,7 @@ function HomeV3Temp() {
           borderLeft: `3px solid ${HT.warning400}`,
         }}>
           <div style={{ width: 30, height: 30, borderRadius: 10, background: HT.walletPink100, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <CatIcon kind="movie" size={15} color={HT.walletPink} />
+            <CatIcon kind="movie" size={16} color={HT.walletPink} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, color: HT.warning400, fontWeight: 600 }}>⚑ ต้องจ่ายใน 2 วัน</div>

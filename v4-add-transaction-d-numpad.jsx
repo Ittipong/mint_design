@@ -4,6 +4,11 @@
 
 const TC = window.MINT;
 
+const {
+  ESheetShell, ETabs, EAmountHero, EFieldRow,
+  ECategoryChips, EMetaRow, ETagsRow, EReportToggle,
+} = window;
+
 // ─── Transaction Category Color System ────────────────────────
 // All category colors unified (for both expense & income)
 const CATEGORY_COLORS = [
@@ -438,7 +443,7 @@ function DTabs({ active, sub, subOptions }) {
       </div>
       {subOptions && (
         <div style={{
-          marginTop: 10, padding: 4, background: TC.n300, borderRadius: 11, display: 'flex',
+          marginTop: 10, padding: 4, background: TC.n200, borderRadius: 11, display: 'flex', gap: 2,
         }}>
           {subOptions.map(s => {
             const on = s.key === sub;
@@ -446,9 +451,9 @@ function DTabs({ active, sub, subOptions }) {
               <div key={s.key} style={{
                 flex: 1, textAlign: 'center', padding: '7px 4px', borderRadius: 8,
                 fontSize: 12, fontWeight: on ? 700 : 500,
-                color: on ? TC.n900 : TC.n600,
+                color: on ? TC.n900 : TC.n400,
                 background: on ? '#fff' : 'transparent',
-                boxShadow: on ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                boxShadow: on ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
               }}>{s.label}</div>
             );
           })}
@@ -459,7 +464,7 @@ function DTabs({ active, sub, subOptions }) {
 }
 
 // ─── Amount + Category Card (Variation C style) ────
-function DAmountCard({ amount = '0', sign = '-', hint, selectedCat }) {
+function DAmountCard({ amount = '0', sign = '-', hint, selectedCat, quickChips = false }) {
   const cat = selectedCat || CATEGORY_COLORS[0];
   return (
     <div style={{
@@ -497,6 +502,19 @@ function DAmountCard({ amount = '0', sign = '-', hint, selectedCat }) {
         </div>
       </div>
       {hint && <div style={{ fontSize: 11, color: TC.n600, marginTop: 6 }}>{hint}</div>}
+      {quickChips && (
+        <div style={{ display: 'flex', gap: 6, marginTop: 12, flexWrap: 'wrap' }}>
+          {['+50', '+100', '+500', '+1k', 'C'].map((q, i) => (
+            <div key={q} style={{
+              padding: '6px 14px', borderRadius: 999,
+              background: i === 4 ? TC.error100 : TC.n200,
+              color: i === 4 ? TC.error500 : TC.n700,
+              fontSize: 12, fontWeight: 700, letterSpacing: 0.2,
+              cursor: 'pointer',
+            }}>{q}</div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -566,13 +584,10 @@ function DMetaRow() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <div style={{
-            width: 10, height: 10, borderRadius: 2,
-            background: TC.primary100,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 6, height: 6, borderRadius: 999,
+            background: TC.primary500,
             flexShrink: 0,
-          }}>
-            <CatIcon kind="budget" size={7} color={TC.primary500} />
-          </div>
+          }} />
           <div style={{ fontSize: 9, fontWeight: 600, color: TC.n700 }}>วันที่</div>
         </div>
         <div style={{ borderTop: `1px solid ${TC.n200}`, marginTop: 4, paddingTop: 4 }}>
@@ -663,7 +678,7 @@ function AddTxnD_Expense() {
   return (
     <DSheetShell txns={txns}>
       <DTabs active="expense" />
-      <DAmountCard amount="85" sign="-" hint="หมวด: อาหาร · กระเป๋า: ครอบครัว" selectedCat={CATEGORY_COLORS[0]} />
+      <DAmountCard amount="85" sign="-" selectedCat={CATEGORY_COLORS[0]} quickChips />
 
       <div style={{ padding: '0 16px 10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <DAccountRow
@@ -682,9 +697,12 @@ function AddTxnD_Expense() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// D2 · INCOME
+// D2 · INCOME (E-style improved)
 // ═══════════════════════════════════════════════════════════════
 function AddTxnD_Income() {
+  const [cat, setCat] = React.useState(null);
+  const [tags, setTags] = React.useState([]);
+  const [inReport, setInReport] = React.useState(true);
   const [txns] = React.useState([
     {
       type: 'income',
@@ -698,30 +716,41 @@ function AddTxnD_Income() {
   ]);
 
   return (
-    <DSheetShell txns={txns}>
-      <DTabs active="income" />
-      <DAmountCard amount="35,000" sign="+" hint="หมวด: เงินเดือน · เข้า: ครอบครัว" selectedCat={CATEGORY_COLORS[0]} />
+    <ESheetShell txns={txns}>
+      <ETabs active="income" />
 
-      <div style={{ padding: '0 16px 10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <DAccountRow
-          label="หมวดหมู่"
-          icon={<DWalletIcon bg={CATEGORY_COLORS[0].bg} ic={CATEGORY_COLORS[0].ic} kind={CATEGORY_COLORS[0].icon} />}
-          name="เงินเดือน" />
-        <DAccountRow
+      <EAmountHero amount="35,000" sign="+" />
+
+      <div style={{ padding: '0 16px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <ECategoryChips value={cat} onChange={setCat} />
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletPink100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="piggy" size={18} color={TC.walletPink} />
+          </div>}
           label="เข้ากระเป๋า"
-          icon={<DWalletIcon bg={TC.walletPink100} ic={TC.walletPink} kind="piggy" />}
-          name="ครอบครัว" />
+          value="ครอบครัว"
+          hint="คงเหลือ 34,368฿"
+        />
       </div>
 
-      <DMetaRow />
-    </DSheetShell>
+      <EMetaRow />
+
+      <ETagsRow value={tags} onChange={setTags} />
+
+      <EReportToggle value={inReport} onChange={setInReport} />
+    </ESheetShell>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// D3a · CREDIT CARD — จ่ายบัตร
+// D3a · CREDIT CARD — จ่ายบัตร (E-style)
 // ═══════════════════════════════════════════════════════════════
 function AddTxnD_CreditPay() {
+  const [tags, setTags] = React.useState([]);
+  const [inReport, setInReport] = React.useState(true);
   const [txns] = React.useState([
     {
       type: 'transfer',
@@ -735,47 +764,124 @@ function AddTxnD_CreditPay() {
   ]);
 
   return (
-    <DSheetShell txns={txns}>
-      <DTabs active="credit" sub="pay" subOptions={[
-        { key: 'pay', label: 'จ่ายบัตรเครดิต' },
-        { key: 'cashback', label: 'รับ Cashback' },
-        { key: 'withdraw', label: 'กดเงินสด' },
-      ]} />
-      <DAmountCard amount="3,500" sign="" hint="ขั้นต่ำเดือนนี้: 1,200 ฿ · กำหนด 5 พ.ค." />
+    <ESheetShell txns={txns}>
+      <ETabs active="credit" />
 
-      <div style={{ padding: '0 16px 10px' }}>
-        <div style={{
-          background: '#fff', borderRadius: 14, padding: 12,
-          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-        }}>
-          <DAccountRow
-            label="ชำระบัตรเครดิต"
-            icon={<DWalletIcon bg={TC.walletViolet100} ic={TC.walletViolet} kind="card" />}
-            name="Kbank Credit"
-            sub="ค้างชำระ 116,547 ฿" />
-          <DArrowConnector />
-          <DAccountRow
-            label="จ่ายจากกระเป๋า"
-            icon={<DWalletIcon bg={TC.walletPink100} ic={TC.walletPink} kind="piggy" />}
-            name="ครอบครัว"
-            sub="คงเหลือ 34,368 ฿" />
+      {/* Segment tabs */}
+      <div style={{ margin: '0 16px 12px', padding: '4px', background: TC.n200, borderRadius: 12 }}>
+        <div style={{ display: 'flex', gap: 2 }}>
+          {[
+            { key: 'pay', label: 'จ่ายบัตรเครดิต' },
+            { key: 'cashback', label: 'รับ Cashback' },
+            { key: 'withdraw', label: 'กดเงินสด' },
+          ].map(t => {
+            const on = t.key === 'pay';
+            return (
+              <div key={t.key} style={{
+                flex: 1, padding: '8px 4px', borderRadius: 10,
+                background: on ? '#fff' : 'transparent',
+                color: on ? TC.n900 : TC.n400,
+                fontSize: 13, fontWeight: on ? 700 : 500,
+                textAlign: 'center',
+                boxShadow: on ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+              }}>{t.label}</div>
+            );
+          })}
         </div>
-
-        <DQuickChips items={[
-          { label: 'ขั้นต่ำ 1,200', active: true },
-          { label: 'เต็ม 116,547', active: false },
-          { label: '50% 58,273', active: false },
-          { label: 'กำหนดเอง', active: false },
-        ]} />
       </div>
 
-      <DMetaRow />
-    </DSheetShell>
+      {/* Amount hero with hint */}
+      <div style={{
+        margin: '0 16px 12px', background: '#fff', borderRadius: 18,
+        padding: '20px 18px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 12, color: TC.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>
+          จำนวนเงิน
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6 }}>
+          <span style={{ fontSize: 28, fontWeight: 700, color: TC.n900, letterSpacing: -0.5 }}>{'−'}</span>
+          <span style={{
+            fontSize: 56, fontWeight: 800, color: TC.n900,
+            letterSpacing: -2, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+          }}>
+            3,500
+          </span>
+          <span style={{ fontSize: 22, fontWeight: 600, color: TC.n400, fontVariantNumeric: 'tabular-nums' }}>.00</span>
+          <span style={{ fontSize: 13, color: TC.n400, fontWeight: 600, marginLeft: 4 }}>฿</span>
+        </div>
+        <div style={{ fontSize: 12, color: TC.n500, marginTop: 8, fontWeight: 500 }}>
+          ขั้นต่ำเดือนนี้: 1,200 ฿ · กำหนด 5 พ.ค.
+        </div>
+        {/* Quick amount chips */}
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 14, flexWrap: 'wrap' }}>
+          {['ขั้นต่ำ 1,200', 'เต็ม 116,547', '50% 58,273', 'กำหนดเอง'].map((q, i) => (
+            <div key={q} style={{
+              padding: '6px 14px', borderRadius: 999,
+              background: i === 0 ? TC.walletViolet100 : TC.n200,
+              color: i === 0 ? TC.walletViolet : TC.n700,
+              fontSize: 12, fontWeight: 700, letterSpacing: 0.2,
+              cursor: 'pointer',
+            }}>{q}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Card & Wallet rows — arrow shows money flow direction */}
+      <div style={{ padding: '0 16px 10px', position: 'relative', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletViolet100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="card" size={18} color={TC.walletViolet} />
+          </div>}
+          label="ชำระบัตรเครดิต"
+          value="Kbank Credit"
+          hint="ค้างชำระ 116,547 ฿"
+          prominent
+        />
+        <div style={{
+          position: 'absolute', left: '50%', top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 28, height: 28, borderRadius: 999,
+          background: '#fff', border: `1.5px solid ${TC.n300}`,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1, pointerEvents: 'none',
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 5v14M6 13l6 6 6-6" stroke={TC.primary500} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletPink100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="piggy" size={18} color={TC.walletPink} />
+          </div>}
+          label="จ่ายจากกระเป๋า"
+          value="ครอบครัว"
+          hint="คงเหลือ 34,368 ฿"
+          prominent
+        />
+      </div>
+
+      <EMetaRow />
+
+      <ETagsRow value={tags} onChange={setTags} />
+
+      <EReportToggle value={inReport} onChange={setInReport} />
+    </ESheetShell>
   );
 }
 
-// D3b · CREDIT CARD — รับ Cashback
+// D3b · CREDIT CARD — รับ Cashback (E-style)
 function AddTxnD_CreditCashback() {
+  const [tags, setTags] = React.useState([]);
+  const [inReport, setInReport] = React.useState(true);
   const [txns] = React.useState([
     {
       type: 'income',
@@ -789,23 +895,73 @@ function AddTxnD_CreditCashback() {
   ]);
 
   return (
-    <DSheetShell txns={txns}>
-      <DTabs active="credit" sub="cashback" subOptions={[
-        { key: 'pay', label: 'จ่ายบัตรเครดิต' },
-        { key: 'cashback', label: 'รับ Cashback' },
-        { key: 'withdraw', label: 'กดเงินสด' },
-      ]} />
-      <DAmountCard amount="240" sign="+" hint="Cashback ลดค้างชำระ Kbank Credit" />
+    <ESheetShell txns={txns}>
+      <ETabs active="credit" />
 
-      <div style={{ padding: '0 16px 10px' }}>
-        <DAccountRow
-          label="เข้าบัตรเครดิต"
-          icon={<DWalletIcon bg={TC.walletViolet100} ic={TC.walletViolet} kind="card" />}
-          name="Kbank Credit"
-          sub="ค้างชำระ 116,547 ฿" />
+      {/* Segment tabs */}
+      <div style={{ margin: '0 16px 12px', padding: '4px', background: TC.n200, borderRadius: 12 }}>
+        <div style={{ display: 'flex', gap: 2 }}>
+          {[
+            { key: 'pay', label: 'จ่ายบัตรเครดิต' },
+            { key: 'cashback', label: 'รับ Cashback' },
+            { key: 'withdraw', label: 'กดเงินสด' },
+          ].map(t => {
+            const on = t.key === 'cashback';
+            return (
+              <div key={t.key} style={{
+                flex: 1, padding: '8px 4px', borderRadius: 10,
+                background: on ? '#fff' : 'transparent',
+                color: on ? TC.n900 : TC.n400,
+                fontSize: 13, fontWeight: on ? 700 : 500,
+                textAlign: 'center',
+                boxShadow: on ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+              }}>{t.label}</div>
+            );
+          })}
+        </div>
       </div>
 
-      <div style={{ padding: '0 16px 10px' }}>
+      {/* Amount hero */}
+      <div style={{
+        margin: '0 16px 12px', background: '#fff', borderRadius: 18,
+        padding: '20px 18px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 12, color: TC.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>
+          จำนวนเงิน
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6 }}>
+          <span style={{ fontSize: 28, fontWeight: 700, color: TC.primary500, letterSpacing: -0.5 }}>{'+'}</span>
+          <span style={{
+            fontSize: 56, fontWeight: 800, color: TC.n900,
+            letterSpacing: -2, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+          }}>
+            240
+          </span>
+          <span style={{ fontSize: 22, fontWeight: 600, color: TC.n400, fontVariantNumeric: 'tabular-nums' }}>.00</span>
+          <span style={{ fontSize: 13, color: TC.n400, fontWeight: 600, marginLeft: 4 }}>฿</span>
+        </div>
+        <div style={{ fontSize: 12, color: TC.primary500, marginTop: 8, fontWeight: 500 }}>
+          Cashback ลดค้างชำระ Kbank Credit
+        </div>
+      </div>
+
+      {/* Card row + Promo */}
+      <div style={{ padding: '0 16px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletViolet100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="card" size={18} color={TC.walletViolet} />
+          </div>}
+          label="เข้าบัตรเครดิต"
+          value="Kbank Credit"
+          hint="ค้างชำระ 116,547 ฿"
+        />
+
+        {/* Promo card */}
         <div style={{
           background: TC.primary100, borderRadius: 12, padding: '10px 12px',
           display: 'flex', alignItems: 'center', gap: 10,
@@ -829,13 +985,19 @@ function AddTxnD_CreditCashback() {
         </div>
       </div>
 
-      <DMetaRow />
-    </DSheetShell>
+      <EMetaRow />
+
+      <ETagsRow value={tags} onChange={setTags} />
+
+      <EReportToggle value={inReport} onChange={setInReport} />
+    </ESheetShell>
   );
 }
 
-// D3c · CREDIT CARD — กดเงินสด
+// D3c · CREDIT CARD — กดเงินสด (E-style)
 function AddTxnD_CreditWithdraw() {
+  const [tags, setTags] = React.useState([]);
+  const [inReport, setInReport] = React.useState(true);
   const [txns] = React.useState([
     {
       type: 'transfer',
@@ -849,33 +1011,85 @@ function AddTxnD_CreditWithdraw() {
   ]);
 
   return (
-    <DSheetShell txns={txns}>
-      <DTabs active="credit" sub="withdraw" subOptions={[
-        { key: 'pay', label: 'จ่ายบัตรเครดิต' },
-        { key: 'cashback', label: 'รับ Cashback' },
-        { key: 'withdraw', label: 'กดเงินสด' },
-      ]} />
-      <DAmountCard amount="2,000" sign="" hint="ค่าธรรมเนียม 3% ≈ 60 ฿ · ดอกเบี้ยเริ่มทันที" />
+    <ESheetShell txns={txns}>
+      <ETabs active="credit" />
 
-      <div style={{ padding: '0 16px 10px' }}>
-        <div style={{
-          background: '#fff', borderRadius: 14, padding: 12,
-          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-        }}>
-          <DAccountRow
-            label="กดเงินสดจาก"
-            icon={<DWalletIcon bg={TC.walletViolet100} ic={TC.walletViolet} kind="card" />}
-            name="Kbank Credit"
-            sub="วงเงินสด 50,000 ฿" />
-          <DArrowConnector />
-          <DAccountRow
-            label="เข้ากระเป๋า"
-            icon={<DWalletIcon bg={TC.walletGreen100} ic={TC.walletGreen} kind="wallet" />}
-            name="เงินสด" />
+      {/* Segment tabs */}
+      <div style={{ margin: '0 16px 12px', padding: '4px', background: TC.n200, borderRadius: 12 }}>
+        <div style={{ display: 'flex', gap: 2 }}>
+          {[
+            { key: 'pay', label: 'จ่ายบัตรเครดิต' },
+            { key: 'cashback', label: 'รับ Cashback' },
+            { key: 'withdraw', label: 'กดเงินสด' },
+          ].map(t => {
+            const on = t.key === 'withdraw';
+            return (
+              <div key={t.key} style={{
+                flex: 1, padding: '8px 4px', borderRadius: 10,
+                background: on ? '#fff' : 'transparent',
+                color: on ? TC.n900 : TC.n400,
+                fontSize: 13, fontWeight: on ? 700 : 500,
+                textAlign: 'center',
+                boxShadow: on ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+              }}>{t.label}</div>
+            );
+          })}
         </div>
+      </div>
 
+      {/* Amount hero */}
+      <div style={{
+        margin: '0 16px 12px', background: '#fff', borderRadius: 18,
+        padding: '20px 18px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 12, color: TC.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>
+          จำนวนเงิน
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6 }}>
+          <span style={{ fontSize: 28, fontWeight: 700, color: TC.n900, letterSpacing: -0.5 }}>{'−'}</span>
+          <span style={{
+            fontSize: 56, fontWeight: 800, color: TC.n900,
+            letterSpacing: -2, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+          }}>
+            2,000
+          </span>
+          <span style={{ fontSize: 22, fontWeight: 600, color: TC.n400, fontVariantNumeric: 'tabular-nums' }}>.00</span>
+          <span style={{ fontSize: 13, color: TC.n400, fontWeight: 600, marginLeft: 4 }}>฿</span>
+        </div>
+        <div style={{ fontSize: 12, color: TC.error500, marginTop: 8, fontWeight: 500 }}>
+          ค่าธรรมเนียม 3% ≈ 60 ฿ · ดอกเบี้ยเริ่มทันที
+        </div>
+      </div>
+
+      {/* Card & Wallet rows */}
+      <div style={{ padding: '0 16px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletViolet100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="card" size={18} color={TC.walletViolet} />
+          </div>}
+          label="กดเงินสดจาก"
+          value="Kbank Credit"
+          hint="วงเงินสด 50,000 ฿"
+        />
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletGreen100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="wallet" size={18} color={TC.walletGreen} />
+          </div>}
+          label="เข้ากระเป๋า"
+          value="เงินสด"
+        />
+
+        {/* Warning alert */}
         <div style={{
-          marginTop: 8, padding: '8px 12px', borderRadius: 10,
+          padding: '8px 12px', borderRadius: 10,
           background: TC.error100, display: 'flex', alignItems: 'center', gap: 8,
         }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -888,15 +1102,19 @@ function AddTxnD_CreditWithdraw() {
         </div>
       </div>
 
-      <DMetaRow />
-    </DSheetShell>
+      <EMetaRow />
+
+      <ETagsRow value={tags} onChange={setTags} />
+
+      <EReportToggle value={inReport} onChange={setInReport} />
+    </ESheetShell>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// D4 · TRANSFER
-// ═══════════════════════════════════════════════════════════════
+// D4 · TRANSFER (E-style)
 function AddTxnD_Transfer() {
+  const [tags, setTags] = React.useState([]);
+  const [inReport, setInReport] = React.useState(false);
   const [txns] = React.useState([
     {
       type: 'transfer',
@@ -910,30 +1128,62 @@ function AddTxnD_Transfer() {
   ]);
 
   return (
-    <DSheetShell txns={txns}>
-      <DTabs active="transfer" />
-      <DAmountCard amount="5,000" sign="" hint="โอนระหว่างกระเป๋า · ไม่นับเป็นรายจ่าย/รับ" />
+    <ESheetShell txns={txns}>
+      <ETabs active="transfer" />
 
-      <div style={{ padding: '0 16px 10px' }}>
-        <div style={{
-          background: '#fff', borderRadius: 14, padding: 12,
-          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-        }}>
-          <DAccountRow
-            label="โอนจาก"
-            icon={<DWalletIcon bg={TC.walletPink100} ic={TC.walletPink} kind="piggy" />}
-            name="ครอบครัว"
-            sub="คงเหลือ 34,368 ฿" />
-          <DArrowConnector />
-          <DAccountRow
-            label="โอนไปยัง"
-            icon={<DWalletIcon bg={TC.walletGreen100} ic={TC.walletGreen} kind="wallet" />}
-            name="TrueMoney"
-            sub="คงเหลือ 17,300 ฿" />
+      {/* Amount hero */}
+      <div style={{
+        margin: '0 16px 12px', background: '#fff', borderRadius: 18,
+        padding: '20px 18px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 12, color: TC.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>
+          จำนวนเงิน
         </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6 }}>
+          <span style={{
+            fontSize: 56, fontWeight: 800, color: TC.n900,
+            letterSpacing: -2, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+          }}>
+            5,000
+          </span>
+          <span style={{ fontSize: 22, fontWeight: 600, color: TC.n400, fontVariantNumeric: 'tabular-nums' }}>.00</span>
+          <span style={{ fontSize: 13, color: TC.n400, fontWeight: 600, marginLeft: 4 }}>฿</span>
+        </div>
+        <div style={{ fontSize: 12, color: TC.n500, marginTop: 8, fontWeight: 500 }}>
+          โอนระหว่างกระเป๋า · ไม่นับเป็นรายจ่าย/รับ
+        </div>
+      </div>
 
+      {/* From/To rows */}
+      <div style={{ padding: '0 16px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletPink100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="piggy" size={18} color={TC.walletPink} />
+          </div>}
+          label="โอนจาก"
+          value="ครอบครัว"
+          hint="คงเหลือ 34,368 ฿"
+        />
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletGreen100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="wallet" size={18} color={TC.walletGreen} />
+          </div>}
+          label="โอนไปยัง"
+          value="TrueMoney"
+          hint="คงเหลือ 17,300 ฿"
+        />
+
+        {/* Fee row */}
         <div style={{
-          marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           background: '#fff', borderRadius: 12, padding: '10px 12px',
           boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
         }}>
@@ -948,15 +1198,19 @@ function AddTxnD_Transfer() {
         </div>
       </div>
 
-      <DMetaRow />
-    </DSheetShell>
+      <EMetaRow />
+
+      <ETagsRow value={tags} onChange={setTags} />
+
+      <EReportToggle value={inReport} onChange={setInReport} />
+    </ESheetShell>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// D5a · SAVING — ออมเงิน (deposit to goal)
-// ═══════════════════════════════════════════════════════════════
+// D5a · SAVING — ออมเงิน (deposit to goal) (E-style)
 function AddTxnD_SavingDeposit() {
+  const [tags, setTags] = React.useState([]);
+  const [inReport, setInReport] = React.useState(true);
   const [txns] = React.useState([
     {
       type: 'income',
@@ -980,14 +1234,33 @@ function AddTxnD_SavingDeposit() {
   const oldPct = (goal.saved / goal.target) * 100;
 
   return (
-    <DSheetShell txns={txns}>
-      <DTabs active="saving" sub="deposit" subOptions={[
-        { key: 'deposit', label: 'ออมเงิน' },
-        { key: 'withdraw', label: 'ถอนเงิน' },
-      ]} />
+    <ESheetShell txns={txns}>
+      <ETabs active="saving" />
 
-      {/* Goal preview card with progress preview */}
-      <div style={{ padding: '0 16px 10px' }}>
+      {/* Saving sub-tabs */}
+      <div style={{ padding: '0 16px 14px' }}>
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+          {[
+            { key: 'deposit', label: 'ออมเงิน' },
+            { key: 'withdraw', label: 'ถอนเงิน' },
+          ].map(t => {
+            const on = t.key === 'deposit';
+            return (
+              <div key={t.key} style={{
+                padding: '8px 16px', borderRadius: 999,
+                background: on ? TC.primary100 : '#fff',
+                color: on ? TC.primary600 : TC.n600,
+                fontSize: 13, fontWeight: on ? 700 : 500,
+                border: on ? `1.5px solid ${TC.primary500}` : `1px solid ${TC.n300}`,
+                flexShrink: 0,
+              }}>{t.label}</div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Goal preview card */}
+      <div style={{ padding: '0 16px 12px' }}>
         <div style={{
           background: '#fff', borderRadius: 14, padding: '12px 14px',
           boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.04)',
@@ -997,12 +1270,12 @@ function AddTxnD_SavingDeposit() {
               width: 38, height: 38, borderRadius: 12, background: goal.bg,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             }}>
-              <CatIcon kind={goal.icon} size={20} color={goal.ic} />
+              <CatIcon kind={goal.icon} size={18} color={goal.ic} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: TC.n900 }}>{goal.name}</div>
               <div style={{ fontSize: 11, color: TC.n400, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <CatIcon kind="budget" size={11} color={TC.n400} />
+                <CatIcon kind="budget" size={14} color={TC.n400} />
                 {goal.by} · เหลืออีก {goal.daysLeft} วัน
               </div>
             </div>
@@ -1053,23 +1326,57 @@ function AddTxnD_SavingDeposit() {
         </div>
       </div>
 
-      <DAmountCard amount="7,161" sign="+" selectedCat={{ label: 'ออมเงิน', icon: 'saving', bg: TC.primary100, ic: TC.primary500 }} />
-
-      <div style={{ padding: '0 16px 10px' }}>
-        <DAccountRow
-          label="จากกระเป๋า"
-          icon={<DWalletIcon bg={TC.walletPink100} ic={TC.walletPink} kind="piggy" />}
-          name="ครอบครัว"
-          sub="คงเหลือ 34,368 ฿" />
+      {/* Amount hero */}
+      <div style={{
+        margin: '0 16px 12px', background: '#fff', borderRadius: 18,
+        padding: '20px 18px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 12, color: TC.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>
+          จำนวนเงิน
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6 }}>
+          <span style={{ fontSize: 28, fontWeight: 700, color: TC.primary500, letterSpacing: -0.5 }}>{'+'}</span>
+          <span style={{
+            fontSize: 56, fontWeight: 800, color: TC.n900,
+            letterSpacing: -2, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+          }}>
+            7,161
+          </span>
+          <span style={{ fontSize: 22, fontWeight: 600, color: TC.n400, fontVariantNumeric: 'tabular-nums' }}>.00</span>
+          <span style={{ fontSize: 13, color: TC.n400, fontWeight: 600, marginLeft: 4 }}>฿</span>
+        </div>
       </div>
 
-      <DMetaRow />
-    </DSheetShell>
+      {/* Wallet row */}
+      <div style={{ padding: '0 16px 10px' }}>
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletPink100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="piggy" size={18} color={TC.walletPink} />
+          </div>}
+          label="จากกระเป๋า"
+          value="ครอบครัว"
+          hint="คงเหลือ 34,368 ฿"
+        />
+      </div>
+
+      <EMetaRow />
+
+      <ETagsRow value={tags} onChange={setTags} />
+
+      <EReportToggle value={inReport} onChange={setInReport} />
+    </ESheetShell>
   );
 }
 
-// D5b · SAVING — ถอนเงิน
+// D5b · SAVING — ถอนเงิน (E-style)
 function AddTxnD_SavingWithdraw() {
+  const [tags, setTags] = React.useState([]);
+  const [inReport, setInReport] = React.useState(true);
   const [txns] = React.useState([
     {
       type: 'expense',
@@ -1092,20 +1399,40 @@ function AddTxnD_SavingWithdraw() {
   const oldPct = (goal.saved / goal.target) * 100;
 
   return (
-    <DSheetShell txns={txns}>
-      <DTabs active="saving" sub="withdraw" subOptions={[
-        { key: 'deposit', label: 'ออมเงิน' },
-        { key: 'withdraw', label: 'ถอนเงิน' },
-      ]} />
+    <ESheetShell txns={txns}>
+      <ETabs active="saving" />
 
-      <div style={{ padding: '0 16px 10px' }}>
+      {/* Saving sub-tabs */}
+      <div style={{ padding: '0 16px 14px' }}>
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+          {[
+            { key: 'deposit', label: 'ออมเงิน' },
+            { key: 'withdraw', label: 'ถอนเงิน' },
+          ].map(t => {
+            const on = t.key === 'withdraw';
+            return (
+              <div key={t.key} style={{
+                padding: '8px 16px', borderRadius: 999,
+                background: on ? TC.error100 : '#fff',
+                color: on ? TC.error400 : TC.n600,
+                fontSize: 13, fontWeight: on ? 700 : 500,
+                border: on ? `1.5px solid ${TC.error400}` : `1px solid ${TC.n300}`,
+                flexShrink: 0,
+              }}>{t.label}</div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Goal preview card */}
+      <div style={{ padding: '0 16px 12px' }}>
         <div style={{
           background: '#fff', borderRadius: 14, padding: '12px 14px',
           boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.04)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: goal.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CatIcon kind={goal.icon} size={20} color={goal.ic} />
+              <CatIcon kind={goal.icon} size={18} color={goal.ic} />
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: TC.n900 }}>{goal.name}</div>
@@ -1155,21 +1482,55 @@ function AddTxnD_SavingWithdraw() {
         </div>
       </div>
 
-      <DAmountCard amount="5,000" sign="−" selectedCat={{ label: 'ออมเงิน', icon: 'saving', bg: TC.primary100, ic: TC.primary500 }} />
-
-      <div style={{ padding: '0 16px 10px' }}>
-        <DAccountRow
-          label="เข้ากระเป๋า"
-          icon={<DWalletIcon bg={TC.walletPink100} ic={TC.walletPink} kind="piggy" />}
-          name="ครอบครัว" />
+      {/* Amount hero */}
+      <div style={{
+        margin: '0 16px 12px', background: '#fff', borderRadius: 18,
+        padding: '20px 18px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 12, color: TC.n400, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: 4 }}>
+          จำนวนเงิน
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6 }}>
+          <span style={{ fontSize: 28, fontWeight: 700, color: TC.error400, letterSpacing: -0.5 }}>{'−'}</span>
+          <span style={{
+            fontSize: 56, fontWeight: 800, color: TC.n900,
+            letterSpacing: -2, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+          }}>
+            5,000
+          </span>
+          <span style={{ fontSize: 22, fontWeight: 600, color: TC.n400, fontVariantNumeric: 'tabular-nums' }}>.00</span>
+          <span style={{ fontSize: 13, color: TC.n400, fontWeight: 600, marginLeft: 4 }}>฿</span>
+        </div>
       </div>
-    </DSheetShell>
+
+      {/* Wallet row */}
+      <div style={{ padding: '0 16px 10px' }}>
+        <EFieldRow
+          icon={<div style={{
+            width: 36, height: 36, borderRadius: 12, background: TC.walletPink100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CatIcon kind="piggy" size={18} color={TC.walletPink} />
+          </div>}
+          label="เข้ากระเป๋า"
+          value="ครอบครัว"
+        />
+      </div>
+
+      <EMetaRow />
+
+      <ETagsRow value={tags} onChange={setTags} />
+
+      <EReportToggle value={inReport} onChange={setInReport} />
+    </ESheetShell>
   );
 }
 
 // ── Exports ─────────────────────────────────────────────────
 Object.assign(window, {
-  AddTxnD_Expense, AddTxnD_Income,
+  AddTxnD_Income,
   AddTxnD_CreditPay, AddTxnD_CreditCashback, AddTxnD_CreditWithdraw,
   AddTxnD_Transfer,
   AddTxnD_SavingDeposit, AddTxnD_SavingWithdraw,

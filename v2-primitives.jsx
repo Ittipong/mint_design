@@ -29,9 +29,29 @@ function MintStatusBarV2({ time = '21:29' }) {
   );
 }
 
-// Custom category icons — SVG, brandable, consistent
+// Asset-backed PNG icons (under assets/cetegory_icons/) — render at 2x/3x for retina
+const CAT_ICON_ASSETS = {
+  food: 'food', transport: 'bus', shopping: 'shopping', cart: 'shopping',
+  piggy: 'piggy', card: 'credit', wallet: 'wallet',
+  coffee: 'coffee', movie: 'movie', bill: 'bill',
+  gas: 'gas', game: 'game', home: 'house', plane: 'travel',
+  budget: 'chart',
+};
+
+// Custom category icons — PNG asset for size >= 16; SVG below that (raster smear at small sizes)
 function CatIcon({ kind, size = 20, color = '#fff' }) {
   const s = { width: size, height: size, display: 'block' };
+  const assetName = CAT_ICON_ASSETS[kind];
+  if (assetName && size >= 16) {
+    return (
+      <img
+        src={`assets/cetegory_icons/${assetName}.png`}
+        srcSet={`assets/cetegory_icons/2.0x/${assetName}.png 2x, assets/cetegory_icons/3.0x/${assetName}.png 3x`}
+        alt=""
+        style={{ ...s, objectFit: 'contain' }}
+      />
+    );
+  }
   switch (kind) {
     case 'coffee':
       return <svg style={s} viewBox="0 0 24 24" fill="none">
@@ -98,7 +118,38 @@ function CatIcon({ kind, size = 20, color = '#fff' }) {
         <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.8"/>
         <path d="M12 3v9l6 4" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
       </svg>;
+    // Below: simplified SVG glyphs for kinds whose detailed PNG would smear at small sizes (<16)
+    case 'food':
+      return <svg style={s} viewBox="0 0 24 24" fill="none">
+        <path d="M5 11h14a7 7 0 01-14 0z" stroke={color} strokeWidth="1.8" strokeLinejoin="round"/>
+        <path d="M3 20h18" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+        <path d="M9 7V4M12 7V3M15 7V4" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+      </svg>;
+    case 'transport':
+      return <svg style={s} viewBox="0 0 24 24" fill="none">
+        <rect x="5" y="4" width="14" height="14" rx="3" stroke={color} strokeWidth="1.8"/>
+        <path d="M5 13h14" stroke={color} strokeWidth="1.6"/>
+        <circle cx="9" cy="16" r="1.1" fill={color}/>
+        <circle cx="15" cy="16" r="1.1" fill={color}/>
+        <path d="M8 21l-1 1M16 21l1 1" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+      </svg>;
+    case 'shopping':
+      return <svg style={s} viewBox="0 0 24 24" fill="none">
+        <path d="M5 8h14l-1 12H6L5 8z" stroke={color} strokeWidth="1.8" strokeLinejoin="round"/>
+        <path d="M9 8V6a3 3 0 016 0v2" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>;
     default:
+      // No SVG glyph defined: fall back to PNG even at small size (better than blank)
+      if (assetName) {
+        return (
+          <img
+            src={`assets/cetegory_icons/${assetName}.png`}
+            srcSet={`assets/cetegory_icons/2.0x/${assetName}.png 2x, assets/cetegory_icons/3.0x/${assetName}.png 3x`}
+            alt=""
+            style={{ ...s, objectFit: 'contain' }}
+          />
+        );
+      }
       return null;
   }
 }
