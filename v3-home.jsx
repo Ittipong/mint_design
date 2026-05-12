@@ -14,120 +14,109 @@ function HomeV3() {
     <div style={{ background: H3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <MintStatusBarV2 time="21:29" />
 
-      {/* Greeting */}
-      <div style={{ padding: '0 20px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Net Worth anchor — top-left, bell on right */}
+      <div style={{ padding: '0 16px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <div style={{ fontSize: 13, color: H3.n600 }}>สวัสดีตอนค่ำ 🌙</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: H3.n900, marginTop: 1 }}>ภูมิ</div>
-        </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#fff', padding: '6px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, color: H3.warning400 }}>
-            🔥 7 วัน
-          </div>
-          <div style={{ position: 'relative' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 3a6 6 0 00-6 6v3l-2 3v1h16v-1l-2-3V9a6 6 0 00-6-6zM9 18a3 3 0 006 0" stroke={H3.n700} strokeWidth="1.8" strokeLinejoin="round"/>
-            </svg>
-            <div style={{ position:'absolute', top:-1, right:-1, width:7, height:7, borderRadius:4, background: H3.error400, border:'1.5px solid #fff' }} />
+          <div style={{ fontSize: 11, color: H3.n400, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.6 }}>Net Worth</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 2 }}>
+            <span style={{ fontSize: 30, fontWeight: 700, color: H3.n900, letterSpacing: -0.8, lineHeight: 1.1 }}>฿ 125,430</span>
+            <span style={{ fontSize: 12, color: H3.primary500, fontWeight: 700 }}>↑ 2.4%</span>
           </div>
         </div>
-      </div>
-
-      {/* Net Worth strip */}
-      <div style={{ margin: '0 20px 10px', display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span style={{ fontSize: 12, color: H3.n400 }}>Net Worth</span>
-        <span style={{ fontSize: 20, fontWeight: 700, color: H3.n900, letterSpacing: -0.3 }}>฿ 125,430</span>
-        <span style={{ fontSize: 11, color: H3.primary500, fontWeight: 600 }}>↑ 2.4%</span>
+        <div style={{ position: 'relative', marginTop: 6 }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3a6 6 0 00-6 6v3l-2 3v1h16v-1l-2-3V9a6 6 0 00-6-6zM9 18a3 3 0 006 0" stroke={H3.n700} strokeWidth="1.8" strokeLinejoin="round"/>
+          </svg>
+          <div style={{ position:'absolute', top:-1, right:-1, width:7, height:7, borderRadius:4, background: H3.error400, border:'1.5px solid #fff' }} />
+        </div>
       </div>
 
       <div style={{ flex: 1, overflow: 'hidden', paddingBottom: 190 }}>
 
-        {/* HERO AI INSIGHT CARD — ตามต้นฉบับ 100% */}
-        <div style={{ margin: '0 16px 14px' }}>
+        {/* HERO AI INSIGHT CARD — anchored, heavier presence */}
+        <div style={{ margin: '0 16px 12px' }}>
           <div style={{
             background: '#fff',
             borderRadius: 20,
             padding: '32px 24px 24px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.03), 0 12px 32px rgba(0,0,0,0.06)',
+            border: `1px solid ${H3.n200}`,
             minHeight: 340,
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            position: 'relative',
+            position: 'relative', overflow: 'hidden',
           }}>
-            {/* subtle gradient ring top-left */}
+            {/* stronger gradient ring top */}
             <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 80,
-              background: `radial-gradient(ellipse at top left, ${H3.walletPink100} 0%, transparent 60%)`,
-              borderTopLeftRadius: 20, borderTopRightRadius: 20,
-              pointerEvents: 'none', opacity: 0.6,
+              position: 'absolute', top: 0, left: 0, right: 0, height: 120,
+              background: `radial-gradient(ellipse at top left, ${H3.walletPink100} 0%, transparent 65%)`,
+              pointerEvents: 'none', opacity: 0.85,
             }}/>
 
-            {/* Lightbulb icon */}
-            <div style={{ fontSize: 54, marginTop: 56, marginBottom: 28, lineHeight: 1 }}>💡</div>
+            {/* Lightbulb icon — bigger focal */}
+            <div style={{ fontSize: 64, marginTop: 48, marginBottom: 24, lineHeight: 1, position: 'relative' }}>💡</div>
 
-            {/* Quote */}
+            {/* Quote — larger, tighter line-height */}
             <div style={{
-              fontSize: 16, color: H3.n900, textAlign: 'center',
-              lineHeight: 1.55, fontWeight: 500, padding: '0 12px',
-              maxWidth: 280,
+              fontSize: 18, color: H3.n900, textAlign: 'center',
+              lineHeight: 1.5, fontWeight: 500, padding: '0 8px',
+              maxWidth: 290, letterSpacing: -0.1,
             }}>
               {ins.quote}
             </div>
 
             {/* Divider + read more */}
             <div style={{
-              marginTop: 36, display: 'flex', alignItems: 'center', gap: 12,
+              marginTop: 32, display: 'flex', alignItems: 'center', gap: 12,
               width: '100%', justifyContent: 'center',
             }}>
               <div style={{ flex: 1, maxWidth: 60, height: 1, background: H3.n300 }}/>
-              <div style={{ fontSize: 13, color: H3.n600, fontWeight: 500, cursor: 'pointer' }}>อ่านเพิ่ม</div>
+              <div style={{ fontSize: 12, color: H3.n600, fontWeight: 600, cursor: 'pointer', letterSpacing: 0.2 }}>อ่านเพิ่ม</div>
               <div style={{ flex: 1, maxWidth: 60, height: 1, background: H3.n300 }}/>
             </div>
           </div>
 
-          {/* pagination dots */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 12 }}>
-            {insights.map((_, i) => (
-              <div key={i} onClick={() => setInsightIdx(i)} style={{
-                width: i === insightIdx ? 18 : 6, height: 6, borderRadius: 3,
-                background: i === insightIdx ? H3.primary400 : H3.n300,
-                transition: 'all 0.2s', cursor: 'pointer',
-              }} />
-            ))}
-          </div>
         </div>
 
-        {/* AI Chat entry — gradient violet→teal, chat-like with 3 suggestion chips */}
+        {/* AI Chat entry — lighter, supports hero (not competes) */}
         <div style={{
           margin: '0 16px 12px',
-          background: `linear-gradient(135deg, ${H3.walletViolet100} 0%, #fff 45%, ${H3.primary100} 100%)`,
+          background: '#fff',
           borderRadius: 18,
-          border: `1px solid ${H3.walletViolet100}`,
+          border: `1px solid ${H3.n200}`,
           padding: '14px 14px 12px',
-          boxShadow: '0 2px 10px rgba(148,154,235,0.18)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+          position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          {/* subtle violet tint only at corner */}
+          <div style={{
+            position: 'absolute', top: 0, right: 0, width: 160, height: 80,
+            background: `radial-gradient(ellipse at top right, ${H3.walletViolet100} 0%, transparent 70%)`,
+            pointerEvents: 'none', opacity: 0.5,
+          }}/>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, position: 'relative' }}>
             <div style={{
-              width: 34, height: 34, borderRadius: 10,
+              width: 32, height: 32, borderRadius: 10,
               background: `linear-gradient(135deg, ${H3.walletViolet} 0%, ${H3.primary400} 100%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 15,
-              boxShadow: '0 2px 6px rgba(148,154,235,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14,
+              boxShadow: '0 2px 6px rgba(148,154,235,0.3)',
             }}>✦</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: H3.n900 }}>สอบถาม AI</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: H3.n900, letterSpacing: -0.1 }}>สอบถาม AI</div>
               <div style={{ fontSize: 11, color: H3.n600 }}>ถามคำถามเกี่ยวกับการเงินของคุณ</div>
             </div>
           </div>
 
           {/* Chat-like input preview */}
           <div style={{
-            background: 'rgba(255,255,255,0.75)',
-            border: `1px solid rgba(148,154,235,0.25)`,
+            background: H3.n100 || '#F7F7FA',
+            border: `1px solid ${H3.n200}`,
             borderRadius: 22,
             padding: '9px 14px',
             display: 'flex', alignItems: 'center', gap: 8,
-            marginBottom: 10,
+            marginBottom: 10, position: 'relative',
           }}>
-            <div style={{ flex: 1, fontSize: 12, color: H3.n400, fontStyle: 'italic' }}>
+            <div style={{ flex: 1, fontSize: 12, color: H3.n400 }}>
               พิมพ์คำถามของคุณ...
             </div>
             <div style={{
@@ -142,7 +131,7 @@ function HomeV3() {
           </div>
 
           {/* 3 suggestion chips */}
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', position: 'relative' }}>
             {[
               '💡 เดือนนี้ใช้อะไรเยอะสุด?',
               '📈 ออมได้เท่าไหร่?',
@@ -150,8 +139,8 @@ function HomeV3() {
             ].map((s, i) => (
               <div key={i} style={{
                 fontSize: 11, padding: '6px 10px', borderRadius: 14,
-                background: 'rgba(255,255,255,0.85)',
-                border: `1px solid rgba(148,154,235,0.3)`,
+                background: H3.n100 || '#F7F7FA',
+                border: `1px solid ${H3.n200}`,
                 color: H3.n700, fontWeight: 500,
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
@@ -164,19 +153,20 @@ function HomeV3() {
         <div style={{
           margin: '0 16px',
           background: '#fff', borderRadius: 14,
-          padding: '11px 14px',
+          padding: '12px 14px',
           display: 'flex', alignItems: 'center', gap: 10,
-          border: `1px solid ${H3.n300}`,
+          border: `1px solid ${H3.n200}`,
           borderLeft: `3px solid ${H3.warning400}`,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
         }}>
-          <div style={{ width: 30, height: 30, borderRadius: 10, background: H3.walletPink100, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: H3.walletPink100, display:'flex', alignItems:'center', justifyContent:'center' }}>
             <CatIcon kind="movie" size={16} color={H3.walletPink} />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: H3.warning400, fontWeight: 600 }}>⚑ ต้องจ่ายใน 2 วัน</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: H3.n900 }}>หนัง · 1,111.00 €</div>
+            <div style={{ fontSize: 11, color: H3.warning400, fontWeight: 600, letterSpacing: 0.1 }}>⚑ ต้องจ่ายใน 2 วัน</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: H3.n900, marginTop: 1, letterSpacing: -0.1 }}>หนัง · 1,111.00 €</div>
           </div>
-          <div style={{ fontSize: 12, color: H3.primary500, fontWeight: 600 }}>จ่าย ›</div>
+          <div style={{ fontSize: 12, color: H3.primary500, fontWeight: 700 }}>จ่าย ›</div>
         </div>
       </div>
 

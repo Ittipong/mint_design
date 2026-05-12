@@ -154,6 +154,20 @@ function ESheetShell({ children, txns = [] }) {
             <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 500 }}>· 85฿</span>
           </button>
           {/* Split chevron — reveals "& เพิ่มอีก" */}
+          <button
+            onClick={() => setSplitOpen(!splitOpen)}
+            style={{
+              width: 50, height: 50, borderRadius: 14, border: 'none',
+              background: TE.primary600, color: '#fff',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 6px 14px rgba(44,122,123,0.3)',
+            }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ transform: splitOpen ? 'rotate(180deg)' : 'none' }}>
+              <path d="M6 9l6 6 6-6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/>
+            </svg>
+          </button>
+
           {/* Reveal: บันทึก & เพิ่มอีก */}
           {splitOpen && (
             <div style={{
@@ -315,7 +329,7 @@ function EAmountHero({ amount = '85', sign = '−' }) {
                     <div style={{ fontSize: 11, color: TE.n400, fontWeight: 500 }}>{c.name}</div>
                   </div>
                   {on && (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">+CHIP_ICON_SIZE
                       <path d="M5 13l4 4L19 7" stroke={TE.primary600} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
@@ -437,6 +451,11 @@ function ECategoryChips({ value, onChange }) {
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [pickerCat, setPickerCat] = React.useState(null); // step-2 category being drilled into
 
+  const CHIP_CONTAINER = 32;
+  const CHIP_ICON_SIZE = Math.round(CHIP_CONTAINER * 0.5); // 50% of container
+  const BREADCRUMB_CONTAINER = 28;
+  const BREADCRUMB_ICON_SIZE = Math.round(BREADCRUMB_CONTAINER * 0.5); // 50% of container
+
   const frequent = FREQUENT_CAT_KEYS.map(findCat);
   const selectedCat = value ? findCat(value.key) : null;
   const selectedSub = selectedCat && value?.subKey ? findSub(selectedCat, value.subKey) : null;
@@ -483,11 +502,11 @@ function ECategoryChips({ value, onChange }) {
         }}
       >
         <div style={{
-          width: 32, height: 32, borderRadius: 10,
+          width: CHIP_CONTAINER, height: CHIP_CONTAINER, borderRadius: 10,
           background: on ? '#fff' : c.bg,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <CatIcon kind={c.icon} containerSize={32} color={c.ic} />
+          <CatIcon kind={c.icon} size={CHIP_ICON_SIZE} color={c.ic} />
         </div>
         <div style={{
           fontSize: 11, fontWeight: on ? 700 : 600,
@@ -527,10 +546,10 @@ function ECategoryChips({ value, onChange }) {
           }}
         >
           <div style={{
-            width: 28, height: 28, borderRadius: 9, background: '#fff',
+            width: BREADCRUMB_CONTAINER, height: BREADCRUMB_CONTAINER, borderRadius: 9, background: '#fff',
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}>
-            <CatIcon kind={selectedCat.icon} containerSize={28} color={selectedCat.ic} />
+            <CatIcon kind={selectedCat.icon} size={BREADCRUMB_ICON_SIZE} color={selectedCat.ic} />
           </div>
           <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: selectedCat.ic, letterSpacing: 0.1 }}>
             {selectedCat.label}
@@ -567,10 +586,10 @@ function ECategoryChips({ value, onChange }) {
           }}
         >
           <div style={{
-            width: 32, height: 32, borderRadius: 10, background: '#fff',
+            width: CHIP_CONTAINER, height: CHIP_CONTAINER, borderRadius: 10, background: '#fff',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <svg width={CHIP_ICON_SIZE} height={CHIP_ICON_SIZE} viewBox="0 0 24 24" fill="none">
               <circle cx="5" cy="6" r="1.4" fill={TE.primary600}/>
               <circle cx="5" cy="12" r="1.4" fill={TE.primary600}/>
               <circle cx="5" cy="18" r="1.4" fill={TE.primary600}/>
@@ -702,7 +721,7 @@ function ECategoryPicker({ step2Cat, onBack, onClose, onPickCategory, onPickSub,
                       width: 38, height: 38, borderRadius: 12, background: c.bg,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <CatIcon kind={c.icon} containerSize={38} color={c.ic} />
+                      <CatIcon kind={c.icon} size={18} color={c.ic} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, color: TE.n900 }}>{c.label}</div>
@@ -736,7 +755,7 @@ function ECategoryPicker({ step2Cat, onBack, onClose, onPickCategory, onPickSub,
                   width: 32, height: 32, borderRadius: 10, background: '#fff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <CatIcon kind={step2Cat.icon} containerSize={32} color={step2Cat.ic} />
+                  <CatIcon kind={step2Cat.icon} size={16} color={step2Cat.ic} />
                 </div>
                 <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: step2Cat.ic }}>
                   ใช้ {step2Cat.label} (ไม่ระบุหมวดย่อย)
@@ -762,7 +781,7 @@ function ECategoryPicker({ step2Cat, onBack, onClose, onPickCategory, onPickSub,
                       width: 32, height: 32, borderRadius: 10, background: step2Cat.bg,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <CatIcon kind={step2Cat.icon} containerSize={32} color={step2Cat.ic} />
+                      <CatIcon kind={step2Cat.icon} size={16} color={step2Cat.ic} />
                     </div>
                     <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: TE.n900 }}>{s.label}</div>
                     {on && (
@@ -1241,7 +1260,7 @@ function AddTxnE_Expense() {
             width: 36, height: 36, borderRadius: 12, background: TE.walletPink100,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <CatIcon kind="piggy" containerSize={36} color={TE.walletPink} />
+            <CatIcon kind="piggy" size={18} color={TE.walletPink} />
           </div>}
           label="กระเป๋า"
           value="ครอบครัว"
