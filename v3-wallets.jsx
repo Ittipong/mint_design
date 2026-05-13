@@ -134,9 +134,10 @@ function SectionShell({ title, summary, children }) {
 
 function MiniBar({ pct, color }) {
   const clamped = Math.min(100, Math.max(0, pct));
+  const fill = color || `linear-gradient(90deg, ${W3.primary300}, ${W3.walletViolet})`;
   return (
     <div style={{ height: 5, borderRadius: 3, background: W3.n300, overflow: 'hidden' }}>
-      <div style={{ width: `${clamped}%`, height: '100%', background: color || W3.primary500, borderRadius: 3 }} />
+      <div style={{ width: `${clamped}%`, height: '100%', background: fill, borderRadius: 3 }} />
     </div>
   );
 }
@@ -210,7 +211,7 @@ function WalletsV3_Accounts() {
                 <div style={{ fontSize: 10.5, color: W3.n400 }}>อีก {g.monthsLeft}ด.</div>
               </div>
               <div style={{ marginTop: 5, marginLeft: 40 }}>
-                <MiniBar pct={g.pct} color={W3.primary500} />
+                <MiniBar pct={g.pct} />
               </div>
             </div>
           ))}
@@ -233,7 +234,7 @@ function WalletsV3_Accounts() {
                   </div>
                 </div>
                 <div style={{ marginTop: 5, marginLeft: 40 }}>
-                  <MiniBar pct={pct} color={W3.primary500} />
+                  <MiniBar pct={pct} />
                 </div>
               </div>
             );
@@ -298,7 +299,7 @@ function WalletsV3_Credit() {
                   <span>ใช้ไป <span style={{ color: W3.n900, fontWeight: 700 }}>{pct.toFixed(0)}%</span></span>
                   <span style={{ fontVariantNumeric: 'tabular-nums' }}>{c.used.toLocaleString()} / {c.limit.toLocaleString()}</span>
                 </div>
-                <MiniBar pct={pct} color={W3.primary500} />
+                <MiniBar pct={pct} />
               </div>
               {/* min row + cta */}
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -345,7 +346,7 @@ function WalletsV3_Goals() {
             แผน <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {monthlyTarget.toLocaleString()} / เดือน</span> · ทำได้ <span style={{ color: W3.n900, fontWeight: 700 }}>{ratioPct}%</span>
           </div>
           <div style={{ marginTop: 12 }}>
-            <MiniBar pct={Math.min(120, ratioPct)} color={W3.primary500} />
+            <MiniBar pct={Math.min(120, ratioPct)} />
           </div>
         </div>
 
@@ -371,7 +372,7 @@ function WalletsV3_Goals() {
               </div>
 
               <div style={{ marginTop: 12 }}>
-                <MiniBar pct={g.pct} color={W3.primary500} />
+                <MiniBar pct={g.pct} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, fontSize: 11, color: W3.n400, fontVariantNumeric: 'tabular-nums' }}>
                   <span><span style={{ color: W3.n900, fontWeight: 700 }}>฿ {g.saved.toLocaleString()}</span> / {g.target.toLocaleString()}</span>
                   <span>เหลือ ฿ {remain.toLocaleString()}</span>
@@ -454,7 +455,7 @@ function WalletsV3_Budget() {
               </div>
 
               <div style={{ marginTop: 12 }}>
-                <MiniBar pct={pct} color={W3.primary500} />
+                <MiniBar pct={pct} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, fontSize: 11, color: W3.n400, fontVariantNumeric: 'tabular-nums' }}>
                   <span><span style={{ color: W3.n900, fontWeight: 700 }}>฿ {bg.spent.toLocaleString()}</span> / {bg.limit.toLocaleString()}</span>
                   <span>{over ? `เกิน ฿ ${(bg.spent - bg.limit).toLocaleString()}` : `เหลือ ฿ ${(bg.limit - bg.spent).toLocaleString()}`}</span>
