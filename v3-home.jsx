@@ -1,8 +1,100 @@
 // Home v3 — AI insight hero ON TOP, chat below it, quick add sticky bottom
 const H3 = window.MINT;
 
+// === AI Chat card — conversational bubble preview ===
+function AiChatCard() {
+  return (
+    <div style={{
+      margin: '0 16px 12px',
+      background: '#fff',
+      borderRadius: 18,
+      border: `1px solid ${H3.n200}`,
+      padding: '14px',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      {/* header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 10,
+          background: `linear-gradient(135deg, ${H3.walletViolet} 0%, ${H3.primary400} 100%)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14,
+          boxShadow: '0 2px 6px rgba(148,154,235,0.3)',
+        }}>✦</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: H3.n900 }}>คุยกับ AI</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ width: 6, height: 6, borderRadius: 3, background: H3.primary500 }}/>
+            <div style={{ fontSize: 11, color: H3.n600 }}>พร้อมตอบทุกคำถามเงิน ๆ ทอง ๆ</div>
+          </div>
+        </div>
+      </div>
+
+      {/* AI bubble */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+        <div style={{
+          maxWidth: '78%',
+          background: H3.walletViolet100,
+          border: `1px solid ${H3.walletViolet100}`,
+          borderRadius: '14px 14px 14px 4px',
+          padding: '8px 12px',
+          fontSize: 12, color: H3.n900, lineHeight: 1.45,
+        }}>
+          สวัสดี! อยากรู้อะไรเกี่ยวกับการเงินคุณวันนี้? 👋
+        </div>
+      </div>
+
+      {/* tap-to-reply chips, right-aligned like outgoing */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end', marginBottom: 12 }}>
+        {[
+          '💡 เดือนนี้ใช้อะไรเยอะสุด?',
+          '📈 เดือนนี้ออมได้กี่บาท?',
+          '🎯 ถึงเป้าเที่ยวอังกฤษเมื่อไหร่?',
+        ].map((s, i) => (
+          <div key={i} style={{
+            fontSize: 12, padding: '7px 12px',
+            borderRadius: '14px 14px 4px 14px',
+            background: '#fff',
+            border: `1.5px solid ${H3.primary400}`,
+            color: H3.primary500, fontWeight: 600,
+            cursor: 'pointer',
+          }}>{s}</div>
+        ))}
+      </div>
+
+      {/* input bar at bottom of card */}
+      <div style={{
+        background: H3.n100 || '#F7F7FA',
+        border: `1px solid ${H3.n200}`,
+        borderRadius: 22,
+        padding: '8px 8px 8px 14px',
+        display: 'flex', alignItems: 'center', gap: 6,
+      }}>
+        <div style={{ flex: 1, fontSize: 12, color: H3.n400 }}>พิมพ์คำถาม หรือกดเลือกข้างบน...</div>
+        <div style={{
+          width: 28, height: 28, borderRadius: 14,
+          background: H3.n200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 14a3 3 0 003-3V6a3 3 0 00-6 0v5a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3" stroke={H3.n700} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div style={{
+          width: 28, height: 28, borderRadius: 14,
+          background: `linear-gradient(135deg, ${H3.walletViolet} 0%, ${H3.primary400} 100%)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+            <path d="M4 20l16-8L4 4v6l10 2-10 2v6z" fill="#fff"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HomeV3() {
-  const [insightIdx, setInsightIdx] = React.useState(0);
+  const [insightIdx] = React.useState(0);
   const insights = [
     { quote: '"เห็นว่าเดือนนี้คุณใช้จ่ายส่วนบันเทิงเยอะกว่าเดือนก่อน 15% เลยนะ"' },
     { quote: '"คุณใกล้ถึงเป้าหมายเที่ยวอังกฤษแล้ว — ออมเพิ่มอีก 21,000 ฿ ก็ถึงแล้วน้า"' },
@@ -31,7 +123,7 @@ function HomeV3() {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflow: 'hidden', paddingBottom: 190 }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingBottom: 190 }}>
 
         {/* HERO AI INSIGHT CARD — anchored, heavier presence */}
         <div style={{ margin: '0 16px 12px' }}>
@@ -77,77 +169,7 @@ function HomeV3() {
 
         </div>
 
-        {/* AI Chat entry — lighter, supports hero (not competes) */}
-        <div style={{
-          margin: '0 16px 12px',
-          background: '#fff',
-          borderRadius: 18,
-          border: `1px solid ${H3.n200}`,
-          padding: '14px 14px 12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-          position: 'relative', overflow: 'hidden',
-        }}>
-          {/* subtle violet tint only at corner */}
-          <div style={{
-            position: 'absolute', top: 0, right: 0, width: 160, height: 80,
-            background: `radial-gradient(ellipse at top right, ${H3.walletViolet100} 0%, transparent 70%)`,
-            pointerEvents: 'none', opacity: 0.5,
-          }}/>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, position: 'relative' }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 10,
-              background: `linear-gradient(135deg, ${H3.walletViolet} 0%, ${H3.primary400} 100%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14,
-              boxShadow: '0 2px 6px rgba(148,154,235,0.3)',
-            }}>✦</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: H3.n900, letterSpacing: -0.1 }}>สอบถาม AI</div>
-              <div style={{ fontSize: 11, color: H3.n600 }}>ถามคำถามเกี่ยวกับการเงินของคุณ</div>
-            </div>
-          </div>
-
-          {/* Chat-like input preview */}
-          <div style={{
-            background: H3.n100 || '#F7F7FA',
-            border: `1px solid ${H3.n200}`,
-            borderRadius: 22,
-            padding: '9px 14px',
-            display: 'flex', alignItems: 'center', gap: 8,
-            marginBottom: 10, position: 'relative',
-          }}>
-            <div style={{ flex: 1, fontSize: 12, color: H3.n400 }}>
-              พิมพ์คำถามของคุณ...
-            </div>
-            <div style={{
-              width: 26, height: 26, borderRadius: 13,
-              background: `linear-gradient(135deg, ${H3.walletViolet} 0%, ${H3.primary400} 100%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path d="M4 20l16-8L4 4v6l10 2-10 2v6z" fill="#fff"/>
-              </svg>
-            </div>
-          </div>
-
-          {/* 3 suggestion chips */}
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', position: 'relative' }}>
-            {[
-              '💡 เดือนนี้ใช้อะไรเยอะสุด?',
-              '📈 ออมได้เท่าไหร่?',
-              '🎯 ถึงเป้าเมื่อไหร่?',
-            ].map((s, i) => (
-              <div key={i} style={{
-                fontSize: 11, padding: '6px 10px', borderRadius: 14,
-                background: H3.n100 || '#F7F7FA',
-                border: `1px solid ${H3.n200}`,
-                color: H3.n700, fontWeight: 500,
-                whiteSpace: 'nowrap',
-                cursor: 'pointer',
-              }}>{s}</div>
-            ))}
-          </div>
-        </div>
+        <AiChatCard />
 
         {/* Upcoming bill — inline alert */}
         <div style={{
