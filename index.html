@@ -40,8 +40,7 @@
 <script type="text/babel" src="v4-goal-detail.jsx"></script>
 <script type="text/babel" src="v4-budget-detail.jsx"></script>
 <script type="text/babel" src="v4-create-wallet-a-wizard.jsx"></script>
-<script type="text/babel" src="v4-create-wallet-b-preset.jsx"></script>
-<script type="text/babel" src="v4-create-wallet-c-chat.jsx"></script>
+<script type="text/babel" src="v4-create-credit-wizard.jsx"></script>
 <script type="text/babel" src="v4-icon-color-picker.jsx"></script>
 <script type="text/babel" src="v4-icon-library-manager.jsx"></script>
 <script type="text/babel" src="v4-icon-add-custom.jsx"></script>
@@ -276,14 +275,29 @@ function App() {
           <DCArtboard label="A2 · Wizard · ตั้งชื่อ + icon + สี (live preview)" width={390} height={844}>
             <CreateWalletA_Step2 />
           </DCArtboard>
-          <DCArtboard label="A3 · Wizard · ยอด + AI (optional)" width={390} height={844}>
+          <DCArtboard label="A3 · Wizard · ยอดเริ่มต้น + สกุลเงิน" width={390} height={844}>
             <CreateWalletA_Step3 />
           </DCArtboard>
-          <DCArtboard label="B · Smart Single Page (Preset-Driven)" width={390} height={844}>
-            <CreateWalletB_Preset />
+          <DCArtboard label="A4 · Wizard · เป้าหมาย AI (required)" width={390} height={844}>
+            <CreateWalletA_Step4 />
           </DCArtboard>
-          <DCArtboard label="C · Conversational Setup (AI chat)" width={390} height={844}>
-            <CreateWalletC_Chat />
+        </DCSection>
+
+        <DCSection
+          title="v4 — Create Credit Card · Wizard"
+          subtitle="4-step wizard เฉพาะบัตรเครดิต — แก้ pain ของฟอร์มเดิมที่ยัด 10+ fields ในหน้าเดียว · Step 1: เลือกธนาคาร (สี+ไอคอนเริ่มต้น auto) · Step 2: ตั้งชื่อ+เลข 4 หลักท้าย+icon/สี · Step 3: วงเงิน+ยอดค้าง+รอบบิล+กำหนดชำระ+แจ้งเตือน · Step 4: เป้าหมาย AI (required)"
+        >
+          <DCArtboard label="CC1 · Wizard · เลือกธนาคาร" width={390} height={844}>
+            <CreateCreditWizard_Step1 />
+          </DCArtboard>
+          <DCArtboard label="CC2 · Wizard · ตั้งชื่อ + เลข 4 หลัก + icon + สี" width={390} height={844}>
+            <CreateCreditWizard_Step2 />
+          </DCArtboard>
+          <DCArtboard label="CC3 · Wizard · วงเงินและรอบบิล" width={390} height={844}>
+            <CreateCreditWizard_Step3 />
+          </DCArtboard>
+          <DCArtboard label="CC4 · Wizard · เป้าหมาย AI (required)" width={390} height={844}>
+            <CreateCreditWizard_Step4 />
           </DCArtboard>
         </DCSection>
 
