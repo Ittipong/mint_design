@@ -1,100 +1,11 @@
 // Home v3 — AI insight hero ON TOP, chat below it, quick add sticky bottom
 const H3 = window.MINT;
 
-// === AI Chat card — conversational bubble preview ===
-function AiChatCard() {
-  return (
-    <div style={{
-      margin: '0 16px 12px',
-      background: '#fff',
-      borderRadius: 18,
-      border: `1px solid ${H3.n200}`,
-      padding: '14px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-      position: 'relative', overflow: 'hidden',
-    }}>
-      {/* header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <div style={{
-          width: 32, height: 32, borderRadius: 10,
-          background: `linear-gradient(135deg, ${H3.walletViolet} 0%, ${H3.primary400} 100%)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14,
-          boxShadow: '0 2px 6px rgba(148,154,235,0.3)',
-        }}>✦</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: H3.n900 }}>คุยกับ AI</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <div style={{ width: 6, height: 6, borderRadius: 3, background: H3.primary500 }}/>
-            <div style={{ fontSize: 11, color: H3.n600 }}>พร้อมตอบทุกคำถามเงิน ๆ ทอง ๆ</div>
-          </div>
-        </div>
-      </div>
-
-      {/* AI bubble */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-        <div style={{
-          maxWidth: '78%',
-          background: H3.walletViolet100,
-          border: `1px solid ${H3.walletViolet100}`,
-          borderRadius: '14px 14px 14px 4px',
-          padding: '8px 12px',
-          fontSize: 12, color: H3.n900, lineHeight: 1.45,
-        }}>
-          สวัสดี! อยากรู้อะไรเกี่ยวกับการเงินคุณวันนี้? 👋
-        </div>
-      </div>
-
-      {/* tap-to-reply chips, right-aligned like outgoing */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end', marginBottom: 12 }}>
-        {[
-          '💡 เดือนนี้ใช้อะไรเยอะสุด?',
-          '📈 เดือนนี้ออมได้กี่บาท?',
-          '🎯 ถึงเป้าเที่ยวอังกฤษเมื่อไหร่?',
-        ].map((s, i) => (
-          <div key={i} style={{
-            fontSize: 12, padding: '7px 12px',
-            borderRadius: '14px 14px 4px 14px',
-            background: '#fff',
-            border: `1.5px solid ${H3.primary400}`,
-            color: H3.primary500, fontWeight: 600,
-            cursor: 'pointer',
-          }}>{s}</div>
-        ))}
-      </div>
-
-      {/* input bar at bottom of card */}
-      <div style={{
-        background: H3.n100 || '#F7F7FA',
-        border: `1px solid ${H3.n200}`,
-        borderRadius: 22,
-        padding: '8px 8px 8px 14px',
-        display: 'flex', alignItems: 'center', gap: 6,
-      }}>
-        <div style={{ flex: 1, fontSize: 12, color: H3.n400 }}>พิมพ์คำถาม หรือกดเลือกข้างบน...</div>
-        <div style={{
-          width: 28, height: 28, borderRadius: 14,
-          background: H3.n200, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M12 14a3 3 0 003-3V6a3 3 0 00-6 0v5a3 3 0 003 3zM5 11a7 7 0 0014 0M12 18v3" stroke={H3.n700} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <div style={{
-          width: 28, height: 28, borderRadius: 14,
-          background: `linear-gradient(135deg, ${H3.walletViolet} 0%, ${H3.primary400} 100%)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-            <path d="M4 20l16-8L4 4v6l10 2-10 2v6z" fill="#fff"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function HomeV3() {
   const [insightIdx] = React.useState(0);
+  const [nwExpanded, setNwExpanded] = React.useState(false);
+  const [nwHidden, setNwHidden] = React.useState(false);
   const insights = [
     { quote: '"เห็นว่าเดือนนี้คุณใช้จ่ายส่วนบันเทิงเยอะกว่าเดือนก่อน 15% เลยนะ"' },
     { quote: '"คุณใกล้ถึงเป้าหมายเที่ยวอังกฤษแล้ว — ออมเพิ่มอีก 21,000 ฿ ก็ถึงแล้วน้า"' },
@@ -102,26 +13,101 @@ function HomeV3() {
   ];
   const ins = insights[insightIdx];
 
+  // Sparkline path — used only when Net Worth card is expanded
+  const sparkData = [40, 35, 45, 42, 55, 48, 62];
+  const sparkW = 70, sparkH = 22;
+  const sparkMax = Math.max(...sparkData), sparkMin = Math.min(...sparkData);
+  const sparkPath = sparkData.map((v, i) => {
+    const x = (i / (sparkData.length - 1)) * sparkW;
+    const y = sparkH - ((v - sparkMin) / (sparkMax - sparkMin)) * (sparkH - 2) - 1;
+    return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join(' ');
+
   return (
     <div style={{ background: H3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <MintStatusBarV2 time="21:29" />
 
-      {/* Net Worth anchor — top-left, bell on right */}
-      <div style={{ padding: '0 16px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontSize: 11, color: H3.n400, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.6 }}>Net Worth</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 2 }}>
-            <span style={{ fontSize: 30, fontWeight: 700, color: H3.n900, letterSpacing: -0.8, lineHeight: 1.1 }}>฿ 125,430</span>
-            <span style={{ fontSize: 12, color: H3.primary500, fontWeight: 700 }}>↑ 2.4%</span>
+      {!nwExpanded ? (
+        /* Compact Net Worth anchor — top-left, bell on right · tap to expand */
+        <div style={{ padding: '0 16px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div onClick={() => setNwExpanded(true)} style={{ cursor: 'pointer' }}>
+            <div style={{ fontSize: 11, color: H3.n400, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.6 }}>Net Worth</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 2 }}>
+              <span style={{ fontSize: 30, fontWeight: 700, color: H3.n900, letterSpacing: -0.8, lineHeight: 1.1 }}>฿ 125,430</span>
+              <span style={{ fontSize: 12, color: H3.primary500, fontWeight: 700 }}>↑ 2.4%</span>
+            </div>
+          </div>
+          <div style={{ position: 'relative', marginTop: 6 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 3a6 6 0 00-6 6v3l-2 3v1h16v-1l-2-3V9a6 6 0 00-6-6zM9 18a3 3 0 006 0" stroke={H3.n700} strokeWidth="1.8" strokeLinejoin="round"/>
+            </svg>
+            <div style={{ position:'absolute', top:-1, right:-1, width:7, height:7, borderRadius:4, background: H3.error400, border:'1.5px solid #fff' }} />
           </div>
         </div>
-        <div style={{ position: 'relative', marginTop: 6 }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M12 3a6 6 0 00-6 6v3l-2 3v1h16v-1l-2-3V9a6 6 0 00-6-6zM9 18a3 3 0 006 0" stroke={H3.n700} strokeWidth="1.8" strokeLinejoin="round"/>
-          </svg>
-          <div style={{ position:'absolute', top:-1, right:-1, width:7, height:7, borderRadius:4, background: H3.error400, border:'1.5px solid #fff' }} />
+      ) : (
+        /* Expanded Net Worth card — full breakdown · tap chevron to collapse */
+        <div
+          onClick={() => setNwExpanded(false)}
+          style={{
+            margin: '0 16px 12px',
+            background: '#fff', borderRadius: 18,
+            padding: '14px 16px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
+            cursor: 'pointer',
+          }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+            <div style={{ fontSize: 11, color: H3.n400, fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>Net Worth</div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" onClick={(e) => { e.stopPropagation(); setNwHidden(!nwHidden); }} style={{ cursor: 'pointer' }}>
+                {nwHidden
+                  ? <path d="M3 3l18 18M10.5 10.7a2 2 0 002.8 2.8M6.5 6.5C4.5 8 3 10 2 12c2 4 6 7 10 7 1.5 0 3-.4 4.3-1M10 5.2A9 9 0 0112 5c4 0 8 3 10 7-.5 1-1.2 2-2 2.8" stroke={H3.n400} strokeWidth="1.6" strokeLinecap="round"/>
+                  : <><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke={H3.n400} strokeWidth="1.6"/><circle cx="12" cy="12" r="3" stroke={H3.n400} strokeWidth="1.6"/></>}
+              </svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ transform: 'rotate(90deg)' }}>
+                <path d="M9 6l6 6-6 6" stroke={H3.n400} strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <div style={{ fontSize: 26, fontWeight: 700, color: H3.n900, letterSpacing: -0.5 }}>
+              {nwHidden ? '฿ •••,•••' : '฿ 125,430'}
+            </div>
+            <svg width={sparkW} height={sparkH} viewBox={`0 0 ${sparkW} ${sparkH}`}>
+              <defs>
+                <linearGradient id="nwSparkFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor={H3.primary400} stopOpacity="0.25"/>
+                  <stop offset="1" stopColor={H3.primary400} stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d={`${sparkPath} L ${sparkW} ${sparkH} L 0 ${sparkH} Z`} fill="url(#nwSparkFill)"/>
+              <path d={sparkPath} stroke={H3.primary400} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, marginBottom: 10 }}>
+            <span style={{ color: H3.primary500, fontWeight: 700 }}>↑ 2,935 ฿ (2.4%)</span>
+            <span style={{ color: H3.n400 }}>· 7 วันที่แล้ว</span>
+          </div>
+
+          <div style={{
+            display: 'flex', gap: 8, paddingTop: 8,
+            borderTop: `1px solid ${H3.n300}`,
+            fontSize: 11,
+          }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ width: 6, height: 6, borderRadius: 3, background: H3.primary400 }}/>
+              <span style={{ color: H3.n400 }}>สินทรัพย์</span>
+              <span style={{ color: H3.n900, fontWeight: 600, marginLeft: 'auto' }}>{nwHidden ? '•••' : '460,473 ฿'}</span>
+            </div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ width: 6, height: 6, borderRadius: 3, background: H3.error400 }}/>
+              <span style={{ color: H3.n400 }}>หนี้สิน</span>
+              <span style={{ color: H3.n900, fontWeight: 600, marginLeft: 'auto' }}>{nwHidden ? '•••' : '335,043 ฿'}</span>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingBottom: 190 }}>
 
@@ -168,8 +154,6 @@ function HomeV3() {
           </div>
 
         </div>
-
-        <AiChatCard />
 
         {/* Upcoming bill — inline alert */}
         <div style={{

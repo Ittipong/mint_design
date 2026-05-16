@@ -134,9 +134,10 @@ function SectionShell({ title, summary, children }) {
 
 function MiniBar({ pct, color }) {
   const clamped = Math.min(100, Math.max(0, pct));
-  const fill = color || `linear-gradient(90deg, ${W3.primary300}, ${W3.walletViolet})`;
+  // Brand-aligned teal gradient — harmonizes with white cards + pastel icon tints
+  const fill = color || `linear-gradient(90deg, ${W3.primary300}, ${W3.primary500})`;
   return (
-    <div style={{ height: 5, borderRadius: 3, background: W3.n300, overflow: 'hidden' }}>
+    <div style={{ height: 5, borderRadius: 3, background: W3.n200, overflow: 'hidden' }}>
       <div style={{ width: `${clamped}%`, height: '100%', background: fill, borderRadius: 3 }} />
     </div>
   );
@@ -211,7 +212,7 @@ function WalletsV3_Accounts() {
                 <div style={{ fontSize: 10.5, color: W3.n400 }}>อีก {g.monthsLeft}ด.</div>
               </div>
               <div style={{ marginTop: 5, marginLeft: 40 }}>
-                <MiniBar pct={g.pct} />
+                <MiniBar pct={g.pct} color={g.ic} />
               </div>
             </div>
           ))}
@@ -234,7 +235,7 @@ function WalletsV3_Accounts() {
                   </div>
                 </div>
                 <div style={{ marginTop: 5, marginLeft: 40 }}>
-                  <MiniBar pct={pct} />
+                  <MiniBar pct={pct} color={bg.ic} />
                 </div>
               </div>
             );
@@ -254,24 +255,48 @@ function WalletsV3_Accounts() {
 // DRILL — บัตรเครดิต
 // ────────────────────────────────────────────────
 function WalletsV3_Credit() {
-  const dueWithin30 = MM.credits.reduce((s, c) => s + c.statement, 0);
-  const totalMin = MM.credits.reduce((s, c) => s + c.minPay, 0);
   const totalUsed = MM.credits.reduce((s, c) => s + c.used, 0);
   const totalLimit = MM.credits.reduce((s, c) => s + c.limit, 0);
+  const headroom = totalLimit - totalUsed;
+  const utilPct = (totalUsed / totalLimit) * 100;
+  const nextDue = MM.credits.slice().sort((a, b) => a.daysUntilDue - b.daysUntilDue)[0];
+
+  // Utilization health zone — calm tri-state label; bar fill stays default teal for visual consistency with per-card bars
+  const zone = utilPct <= 30
+    ? { label: 'ปลอดภัย', color: W3.primary500 }
+    : utilPct <= 70
+      ? { label: 'พอดี',    color: W3.n700 }
+      : { label: 'สูง',     color: W3.error400 };
 
   return (
     <div style={{ background: W3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <DrillHeader title="บัตรเครดิต" />
 
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        {/* HERO — total due within 30 days */}
+        {/* HERO — cash flow lens: due this month + headroom + next date + utilization zone */}
         <div style={{ margin: '0 16px 14px', ...w3card(2), padding: '18px 20px' }}>
-          <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ยอดที่ต้องจ่ายภายใน 30 วัน</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ยอดใช้บัตรรวม</div>
+            <div style={{ fontSize: 10.5, color: W3.n700, fontWeight: 600, background: W3.n200, borderRadius: 10, padding: '3px 9px' }}>
+              {MM.credits.length} บัตร
+            </div>
+          </div>
           <div style={{ fontSize: 32, fontWeight: 700, color: W3.n900, marginTop: 4, letterSpacing: -0.5, fontVariantNumeric: 'tabular-nums' }}>
-            ฿ {dueWithin30.toLocaleString()}
+            ฿ {totalUsed.toLocaleString()}
           </div>
           <div style={{ fontSize: 11, color: W3.n400, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
-            ใช้ <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {totalUsed.toLocaleString()}</span> / {totalLimit.toLocaleString()} · ขั้นต่ำรวม <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {totalMin.toLocaleString()}</span>
+            วงเงินคงเหลือ <span style={{ color: W3.n900, fontWeight: 700 }}>฿ {headroom.toLocaleString()}</span> · ครบกำหนดถัดไป <span style={{ color: W3.n900, fontWeight: 700 }}>{nextDue.dueDate}</span>
+          </div>
+
+          {/* Utilization health bar + zone label */}
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+              <div style={{ fontSize: 10.5, color: W3.n400, fontWeight: 600 }}>
+                ใช้ไป <span style={{ color: W3.n900, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{utilPct.toFixed(0)}%</span>
+              </div>
+              <div style={{ fontSize: 10.5, color: zone.color, fontWeight: 700 }}>{zone.label}</div>
+            </div>
+            <MiniBar pct={utilPct} />
           </div>
         </div>
 
@@ -299,12 +324,12 @@ function WalletsV3_Credit() {
                   <span>ใช้ไป <span style={{ color: W3.n900, fontWeight: 700 }}>{pct.toFixed(0)}%</span></span>
                   <span style={{ fontVariantNumeric: 'tabular-nums' }}>{c.used.toLocaleString()} / {c.limit.toLocaleString()}</span>
                 </div>
-                <MiniBar pct={pct} />
+                <MiniBar pct={pct} color={c.ic} />
               </div>
               {/* min row + cta */}
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontSize: 11, color: W3.n400 }}>ขั้นต่ำ <span style={{ color: W3.n900, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>฿ {c.minPay.toLocaleString()}</span></div>
-                <button style={{ background: 'rgb(205, 236, 234)', color: 'rgb(39, 125, 120)', border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>จ่ายบัตรนี้</button>
+                <button style={{ background: W3.n200, color: W3.n700, border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>จ่ายบัตรนี้</button>
               </div>
             </div>
           );
@@ -333,7 +358,12 @@ function WalletsV3_Goals() {
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
         {/* HERO — saved this month vs plan */}
         <div style={{ margin: '0 16px 14px', ...w3card(2), padding: '18px 20px' }}>
-          <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ออมเดือนนี้</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ออมเดือนนี้</div>
+            <div style={{ fontSize: 10.5, color: W3.n700, fontWeight: 600, background: W3.n200, borderRadius: 10, padding: '3px 9px' }}>
+              {MM.goals.length} เป้าหมาย
+            </div>
+          </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
             <div style={{ fontSize: 32, fontWeight: 700, color: W3.n900, letterSpacing: -0.5, fontVariantNumeric: 'tabular-nums' }}>
               ฿ {MM.savedThisMonth.toLocaleString()}
@@ -372,7 +402,7 @@ function WalletsV3_Goals() {
               </div>
 
               <div style={{ marginTop: 12 }}>
-                <MiniBar pct={g.pct} />
+                <MiniBar pct={g.pct} color={g.ic} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, fontSize: 11, color: W3.n400, fontVariantNumeric: 'tabular-nums' }}>
                   <span><span style={{ color: W3.n900, fontWeight: 700 }}>฿ {g.saved.toLocaleString()}</span> / {g.target.toLocaleString()}</span>
                   <span>เหลือ ฿ {remain.toLocaleString()}</span>
@@ -381,7 +411,7 @@ function WalletsV3_Goals() {
 
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontSize: 11, color: W3.n400 }}>ออมเดือนละ <span style={{ color: W3.n900, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>฿ {monthly.toLocaleString()}</span></div>
-                <button style={{ background: 'rgb(205, 236, 234)', color: 'rgb(39, 125, 120)', border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>+ ฝาก</button>
+                <button style={{ background: W3.n200, color: W3.n700, border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>+ ฝาก</button>
               </div>
             </div>
           );
@@ -411,7 +441,12 @@ function WalletsV3_Budget() {
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
         {/* HERO — daily allowance + dual progress (used vs month elapsed) */}
         <div style={{ margin: '0 16px 14px', ...w3card(2), padding: '18px 20px' }}>
-          <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ใช้ได้ต่อวัน</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ใช้ได้ต่อวัน</div>
+            <div style={{ fontSize: 10.5, color: W3.n700, fontWeight: 600, background: W3.n200, borderRadius: 10, padding: '3px 9px' }}>
+              {MM.budgets.length} งบ
+            </div>
+          </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
             <div style={{ fontSize: 32, fontWeight: 700, color: W3.n900, letterSpacing: -0.5, fontVariantNumeric: 'tabular-nums' }}>
               ฿ {dailyLeft.toLocaleString()}
@@ -455,7 +490,7 @@ function WalletsV3_Budget() {
               </div>
 
               <div style={{ marginTop: 12 }}>
-                <MiniBar pct={pct} />
+                <MiniBar pct={pct} color={bg.ic} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, fontSize: 11, color: W3.n400, fontVariantNumeric: 'tabular-nums' }}>
                   <span><span style={{ color: W3.n900, fontWeight: 700 }}>฿ {bg.spent.toLocaleString()}</span> / {bg.limit.toLocaleString()}</span>
                   <span>{over ? `เกิน ฿ ${(bg.spent - bg.limit).toLocaleString()}` : `เหลือ ฿ ${(bg.limit - bg.spent).toLocaleString()}`}</span>
@@ -468,7 +503,7 @@ function WalletsV3_Budget() {
                     ? <span style={{ color: W3.n900, fontWeight: 700 }}>เกินงบแล้ว</span>
                     : <>ใช้ต่อวัน <span style={{ color: W3.n900, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>฿ {dailyLeftJar.toLocaleString()}</span></>}
                 </div>
-                <button style={{ background: 'rgb(205, 236, 234)', color: 'rgb(39, 125, 120)', border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>ปรับงบ</button>
+                <button style={{ background: W3.n200, color: W3.n700, border: 'none', borderRadius: 20, fontSize: 12, fontWeight: 600, padding: '6px 12px', fontFamily: 'inherit', cursor: 'pointer' }}>ปรับงบ</button>
               </div>
             </div>
           );
@@ -480,6 +515,126 @@ function WalletsV3_Budget() {
   );
 }
 
+// ────────────────────────────────────────────────
+// DRILL — บัญชี (wallet list)
+// ────────────────────────────────────────────────
+function WalletsV3_AccountsList() {
+  const total = MM.accounts.reduce((s, a) => s + a.amt, 0);
+  const incomeThisMonth = 42000;
+  const expenseThisMonth = 18800;
+  const netThisMonth = incomeThisMonth - expenseThisMonth;
+
+  const accounts = [
+    { icon: 'piggy',  bg: W3.walletPink100,  ic: W3.walletPink,  name: 'ครอบครัว',   sub: 'บัญชีออมทรัพย์', bank: 'กสิกรไทย',    amt: 180600, change: +5200,  lastTxn: '2 ชม. ที่แล้ว' },
+    { icon: 'wallet', bg: W3.walletGreen100, ic: W3.walletGreen, name: 'TrueMoney',   sub: 'e-Wallet',       bank: 'TrueMoney',   amt: 45200,  change: -1800,  lastTxn: 'เมื่อวาน' },
+    { icon: 'piggy',  bg: W3.walletBrown100, ic: W3.walletBrown, name: 'เงินสด',     sub: 'พกติดตัว',       bank: null,          amt: 20000,  change: -3000,  lastTxn: '3 วันที่แล้ว' },
+  ];
+
+  return (
+    <div style={{ background: W3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <DrillHeader title="บัญชี" action={<PlusBtn />} />
+
+      <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
+        {/* HERO — net balance + income/expense this month */}
+        <div style={{ margin: '0 16px 14px', ...w3card(2), padding: '18px 20px' }}>
+          {/* Title row: label + account count chip */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 12, color: W3.n400, fontWeight: 600 }}>ยอดรวมทุกบัญชี</div>
+            <div style={{ fontSize: 10.5, color: W3.n700, fontWeight: 600, background: W3.n200, borderRadius: 10, padding: '3px 9px' }}>
+              {accounts.length} บัญชี
+            </div>
+          </div>
+
+          {/* Big balance + net delta */}
+          <div style={{ fontSize: 32, fontWeight: 700, color: W3.n900, marginTop: 4, letterSpacing: -0.5, fontVariantNumeric: 'tabular-nums' }}>
+            ฿ {total.toLocaleString()}
+          </div>
+          {/* Net delta — ink text + tiny accent chevron */}
+          <div style={{ fontSize: 11, marginTop: 2, fontWeight: 600, fontVariantNumeric: 'tabular-nums',
+            color: W3.n900, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+              <path d={netThisMonth >= 0 ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7'}
+                stroke={netThisMonth >= 0 ? W3.primary500 : W3.error400} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>{netThisMonth >= 0 ? '+' : '−'}฿ {Math.abs(netThisMonth).toLocaleString()} เดือนนี้</span>
+          </div>
+
+          {/* Income / Expense — compact inline pills (semantic blue/coral, ink values) */}
+          <div style={{ marginTop: 12, display: 'flex', gap: 6 }}>
+            {/* Income */}
+            <div style={{ flex: 1, background: W3.info100, borderRadius: 10, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M12 19V5M5 12l7-7 7 7" stroke={W3.info400} strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <div style={{ fontSize: 10.5, color: W3.n400, fontWeight: 600 }}>รายรับ</div>
+              <div style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>
+                ฿ {incomeThisMonth.toLocaleString()}
+              </div>
+            </div>
+
+            {/* Expense */}
+            <div style={{ flex: 1, background: W3.error100, borderRadius: 10, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M12 5v14M5 12l7 7 7-7" stroke={W3.error400} strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <div style={{ fontSize: 10.5, color: W3.n400, fontWeight: 600 }}>รายจ่าย</div>
+              <div style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>
+                ฿ {expenseThisMonth.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* LIST */}
+        {accounts.map((a, i) => (
+          <div key={i} style={{ margin: '0 16px 10px', ...w3card(1), padding: '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CatIcon kind={a.icon} size={18} color={a.ic} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: W3.n900 }}>{a.name}</div>
+                <div style={{ fontSize: 11, color: W3.n400, marginTop: 2 }}>
+                  {a.sub}{a.bank ? ` · ${a.bank}` : ''}
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: W3.n900, fontVariantNumeric: 'tabular-nums' }}>
+                  ฿ {a.amt.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${W3.n200}`,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 11, color: W3.n400, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+                <span style={{ color: W3.n700, fontWeight: 600 }}>{a.change >= 0 ? '+' : '−'}</span>
+                {Math.abs(a.change).toLocaleString()} เดือนนี้
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                <button style={{ background: W3.n200, color: W3.n700, border: 'none', borderRadius: 20, fontSize: 11.5, fontWeight: 600, padding: '5px 10px', fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  ธุรกรรม
+                </button>
+                <button style={{ background: W3.n200, color: W3.n700, border: 'none', borderRadius: 20, fontSize: 11.5, fontWeight: 600, padding: '5px 10px', fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 3v18h18M7 14l3-3 4 4 5-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  รายงาน
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <BottomNavV2 active="wallets" />
+    </div>
+  );
+}
+
 Object.assign(window, {
-  WalletsV3_Accounts, WalletsV3_Credit, WalletsV3_Goals, WalletsV3_Budget,
+  WalletsV3_Accounts, WalletsV3_AccountsList, WalletsV3_Credit, WalletsV3_Goals, WalletsV3_Budget,
 });

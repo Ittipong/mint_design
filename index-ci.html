@@ -379,7 +379,14 @@ function App() {
           </div>
         </ComponentCard>
 
-        <ComponentCard title="Category Icons (CatIcon)" description="coffee, movie, bill, cart, gas, game, plane, home, piggy, card, wallet, japan, budget">
+        <ComponentCard
+          title="Category Icons (CatIcon)"
+          description="Pass containerSize (the bg square size) — icon auto-scales to bg/1.7. Always match this to the parent square so scale stays consistent across screens."
+          code={`// glyph auto-scales to containerSize / 1.7
+<div style={{ width: 56, height: 56, borderRadius: 16, background: bg }}>
+  <CatIcon kind="coffee" containerSize={56} color={ic} />
+</div>`}
+        >
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
             {['coffee', 'movie', 'bill', 'cart', 'gas', 'game', 'plane', 'home', 'piggy', 'card', 'wallet', 'japan', 'budget'].map(kind => (
               <div key={kind} style={{ textAlign: 'center' }}>
@@ -387,9 +394,33 @@ function App() {
                   width: 48, height: 48, borderRadius: 12, background: M.primary500,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <CatIcon kind={kind} size={24} color="#fff" />
+                  <CatIcon kind={kind} containerSize={48} color="#fff" />
                 </div>
                 <div style={{ fontSize: 9, color: '#888', marginTop: 4 }}>{kind}</div>
+              </div>
+            ))}
+          </div>
+        </ComponentCard>
+
+        <ComponentCard
+          title="CatIcon · Scale matrix"
+          description="Same kind across container sizes — glyph stays proportional. Use 56 for hero / detail cards, 32 for list rows, 24 for inline chips."
+          code={`<CatIcon kind="coffee" containerSize={32} color={ic} />  // list row
+<CatIcon kind="coffee" containerSize={56} color={ic} />  // hero card`}
+        >
+          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-end', justifyContent: 'center' }}>
+            {[24, 32, 40, 48, 56, 64].map(cs => (
+              <div key={cs} style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: cs, height: cs, borderRadius: Math.round(cs * 0.28),
+                  background: M.walletBrown100,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto',
+                }}>
+                  <CatIcon kind="coffee" containerSize={cs} color={M.walletBrown} />
+                </div>
+                <div style={{ fontSize: 10, color: '#888', marginTop: 6 }}>{cs}px</div>
+                <div style={{ fontSize: 9, color: '#bbb' }}>glyph {Math.round(cs / 1.7)}px</div>
               </div>
             ))}
           </div>

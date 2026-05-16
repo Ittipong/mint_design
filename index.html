@@ -34,10 +34,11 @@
 <script type="text/babel" src="v2-screens.jsx"></script>
 <script type="text/babel" src="v3-home.jsx"></script>
 <script type="text/babel" src="v3-ai-chat.jsx"></script>
-<script type="text/babel" src="v3-home-temp.jsx"></script>
 <script type="text/babel" src="v3-wallets.jsx"></script>
-<script type="text/babel" src="v4-wallets.jsx"></script>
-<script type="text/babel" src="v4-add-transaction.jsx"></script>
+<script type="text/babel" src="v4-wallet-detail.jsx"></script>
+<script type="text/babel" src="v4-credit-card-detail.jsx"></script>
+<script type="text/babel" src="v4-goal-detail.jsx"></script>
+<script type="text/babel" src="v4-budget-detail.jsx"></script>
 <script type="text/babel" src="transaction_shared.jsx"></script>
 <script type="text/babel" src="transaction_1.jsx"></script>
 <script type="text/babel" src="transaction_2.jsx"></script>
@@ -187,27 +188,6 @@ function App() {
           <DCArtboard label="AI Chat · สอบถาม AI" width={390} height={844}>
             <AIChatScreen />
           </DCArtboard>
-          <DCArtboard label="Home v3-temp · B′ compact" width={390} height={844}>
-            <HomeV3Temp />
-          </DCArtboard>
-        </DCSection>
-
-        <DCSection
-          title="v4 — Add Transaction Redesign"
-          subtitle="Original (จากภาพ) ปัญหา: tabs 2 ชั้นซ้ำซ้อน · amount เล็กไม่เด่น · category dropdown ต้องกด 2 ครั้ง · ปุ่มบันทึกดูถูก disable · ฟิลด์ว่างหมด · ไม่มี keypad — สามแนวทางแก้:"
-        >
-          <DCArtboard label="00 · Original (recreated)" width={390} height={844}>
-            <AddTxnOriginal />
-          </DCArtboard>
-          <DCArtboard label="A · Compact Refined" width={390} height={844}>
-            <AddTxnA />
-          </DCArtboard>
-          <DCArtboard label="B · Numpad-first" width={390} height={844}>
-            <AddTxnB />
-          </DCArtboard>
-          <DCArtboard label="C · Smart Bottom Sheet" width={390} height={844}>
-            <AddTxnC />
-          </DCArtboard>
         </DCSection>
 
         <DCSection
@@ -247,37 +227,41 @@ function App() {
           <DCArtboard label="01 · Wallets v3 · กระเป๋า" width={390} height={844}>
             <WalletsV3_Accounts />
           </DCArtboard>
-          <DCArtboard label="02 · Wallets v3 · บัตรเครดิต" width={390} height={844}>
+          <DCArtboard label="02 · Wallets v3 · บัญชี list" width={390} height={844}>
+            <WalletsV3_AccountsList />
+          </DCArtboard>
+          <DCArtboard label="03 · Wallets v3 · บัตรเครดิต" width={390} height={844}>
             <WalletsV3_Credit />
           </DCArtboard>
-          <DCArtboard label="03 · Wallets v3 · เป้าหมาย" width={390} height={844}>
+          <DCArtboard label="04 · Wallets v3 · เป้าหมาย" width={390} height={844}>
             <WalletsV3_Goals />
           </DCArtboard>
-          <DCArtboard label="04 · Wallets v3 · งบประมาณ" width={390} height={844}>
+          <DCArtboard label="05 · Wallets v3 · งบประมาณ" width={390} height={844}>
             <WalletsV3_Budget />
           </DCArtboard>
         </DCSection>
 
         <DCSection
-          title="v4 — Wallets Redesign"
-          subtitle="ต่อยอดจาก v3 · iterate การจัด layout / สี / typography ของ Money Map และ drill pages"
+          title="v4 — Wallet Detail (bottom sheet)"
+          subtitle="หน้ารายละเอียดของกระเป๋าเดียว · เปิดเป็น bottom sheet จากแถวบัญชีในหน้า Wallets · Hero snapshot → Quick Actions → เดือนนี้ (เข้า/ออก) → top categories → ผูกกับเป้าหมาย/งบ → transactions 20 รายการ (group by date)"
         >
-          <DCArtboard label="01 · Wallets v4 · กระเป๋า" width={390} height={844}>
-            <WalletsV4_Accounts />
+          <DCArtboard label="01 · Wallet Detail · kbank" width={390} height={844}>
+            <WalletDetailV4 />
           </DCArtboard>
-          <DCArtboard label="02 · Wallets v4 · บัตรเครดิต" width={390} height={844}>
-            <WalletsV4_Credit />
+          <DCArtboard label="02 · Credit Card Detail · KBank" width={390} height={844}>
+            <CreditCardDetailV4 />
           </DCArtboard>
-          <DCArtboard label="03 · Wallets v4 · เป้าหมาย" width={390} height={844}>
-            <WalletsV4_Goals />
+          <DCArtboard label="03 · Goal Detail · เที่ยวญี่ปุ่น" width={390} height={844}>
+            <GoalDetailV4 />
           </DCArtboard>
-          <DCArtboard label="04 · Wallets v4 · งบประมาณ" width={390} height={844}>
-            <WalletsV4_Budget />
+          <DCArtboard label="04 · Budget Detail · งบใช้จ่ายรายเดือน" width={390} height={844}>
+            <BudgetDetailV4 />
           </DCArtboard>
         </DCSection>
+
       </DesignCanvas>
 
-      <App.TweakPanel {...{ tweaks, setTweaks, visible: tweaksVisible }} />
+      <App.TweakPanel {...{ tweaks, setTweaks, visible: tweaksVisible }} />≠
     </>
   );
 }
