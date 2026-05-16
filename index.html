@@ -39,6 +39,13 @@
 <script type="text/babel" src="v4-credit-card-detail.jsx"></script>
 <script type="text/babel" src="v4-goal-detail.jsx"></script>
 <script type="text/babel" src="v4-budget-detail.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-a-wizard.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-b-preset.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-c-chat.jsx"></script>
+<script type="text/babel" src="v4-icon-color-picker.jsx"></script>
+<script type="text/babel" src="v4-icon-library-manager.jsx"></script>
+<script type="text/babel" src="v4-icon-add-custom.jsx"></script>
+<script type="text/babel" src="v4-color-palette-compare.jsx"></script>
 <script type="text/babel" src="transaction_shared.jsx"></script>
 <script type="text/babel" src="transaction_1.jsx"></script>
 <script type="text/babel" src="transaction_2.jsx"></script>
@@ -256,6 +263,51 @@ function App() {
           </DCArtboard>
           <DCArtboard label="04 · Budget Detail · งบใช้จ่ายรายเดือน" width={390} height={844}>
             <BudgetDetailV4 />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Create Wallet · 3 design options"
+          subtitle="ออกแบบใหม่จาก old design (ฟอร์มยาว · chips 3 แถว · icon/สีแยก · AI goal ไม่ชัด optional) · เลือก 1 จาก 3 approach ก่อนทำ Flutter"
+        >
+          <DCArtboard label="A1 · Wizard · เลือกประเภท" width={390} height={844}>
+            <CreateWalletA_Step1 />
+          </DCArtboard>
+          <DCArtboard label="A2 · Wizard · ตั้งชื่อ + icon + สี (live preview)" width={390} height={844}>
+            <CreateWalletA_Step2 />
+          </DCArtboard>
+          <DCArtboard label="A3 · Wizard · ยอด + AI (optional)" width={390} height={844}>
+            <CreateWalletA_Step3 />
+          </DCArtboard>
+          <DCArtboard label="B · Smart Single Page (Preset-Driven)" width={390} height={844}>
+            <CreateWalletB_Preset />
+          </DCArtboard>
+          <DCArtboard label="C · Conversational Setup (AI chat)" width={390} height={844}>
+            <CreateWalletC_Chat />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Icon & Color Picker Redesign"
+          subtitle="Pain ของ picker เดิม: icon+สี เปิด 2 sheets · pack มี broken icons · color 24 ตัวไม่มี group · tab 'แพ็คเกจ' ปนกับ picker · ของใหม่: รวมในแผ่นเดียว + live preview + library manager แยกใน More menu"
+        >
+          <DCArtboard label="01 · Unified Picker · icon + color + preview" width={390} height={844}>
+            <IconColorPickerUnified />
+          </DCArtboard>
+          <DCArtboard label="02 · Library Manager · เปิดจาก More menu" width={390} height={844}>
+            <IconLibraryManager />
+          </DCArtboard>
+          <DCArtboard label="02b · Add Custom Icon · scroll continuous, ไม่มี tabs" width={390} height={844}>
+            <IconAddCustom />
+          </DCArtboard>
+          <DCArtboard label="03a · Color Picker · Preview = TINT (SVG paired)" width={390} height={844}>
+            <ColorPickerTint />
+          </DCArtboard>
+          <DCArtboard label="03b · Color Picker · Preview = ASSET (flat 3D)" width={390} height={844}>
+            <ColorPickerAsset />
+          </DCArtboard>
+          <DCArtboard label="03c · Color Picker · Preview = EMOJI" width={390} height={844}>
+            <ColorPickerEmoji />
           </DCArtboard>
         </DCSection>
 
