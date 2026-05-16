@@ -41,6 +41,8 @@
 <script type="text/babel" src="v4-budget-detail.jsx"></script>
 <script type="text/babel" src="v4-create-wallet-a-wizard.jsx"></script>
 <script type="text/babel" src="v4-create-credit-wizard.jsx"></script>
+<script type="text/babel" src="v4-create-goal-wizard.jsx"></script>
+<script type="text/babel" src="v4-create-budget-wizard.jsx"></script>
 <script type="text/babel" src="v4-icon-color-picker.jsx"></script>
 <script type="text/babel" src="v4-icon-library-manager.jsx"></script>
 <script type="text/babel" src="v4-icon-add-custom.jsx"></script>
@@ -298,6 +300,45 @@ function App() {
           </DCArtboard>
           <DCArtboard label="CC4 · Wizard · เป้าหมาย AI (required)" width={390} height={844}>
             <CreateCreditWizard_Step4 />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Create Goal Wallet · Wizard"
+          subtitle="4-step wizard เฉพาะเป้าหมายออมเงิน — Step 1: เลือกประเภทเป้าหมาย (เที่ยว/บ้าน/รถ/ฉุกเฉิน/ฯลฯ) · Step 2: ตั้งชื่อ + icon + สี · Step 3: ยอดเป้าหมาย + สกุลเงิน + วันเริ่ม + วันที่ตั้งเป้า + คำนวณ ออม/เดือน · Step 4: เหตุผล/แรงจูงใจ AI (required) — เก็บ 'ทำไม' เพื่อให้ AI เตือนแบบตรงใจ"
+        >
+          <DCArtboard label="G1 · Wizard · เลือกประเภทเป้าหมาย" width={390} height={844}>
+            <CreateGoalWizard_Step1 />
+          </DCArtboard>
+          <DCArtboard label="G2 · Wizard · ตั้งชื่อ + icon + สี" width={390} height={844}>
+            <CreateGoalWizard_Step2 />
+          </DCArtboard>
+          <DCArtboard label="G3 · Wizard · ยอด + สกุลเงิน + วันที่" width={390} height={844}>
+            <CreateGoalWizard_Step3 />
+          </DCArtboard>
+          <DCArtboard label="G4 · Wizard · เหตุผล AI (required)" width={390} height={844}>
+            <CreateGoalWizard_Step4 />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Create Budget · Wizard"
+          subtitle="5-step wizard เฉพาะงบประมาณ (เพิ่มอีก 1 step เพราะ wallet+category selection ซับซ้อนกว่า) · Step 1: เลือกประเภทงบ (อาหาร/เดินทาง/ฯลฯ) · Step 2: ตั้งชื่อ + icon + สี · Step 3: ยอดงบ + สกุลเงิน + ช่วงเวลา + ทำซ้ำ · Step 4: เลือกกระเป๋า + หมวดหมู่ (multi-wallet nested) · Step 5: เป้าหมาย AI (required)"
+        >
+          <DCArtboard label="B1 · Wizard · เลือกประเภทงบ" width={390} height={844}>
+            <CreateBudgetWizard_Step1 />
+          </DCArtboard>
+          <DCArtboard label="B2 · Wizard · ตั้งชื่อ + icon + สี" width={390} height={844}>
+            <CreateBudgetWizard_Step2 />
+          </DCArtboard>
+          <DCArtboard label="B3 · Wizard · ยอด + ช่วงเวลา + ทำซ้ำ" width={390} height={844}>
+            <CreateBudgetWizard_Step3 />
+          </DCArtboard>
+          <DCArtboard label="B4 · Wizard · กระเป๋า + หมวดหมู่" width={390} height={844}>
+            <CreateBudgetWizard_Step4 />
+          </DCArtboard>
+          <DCArtboard label="B5 · Wizard · เป้าหมาย AI (required)" width={390} height={844}>
+            <CreateBudgetWizard_Step5 />
           </DCArtboard>
         </DCSection>
 

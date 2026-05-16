@@ -58,9 +58,15 @@ function Header({ step, total = 4, title, onBack }) {
         <div style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: 700, color: W.n900 }}>{title}</div>
         <div style={{ width: 32, fontSize: 12, color: W.n400, textAlign: 'right' }}>{step}/{total}</div>
       </div>
-      {/* progress bar */}
-      <div style={{ height: 3, background: W.n300, borderRadius: 2, margin: '4px 16px 0' }}>
-        <div style={{ width: `${(step / total) * 100}%`, height: '100%', background: W.primary400, borderRadius: 2, transition: 'width 0.3s' }} />
+      {/* progress segments — N bars separated by white gaps so user can count steps */}
+      <div style={{ display: 'flex', gap: 4, margin: '4px 16px 0' }}>
+        {Array.from({ length: total }).map((_, i) => (
+          <div key={i} style={{
+            flex: 1, height: 3, borderRadius: 2,
+            background: i < step ? W.primary400 : W.n300,
+            transition: 'background 0.3s',
+          }} />
+        ))}
       </div>
     </div>
   );
@@ -201,9 +207,42 @@ function StepOne() {
             );
           })}
         </div>
-        {/* "อื่นๆ" — text link, ไม่กิน slot ใน grid */}
-        <div style={{ padding: '4px 20px', fontSize: 13, color: W.primary500, fontWeight: 600, cursor: 'pointer' }}>
-          + ประเภทอื่นๆ
+        {/* CUSTOM ESCAPE HATCH — full-width dashed bar for "ตั้งเอง".
+            Visually NOT a preset (dashed, no color chip). Active state flips
+            dashed → solid teal + bg primary100 + check, matching preset tiles. */}
+        <div style={{ padding: '4px 16px 0' }}>
+          <div onClick={() => setSel('custom')} style={{
+            padding: '14px 16px', borderRadius: 16,
+            background: sel === 'custom' ? W.primary100 : 'transparent',
+            border: sel === 'custom' ? `1.5px solid ${W.primary400}` : `1.5px dashed ${INK.faint}`,
+            display: 'flex', alignItems: 'center', gap: 12,
+            cursor: 'pointer', transition: 'all 0.15s',
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: sel === 'custom' ? W.primary400 : 'transparent',
+              border: sel === 'custom' ? 'none' : `1.5px dashed ${INK.faint}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}>
+              <WIcon kind="plus" size={18} color={sel === 'custom' ? '#fff' : INK.muted} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: sel === 'custom' ? W.primary500 : W.n800 }}>
+                ตั้งเอง
+              </div>
+              <div style={{ fontSize: 11, color: INK.muted, marginTop: 2, lineHeight: 1.3 }}>
+                ไม่ตรงสักอัน · กำหนดประเภทเอง
+              </div>
+            </div>
+            {sel === 'custom' && (
+              <div style={{
+                width: 18, height: 18, borderRadius: 9, background: W.primary400,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <WIcon kind="check" size={11} color="#fff" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <StickyCta label="ถัดไป" />

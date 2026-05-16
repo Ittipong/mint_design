@@ -1,21 +1,20 @@
-// Create Credit Card — 4-step Wizard
-//   Step 1: เลือกธนาคารผู้ออกบัตร  (issuer tiles, 2-col grid — gives smart color defaults)
-//   Step 2: ตั้งชื่อและหน้าตา      (name + last-4 digits + icon/color, with live preview)
-//   Step 3: วงเงินและรอบบิล        (limit + outstanding + statement/due date + alert + currency)
-//   Step 4: เป้าหมาย AI            (required goal with CC-specific examples)
+// Create Goal Wallet — 4-step Wizard
+//   Step 1: เลือกประเภทเป้าหมาย   (preset goal tiles — gives smart color+icon defaults)
+//   Step 2: ตั้งชื่อและหน้าตา      (name + icon/color, with live preview)
+//   Step 3: ยอดและกำหนดเวลา        (target amount + currency + start date + target date)
+//   Step 4: เหตุผล / แรงจูงใจ AI   (required — the "why" behind the goal, helps AI advise)
 //
 // Why 4 steps (not the old single-page form):
-//   - Old form crams 10+ fields on one screen — first-time user feels overwhelmed.
-//   - Wizard splits by user mental task: identify card → personalize → billing → goal.
-//   - Each step <30s to complete; total flow ~2 min, the same as old form but with
-//     less cognitive load per screen.
+//   - Old form crams 8+ fields on one screen; first-time user feels overwhelmed.
+//   - Wizard splits by user mental task: pick type → personalize → set target → why.
+//   - Step 4 captures the *motivation* (not the goal itself) so AI can frame nudges:
+//     "เก็บไปเที่ยวญี่ปุ่นนะ — ลดค่ากาแฟวันนี้?" vs flat "เก็บอีก 500".
 //
-// Visual language mirrors v4-create-wallet-a-wizard.jsx + v4-icon-color-picker.jsx
+// Visual language mirrors v4-create-wallet-a-wizard.jsx + v4-create-credit-wizard.jsx
 // (INK palette, eyebrow caps, SectionCard chrome, gradient-wash preview).
 (function () {
 const W = window.MINT;
 
-// INK palette — mirrors the wallet wizard so both flows feel like one family.
 const INK = {
   surface: '#F4F5F8',
   muted:   '#6B6B78',
@@ -31,7 +30,6 @@ const card = {
   boxShadow: cardShadow,
 };
 
-// Eyebrow caps — 10/600 INK.faint, letter-spacing 0.6, uppercase
 function Eyebrow({ children }) {
   return (
     <div style={{
@@ -41,7 +39,6 @@ function Eyebrow({ children }) {
   );
 }
 
-// ─── Header (close/back + title + progress) ───
 function Header({ step, total = 4, title, onBack }) {
   return (
     <div style={{ background: '#fff', paddingBottom: 12 }}>
@@ -74,7 +71,6 @@ function Header({ step, total = 4, title, onBack }) {
   );
 }
 
-// ─── Step intro — large question + supporting line ───
 function StepIntro({ title, sub }) {
   return (
     <div style={{ padding: '18px 20px 8px' }}>
@@ -84,7 +80,6 @@ function StepIntro({ title, sub }) {
   );
 }
 
-// ─── Sticky CTA ───
 function StickyCta({ label, disabled }) {
   return (
     <div style={{
@@ -104,35 +99,33 @@ function StickyCta({ label, disabled }) {
   );
 }
 
-// ─── Icons (svg) — superset; supports issuer logos as letters + standard set ───
 function WIcon({ kind, size = 24, color = '#fff' }) {
   const s = { width: size, height: size };
   switch (kind) {
-    case 'card': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2.5" fill={color}/><rect x="2" y="10" width="20" height="2.5" fill={W.n800} opacity="0.5"/></svg>;
-    case 'wallet': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2.5" fill={color}/><circle cx="17" cy="13" r="1.4" fill={W.n800}/></svg>;
-    case 'shopping': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 7h14l-1 13H6L5 7z" fill={color}/><path d="M9 7V5a3 3 0 016 0v2" stroke={W.n800} strokeWidth="1.4" fill="none"/></svg>;
-    case 'shop': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M4 9l1.5-4h13L20 9v2a2 2 0 01-2 2H6a2 2 0 01-2-2V9z" fill={color}/><rect x="5" y="13" width="14" height="7" fill={color} opacity="0.7"/></svg>;
-    case 'gift': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="3" fill={color}/><rect x="5" y="12" width="14" height="9" fill={color} opacity="0.85"/><rect x="11" y="9" width="2" height="12" fill={W.n800} opacity="0.4"/></svg>;
     case 'plane': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M21 11l-9 4-2 5-2-3-3-2 5-2 4-9 7 7z" fill={color}/></svg>;
-    case 'piggy': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 12c0-3 3-5 7-5s7 2 7 5c0 1-.4 2-1 2.8L18 17h-2l-.5-1.5c-.8.3-1.6.5-2.5.5h-2l-.5 1.5H8.5L7 14c-.5-.4-.8-.7-1.2-1L4 13v-2l1.4.2C5.1 11 5 11.4 5 12z" fill={color}/><circle cx="14" cy="11" r="0.8" fill={W.n800}/></svg>;
-    case 'salary': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 7h14v12a1 1 0 01-1 1H6a1 1 0 01-1-1V7z" fill={color}/><path d="M9 7V5a3 3 0 016 0v2" stroke={W.n800} strokeWidth="1.4" fill="none"/></svg>;
-    case 'cash': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" fill={color}/><circle cx="12" cy="12" r="2.5" fill="none" stroke={W.n800} strokeWidth="1.4"/></svg>;
-    case 'savings': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 11c0-2.8 2.7-5 6-5 1.4 0 2.6.4 3.6 1.1L17 6l-.5 2.6c.9.9 1.5 2.1 1.5 3.4 0 .9-.3 1.7-.7 2.5l.7 1.5h-2.5l-.6-.6c-.7.4-1.5.6-2.4.6h-1l-1 2h-2v-2H7c-1.1 0-2-.9-2-2v-2.5L3 12l1-2 1 1z" fill={color}/></svg>;
-    case 'ewallet': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="18" rx="2.5" fill={color}/><rect x="9" y="6" width="6" height="7" rx="1" fill={W.n800} opacity="0.2"/></svg>;
-    case 'qr': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" fill={color}/><rect x="14" y="3" width="7" height="7" fill={color}/><rect x="3" y="14" width="7" height="7" fill={color}/><rect x="14" y="14" width="3" height="3" fill={color}/><rect x="18" y="18" width="3" height="3" fill={color}/></svg>;
-    case 'chart': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="4" y="14" width="3" height="6" rx="1" fill={color}/><rect x="10" y="10" width="3" height="10" rx="1" fill={color}/><rect x="16" y="6" width="3" height="14" rx="1" fill={color}/></svg>;
-    case 'pie': return <svg style={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill={color}/><path d="M12 3v9l8 3a9 9 0 00-8-12z" fill={W.n800} opacity="0.35"/></svg>;
-    case 'calc': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="2" fill={color}/><rect x="7" y="5" width="10" height="4" rx="1" fill={W.n800} opacity="0.3"/><circle cx="9" cy="13" r="1" fill={W.n800}/><circle cx="12" cy="13" r="1" fill={W.n800}/><circle cx="15" cy="13" r="1" fill={W.n800}/><circle cx="9" cy="17" r="1" fill={W.n800}/><circle cx="12" cy="17" r="1" fill={W.n800}/><circle cx="15" cy="17" r="1" fill={W.n800}/></svg>;
-    case 'envelope': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2" fill={color}/><path d="M3 7l9 7 9-7" stroke={W.n800} strokeWidth="1.4" fill="none" opacity="0.5"/></svg>;
     case 'home': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1v-9z" fill={color}/></svg>;
     case 'car': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M4 13l1.5-5h13L20 13v5h-2v-2H6v2H4v-5z" fill={color}/><circle cx="7.5" cy="15.5" r="1.5" fill={W.n800}/><circle cx="16.5" cy="15.5" r="1.5" fill={W.n800}/></svg>;
+    case 'calc': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="2" fill={color}/><rect x="7" y="5" width="10" height="4" rx="1" fill={W.n800} opacity="0.3"/><circle cx="9" cy="13" r="1" fill={W.n800}/><circle cx="12" cy="13" r="1" fill={W.n800}/><circle cx="15" cy="13" r="1" fill={W.n800}/><circle cx="9" cy="17" r="1" fill={W.n800}/><circle cx="12" cy="17" r="1" fill={W.n800}/><circle cx="15" cy="17" r="1" fill={W.n800}/></svg>;
+    case 'piggy': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 12c0-3 3-5 7-5s7 2 7 5c0 1-.4 2-1 2.8L18 17h-2l-.5-1.5c-.8.3-1.6.5-2.5.5h-2l-.5 1.5H8.5L7 14c-.5-.4-.8-.7-1.2-1L4 13v-2l1.4.2C5.1 11 5 11.4 5 12z" fill={color}/><circle cx="14" cy="11" r="0.8" fill={W.n800}/></svg>;
+    case 'gift': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="3" fill={color}/><rect x="5" y="12" width="14" height="9" fill={color} opacity="0.85"/><rect x="11" y="9" width="2" height="12" fill={W.n800} opacity="0.4"/></svg>;
+    case 'shopping': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 7h14l-1 13H6L5 7z" fill={color}/><path d="M9 7V5a3 3 0 016 0v2" stroke={W.n800} strokeWidth="1.4" fill="none"/></svg>;
+    case 'envelope': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2" fill={color}/><path d="M3 7l9 7 9-7" stroke={W.n800} strokeWidth="1.4" fill="none" opacity="0.5"/></svg>;
+    case 'savings': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 11c0-2.8 2.7-5 6-5 1.4 0 2.6.4 3.6 1.1L17 6l-.5 2.6c.9.9 1.5 2.1 1.5 3.4 0 .9-.3 1.7-.7 2.5l.7 1.5h-2.5l-.6-.6c-.7.4-1.5.6-2.4.6h-1l-1 2h-2v-2H7c-1.1 0-2-.9-2-2v-2.5L3 12l1-2 1 1z" fill={color}/></svg>;
+    case 'cash': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" fill={color}/><circle cx="12" cy="12" r="2.5" fill="none" stroke={W.n800} strokeWidth="1.4"/></svg>;
+    case 'wallet': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2.5" fill={color}/><circle cx="17" cy="13" r="1.4" fill={W.n800}/></svg>;
+    case 'card': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2.5" fill={color}/><rect x="2" y="10" width="20" height="2.5" fill={W.n800} opacity="0.5"/></svg>;
     case 'food': return <svg style={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill={color}/><circle cx="12" cy="12" r="5" fill={W.n800} opacity="0.2"/></svg>;
     case 'coffee': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 7h12v8a4 4 0 01-4 4H9a4 4 0 01-4-4V7z" fill={color}/><path d="M17 9h2a2 2 0 010 4h-2" fill="none" stroke={color} strokeWidth="1.8"/></svg>;
     case 'gas': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 4h7v16H5z" fill={color}/><path d="M13 8h2l2 2v8a2 2 0 002 2" stroke={color} strokeWidth="1.6" fill="none"/></svg>;
-    case 'bell': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2H4.5L6 16z" fill={color}/><path d="M10 19a2 2 0 004 0" stroke={W.n800} strokeWidth="1.5" fill="none"/></svg>;
-    case 'calendar': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" fill={color}/><path d="M3 9h18M8 3v4M16 3v4" stroke={W.n800} strokeWidth="1.4" opacity="0.5"/></svg>;
+    case 'chart': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="4" y="14" width="3" height="6" rx="1" fill={color}/><rect x="10" y="10" width="3" height="10" rx="1" fill={color}/><rect x="16" y="6" width="3" height="14" rx="1" fill={color}/></svg>;
+    case 'pie': return <svg style={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill={color}/><path d="M12 3v9l8 3a9 9 0 00-8-12z" fill={W.n800} opacity="0.35"/></svg>;
+    case 'shop': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M4 9l1.5-4h13L20 9v2a2 2 0 01-2 2H6a2 2 0 01-2-2V9z" fill={color}/><rect x="5" y="13" width="14" height="7" fill={color} opacity="0.7"/></svg>;
+    case 'ewallet': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="6" y="3" width="12" height="18" rx="2.5" fill={color}/><rect x="9" y="6" width="6" height="7" rx="1" fill={W.n800} opacity="0.2"/></svg>;
+    case 'qr': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" fill={color}/><rect x="14" y="3" width="7" height="7" fill={color}/><rect x="3" y="14" width="7" height="7" fill={color}/><rect x="14" y="14" width="3" height="3" fill={color}/><rect x="18" y="18" width="3" height="3" fill={color}/></svg>;
     case 'crown': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M3 8l4 5 5-8 5 8 4-5v10H3V8z" fill={color}/></svg>;
     case 'star-line': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M12 3l2.5 6 6.5.5-5 4.5 1.5 6.5L12 17l-5.5 3.5L8 14 3 9.5 9.5 9 12 3z" fill="none" stroke={color} strokeWidth="1.6" strokeLinejoin="round"/></svg>;
+    case 'calendar': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" fill={color}/><path d="M3 9h18M8 3v4M16 3v4" stroke={W.n800} strokeWidth="1.4" opacity="0.5"/></svg>;
+    case 'flag': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 3v18M5 5h11l-2 4 2 4H5" fill={color} stroke={color} strokeWidth="1.4" strokeLinejoin="round"/></svg>;
     case 'library': return <svg style={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke={color} strokeWidth="1.6" fill="none"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke={color} strokeWidth="1.6" fill="none"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke={color} strokeWidth="1.6" fill="none"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke={color} strokeWidth="1.6" fill="none"/></svg>;
     case 'plus': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke={color} strokeWidth="2.4" strokeLinecap="round"/></svg>;
     case 'arrow': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>;
@@ -142,7 +135,6 @@ function WIcon({ kind, size = 24, color = '#fff' }) {
   }
 }
 
-// SectionCard — uniform card chrome for grid sections (mirrors picker)
 function SectionCard({ title, meta, leadingIcon, trailing, onToggle, collapsible, open = true, children }) {
   return (
     <div style={{
@@ -176,32 +168,29 @@ function SectionCard({ title, meta, leadingIcon, trailing, onToggle, collapsible
   );
 }
 
-// ─── Step 1 — Pick issuer (bank) ───
-// Bank tiles use brand colors so the user recognizes their card at a glance.
-// Picking an issuer pre-fills color + suggested name in Step 2 (smart defaults).
-const ISSUERS = [
-  { k: 'kbank',    name: 'KBank',     sub: 'Kasikorn Bank',         logo: 'K',  bg: W.walletGreen100,  ic: W.walletGreen },
-  { k: 'scb',      name: 'SCB',       sub: 'Siam Commercial',       logo: 'S',  bg: W.walletViolet100, ic: W.walletViolet },
-  { k: 'bbl',      name: 'BBL',       sub: 'Bangkok Bank',          logo: 'B',  bg: W.info200,         ic: W.info400 },
-  { k: 'krungsri', name: 'Krungsri',  sub: 'Bank of Ayudhya',       logo: 'ก',  bg: '#FCEFD9',         ic: W.warning400 },
-  { k: 'ktb',      name: 'Krungthai', sub: 'KTB',                   logo: 'ก',  bg: W.walletPink100,   ic: W.walletPink },
-  { k: 'citi',     name: 'Citi',      sub: 'Citibank',              logo: 'C',  bg: W.walletRed100,    ic: W.walletRed },
-  { k: 'ktc',      name: 'KTC',       sub: 'Krungthai Card',        logo: 'K',  bg: W.primary100,      ic: W.primary500 },
-  { k: 'aeon',     name: 'AEON',      sub: 'AEON Thana Sinsap',     logo: 'A',  bg: W.walletPink100,   ic: W.walletPink },
-  { k: 'amex',     name: 'AMEX',      sub: 'American Express',      logo: 'A',  bg: W.walletBrown100,  ic: W.walletBrown },
-  { k: 'uob',      name: 'UOB',       sub: 'United Overseas Bank',  logo: 'U',  bg: W.walletRed100,    ic: W.walletRed },
+// ─── Step 1 — Pick goal type ───
+// Preset tiles. Each gives smart defaults for color + icon in Step 2.
+const GOAL_TYPES = [
+  { k: 'travel',    label: 'ท่องเที่ยว',  desc: 'เที่ยวในประเทศ/ต่างประเทศ', icon: 'plane',    bg: W.info200,         ic: W.info400 },
+  { k: 'house',     label: 'บ้าน',        desc: 'ดาวน์บ้าน / ผ่อนบ้าน',     icon: 'home',     bg: W.walletGreen100,  ic: W.walletGreen },
+  { k: 'car',       label: 'รถ',          desc: 'ดาวน์รถ / ผ่อนรถ',         icon: 'car',      bg: W.walletRed100,    ic: W.walletRed },
+  { k: 'education', label: 'การศึกษา',    desc: 'เรียนต่อ / คอร์สใหม่',      icon: 'calc',     bg: W.walletViolet100, ic: W.walletViolet },
+  { k: 'emergency', label: 'ฉุกเฉิน',     desc: 'เงินสำรอง 3–6 เดือน',      icon: 'piggy',    bg: W.primary100,      ic: W.primary500 },
+  { k: 'wedding',   label: 'แต่งงาน',     desc: 'งานแต่ง / ฮันนีมูน',        icon: 'gift',     bg: W.walletPink100,   ic: W.walletPink },
+  { k: 'shopping',  label: 'ของอยากได้',  desc: 'ของแต่งบ้าน / gadget',     icon: 'shopping', bg: W.walletBrown100,  ic: W.walletBrown },
+  { k: 'health',    label: 'สุขภาพ',      desc: 'ค่ารักษา / ฟิตเนส',         icon: 'savings',  bg: '#FCEFD9',         ic: W.warning400 },
 ];
 
 function StepOne() {
-  const [sel, setSel] = React.useState('kbank');
+  const [sel, setSel] = React.useState('travel');
   return (
     <div style={{ background: INK.surface, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <MintStatusBar time="12:03" />
-      <Header step={1} title="สร้างบัตรเครดิต" />
+      <Header step={1} title="สร้างเป้าหมายออมเงิน" />
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        <StepIntro title="เลือกธนาคารผู้ออกบัตร" sub="Mint จะใช้สีและไอคอนของธนาคารเป็นค่าเริ่มต้น" />
+        <StepIntro title="เป้าหมายของคุณคืออะไร?" sub="เลือกประเภท — Mint จะแนะนำสี ไอคอน และตัวอย่างให้" />
         <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          {ISSUERS.map(t => {
+          {GOAL_TYPES.map(t => {
             const active = sel === t.k;
             return (
               <div key={t.k} onClick={() => setSel(t.k)} style={{
@@ -217,14 +206,12 @@ function StepOne() {
                 )}
                 <div style={{
                   width: 44, height: 44, borderRadius: 12, background: t.bg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 10,
-                  fontSize: 20, fontWeight: 800, color: t.ic, letterSpacing: -0.5,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10,
                 }}>
-                  {t.logo}
+                  <WIcon kind={t.icon} size={22} color={t.ic} />
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: W.n900 }}>{t.name}</div>
-                <div style={{ fontSize: 11, color: INK.muted, marginTop: 2, lineHeight: 1.3 }}>{t.sub}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: W.n900 }}>{t.label}</div>
+                <div style={{ fontSize: 11, color: INK.muted, marginTop: 2, lineHeight: 1.3 }}>{t.desc}</div>
               </div>
             );
           })}
@@ -251,7 +238,7 @@ function StepOne() {
                 ตั้งเอง
               </div>
               <div style={{ fontSize: 11, color: INK.muted, marginTop: 2, lineHeight: 1.3 }}>
-                ธนาคารไม่อยู่ในลิสต์ · กำหนดเอง
+                ไม่ตรงสักอัน · กำหนดประเภทเอง
               </div>
             </div>
             {sel === 'custom' && (
@@ -270,33 +257,30 @@ function StepOne() {
   );
 }
 
-// ─── Step 2 — Customize: name + last-4 digits + icon + color ───
-// Layout mirrors wallet Step 2 (preview wash → name → color → icon sections).
-// Extra: last-4-digits input under name. Live preview shows "•••• 1234" sub.
+// ─── Step 2 — Name + icon + color ───
 const COLORS = [
-  { k: 'violet', c: W.walletViolet, bg: W.walletViolet100 },
-  { k: 'green',  c: W.walletGreen,  bg: W.walletGreen100 },
-  { k: 'pink',   c: W.walletPink,   bg: W.walletPink100 },
-  { k: 'red',    c: W.walletRed,    bg: W.walletRed100 },
-  { k: 'brown',  c: W.walletBrown,  bg: W.walletBrown100 },
-  { k: 'teal',   c: W.primary400,   bg: W.primary100 },
+  { k: 'sky',    c: W.info400,       bg: W.info200 },
+  { k: 'green',  c: W.walletGreen,   bg: W.walletGreen100 },
+  { k: 'violet', c: W.walletViolet,  bg: W.walletViolet100 },
+  { k: 'pink',   c: W.walletPink,    bg: W.walletPink100 },
+  { k: 'red',    c: W.walletRed,     bg: W.walletRed100 },
+  { k: 'teal',   c: W.primary400,    bg: W.primary100 },
 ];
 
-// CC-flavored "frequently used" — emphasizes card/shopping over savings/cash
-const CC_FAVES = ['card', 'wallet', 'shopping', 'gift', 'plane'];
-const BASIC    = ['savings', 'ewallet', 'qr', 'shop', 'chart', 'pie', 'calc', 'envelope', 'wallet', 'cash'];
-const STD      = ['home', 'car', 'food', 'coffee', 'gift', 'gas', 'shopping', 'plane'];
+// Goal-flavored "frequently used" — emphasizes travel/home/savings over cards
+const GOAL_FAVES = ['plane', 'home', 'piggy', 'gift', 'savings'];
+const BASIC      = ['savings', 'ewallet', 'qr', 'shop', 'chart', 'pie', 'calc', 'envelope', 'wallet', 'cash'];
+const STD        = ['home', 'car', 'food', 'coffee', 'gift', 'gas', 'shopping', 'plane'];
 
 const PACKS = [
-  { name: 'Travel & Miles', count: 32,  ic: 'plane', bg: W.info200,     color: W.info400,    price: 'ฟรี',  isPremium: false },
-  { name: 'Premium Pack',   count: 120, ic: 'crown', bg: '#FCEFD9',     color: W.warning400, price: '฿ 49', isPremium: true  },
+  { name: 'Travel & Adventure', count: 32,  ic: 'plane', bg: W.info200, color: W.info400,    price: 'ฟรี',  isPremium: false },
+  { name: 'Premium Pack',       count: 120, ic: 'crown', bg: '#FCEFD9', color: W.warning400, price: '฿ 49', isPremium: true  },
 ];
 
 function StepTwo() {
-  const [name, setName] = React.useState('KBank Visa');
-  const [last4, setLast4] = React.useState('1234');
+  const [name, setName] = React.useState('เที่ยวญี่ปุ่น');
   const [color, setColor] = React.useState(COLORS[0]);
-  const [icon, setIcon] = React.useState('card');
+  const [icon, setIcon] = React.useState('plane');
   const [openPacks, setOpenPacks] = React.useState({ basic: true, standard: false });
   const togglePack = (k) => setOpenPacks(p => ({ ...p, [k]: !p[k] }));
 
@@ -335,11 +319,11 @@ function StepTwo() {
   return (
     <div style={{ background: INK.surface, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <MintStatusBar time="12:03" />
-      <Header step={2} title="สร้างบัตรเครดิต" onBack />
+      <Header step={2} title="สร้างเป้าหมายออมเงิน" onBack />
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
         <StepIntro title="ตั้งชื่อและหน้าตา" sub="เปลี่ยนได้ภายหลัง" />
 
-        {/* PREVIEW — white card on gradient wash. Card has NO shadow (wash = elevation). */}
+        {/* PREVIEW — white card on gradient wash */}
         <div style={{
           padding: '4px 16px 20px',
           background: `linear-gradient(180deg, ${color.bg} 0%, transparent 100%)`,
@@ -360,40 +344,27 @@ function StepTwo() {
                 fontSize: 15, fontWeight: 700, color: W.n900, marginTop: 2, letterSpacing: -0.1,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>
-                {name || 'ชื่อบัตร'}
+                {name || 'ชื่อเป้าหมาย'}
               </div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: INK.muted, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>
-                บัตรเครดิต · •••• {last4 || '----'}
+              <div style={{ fontSize: 12, fontWeight: 500, color: INK.muted, marginTop: 2 }}>
+                เป้าหมายออมเงิน
               </div>
             </div>
           </div>
         </div>
 
-        {/* NAME + LAST-4 — two fields in one card */}
+        {/* NAME */}
         <div style={{
           margin: '0 16px 12px', background: '#fff', borderRadius: 16,
-          boxShadow: cardShadow, overflow: 'hidden',
+          boxShadow: cardShadow, padding: '14px 16px 14px',
         }}>
-          <div style={{ padding: '14px 16px 12px' }}>
-            <Eyebrow>ชื่อบัตร</Eyebrow>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="เช่น KBank Visa"
-              style={{
-                width: '100%', border: 'none', outline: 'none',
-                fontSize: 15, fontWeight: 600, color: W.n900,
-                fontFamily: 'inherit', background: 'transparent', padding: 0, marginTop: 6,
-              }} />
-          </div>
-          <div style={{ borderTop: `1px solid ${INK.hairline}`, padding: '12px 16px 14px' }}>
-            <Eyebrow>เลขบัตร (4 หลักท้าย)</Eyebrow>
-            <input value={last4} onChange={e => setLast4(e.target.value.replace(/\D/g, '').slice(0, 4))}
-              placeholder="1234" inputMode="numeric" maxLength="4"
-              style={{
-                width: '100%', border: 'none', outline: 'none',
-                fontSize: 15, fontWeight: 600, color: W.n900,
-                fontFamily: 'inherit', background: 'transparent', padding: 0, marginTop: 6,
-                letterSpacing: 2, fontVariantNumeric: 'tabular-nums',
-              }} />
-          </div>
+          <Eyebrow>ชื่อเป้าหมาย</Eyebrow>
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="เช่น เที่ยวญี่ปุ่น"
+            style={{
+              width: '100%', border: 'none', outline: 'none',
+              fontSize: 15, fontWeight: 600, color: W.n900,
+              fontFamily: 'inherit', background: 'transparent', padding: 0, marginTop: 6,
+            }} />
         </div>
 
         {/* COLOR */}
@@ -445,7 +416,7 @@ function StepTwo() {
           meta="แตะค้างเพื่อปักหมุด"
           leadingIcon={<WIcon kind="star-line" size={14} color={W.warning400} />}
         >
-          <Grid kinds={CC_FAVES} />
+          <Grid kinds={GOAL_FAVES} />
         </SectionCard>
 
         <SectionCard
@@ -468,7 +439,7 @@ function StepTwo() {
           <Grid kinds={STD} />
         </SectionCard>
 
-        {/* คลังไอคอนเพิ่มเติม — pack store + library footer */}
+        {/* คลังไอคอนเพิ่มเติม */}
         <div style={{
           margin: '0 16px 16px', background: '#fff', borderRadius: 16,
           boxShadow: cardShadow, overflow: 'hidden',
@@ -531,7 +502,7 @@ function StepTwo() {
   );
 }
 
-// ─── Step 3 — Billing: limit + outstanding + statement/due date + alert + currency ───
+// ─── Step 3 — Target amount + currency + start/target dates ───
 const CURRENCIES = [
   { code: 'THB', name: 'บาทไทย',      symbol: '฿', flag: '🇹🇭' },
   { code: 'USD', name: 'ดอลลาร์สหรัฐ', symbol: '$', flag: '🇺🇸' },
@@ -540,29 +511,30 @@ const CURRENCIES = [
 ];
 
 function StepThree() {
-  const [limit, setLimit] = React.useState('80,000');
-  const [outstanding, setOutstanding] = React.useState('13,440');
-  const [statementDay, setStatementDay] = React.useState(20);
-  const [dueDay, setDueDay] = React.useState(5);
-  const [alertOn, setAlertOn] = React.useState(true);
+  const [target, setTarget] = React.useState('100,000');
   const [currency, setCurrency] = React.useState(CURRENCIES[0]);
+  const [startDate, setStartDate] = React.useState('วันนี้');
+  const [targetDate, setTargetDate] = React.useState('31 ธ.ค. 2569');
+
+  // Mock monthly savings preview — would compute (target / months remaining) in real impl
+  const monthlyHint = '~฿ 12,500 / เดือน · 8 เดือน';
 
   return (
     <div style={{ background: INK.surface, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <MintStatusBar time="12:03" />
-      <Header step={3} title="สร้างบัตรเครดิต" onBack />
+      <Header step={3} title="สร้างเป้าหมายออมเงิน" onBack />
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        <StepIntro title="วงเงินและรอบบิล" sub="Mint จะติดตามและเตือนก่อนถึงกำหนดชำระ" />
+        <StepIntro title="ยอดและกำหนดเวลา" sub="ตั้งเป้าหมายและเส้นตาย — Mint จะคำนวณว่าต้องออมเดือนละเท่าไร" />
 
-        {/* LIMIT — hero amount card */}
+        {/* TARGET AMOUNT — hero amount card */}
         <div style={{
           margin: '8px 16px 12px', background: '#fff', borderRadius: 16,
           boxShadow: cardShadow, padding: '20px 16px 18px', textAlign: 'center',
         }}>
-          <Eyebrow>วงเงินสูงสุด</Eyebrow>
+          <Eyebrow>เป้าหมายเงินออม</Eyebrow>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 6, marginTop: 10 }}>
             <span style={{ fontSize: 18, color: INK.faint, fontWeight: 600 }}>{currency.symbol}</span>
-            <input value={limit} onChange={e => setLimit(e.target.value)}
+            <input value={target} onChange={e => setTarget(e.target.value)}
               style={{
                 border: 'none', outline: 'none', fontSize: 38, fontWeight: 700, color: W.n900,
                 textAlign: 'center', width: '70%', fontFamily: 'inherit', background: 'transparent',
@@ -570,118 +542,22 @@ function StepThree() {
               }} />
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-            {['30,000', '50,000', '100,000', '300,000'].map(p => (
-              <div key={p} onClick={() => setLimit(p)} style={{
+            {['50,000', '100,000', '500,000', '1,000,000'].map(p => (
+              <div key={p} onClick={() => setTarget(p)} style={{
                 padding: '6px 12px', borderRadius: 999, background: INK.surface,
                 fontSize: 12, color: W.n800, fontWeight: 600, cursor: 'pointer',
               }}>{currency.symbol} {p}</div>
             ))}
           </div>
-        </div>
-
-        {/* OUTSTANDING — current unpaid amount */}
-        <div style={{
-          margin: '0 16px 12px', background: '#fff', borderRadius: 16,
-          boxShadow: cardShadow, padding: '14px 16px 14px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Eyebrow>ยอดค้างชำระปัจจุบัน</Eyebrow>
-            <div style={{ fontSize: 11, fontWeight: 500, color: INK.muted }}>ยังไม่จ่าย</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 8 }}>
-            <span style={{ fontSize: 15, color: INK.faint, fontWeight: 600 }}>{currency.symbol}</span>
-            <input value={outstanding} onChange={e => setOutstanding(e.target.value)}
-              style={{
-                border: 'none', outline: 'none', fontSize: 24, fontWeight: 700, color: W.n900,
-                fontFamily: 'inherit', background: 'transparent', padding: 0,
-                fontVariantNumeric: 'tabular-nums', flex: 1,
-              }} />
-          </div>
-        </div>
-
-        {/* BILLING CYCLE — spec list (3 rows: statement / due / grace period).
-            Label left muted, value right bold. Hairline divider between rows.
-            Top 2 rows tappable (✎ = edit hint, no icon chip).
-            Last row is the computed grace period — useful CC literacy:
-            "X วัน" = days between statement cut and payment due, the no-interest window. */}
-        <div style={{
-          margin: '0 16px 12px', background: '#fff', borderRadius: 16,
-          boxShadow: cardShadow, padding: '14px 16px 4px',
-        }}>
-          <Eyebrow>รอบบิล</Eyebrow>
-          <div style={{ marginTop: 10 }}>
-            {/* Row 1 — statement day (tappable) */}
-            <div style={{
-              padding: '12px 0', display: 'flex', alignItems: 'center',
-              justifyContent: 'space-between', gap: 12, cursor: 'pointer',
-              borderTop: `1px solid ${INK.hairline}`,
-            }}>
-              <div style={{ fontSize: 13, color: INK.muted, fontWeight: 500 }}>วันสรุปยอด</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: W.n900, fontVariantNumeric: 'tabular-nums' }}>
-                  ทุกวันที่ {statementDay}
-                </div>
-                <span style={{ fontSize: 13, color: INK.faint, lineHeight: 1 }}>✎</span>
-              </div>
-            </div>
-            {/* Row 2 — due day (tappable) */}
-            <div style={{
-              padding: '12px 0', display: 'flex', alignItems: 'center',
-              justifyContent: 'space-between', gap: 12, cursor: 'pointer',
-              borderTop: `1px solid ${INK.hairline}`,
-            }}>
-              <div style={{ fontSize: 13, color: INK.muted, fontWeight: 500 }}>วันครบกำหนดชำระ</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: W.n900, fontVariantNumeric: 'tabular-nums' }}>
-                  วันที่ {dueDay} <span style={{ fontSize: 12, color: INK.muted, fontWeight: 500 }}>(เดือนถัดไป)</span>
-                </div>
-                <span style={{ fontSize: 13, color: INK.faint, lineHeight: 1 }}>✎</span>
-              </div>
-            </div>
-            {/* Row 3 — grace period (computed, read-only) */}
-            <div style={{
-              padding: '12px 0', display: 'flex', alignItems: 'center',
-              justifyContent: 'space-between', gap: 12,
-              borderTop: `1px solid ${INK.hairline}`,
-            }}>
-              <div style={{ fontSize: 13, color: INK.muted, fontWeight: 500 }}>ช่วงปลอดดอกเบี้ย</div>
-              <div style={{
-                fontSize: 15, fontWeight: 700, color: W.n900,
-                fontVariantNumeric: 'tabular-nums',
-              }}>15 วัน</div>
-            </div>
-          </div>
-        </div>
-
-        {/* NOTIFICATION toggle */}
-        <div style={{
-          margin: '0 16px 12px', background: '#fff', borderRadius: 16,
-          boxShadow: cardShadow, padding: '12px 16px',
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
+          {/* Monthly-needed hint — appears when both target + date set */}
           <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: alertOn ? W.primary100 : INK.surface,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            transition: 'background 0.15s',
+            marginTop: 14, paddingTop: 12, borderTop: `1px solid ${INK.hairline}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            fontSize: 12, color: INK.muted, fontWeight: 500,
           }}>
-            <WIcon kind="bell" size={18} color={alertOn ? W.primary500 : W.n700} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: W.n900 }}>แจ้งเตือนก่อนกำหนดชำระ</div>
-            <div style={{ fontSize: 11, fontWeight: 500, color: INK.muted, marginTop: 2 }}>เตือน 3 วันก่อนครบกำหนด</div>
-          </div>
-          <div onClick={() => setAlertOn(!alertOn)} style={{
-            width: 44, height: 26, borderRadius: 13,
-            background: alertOn ? W.primary400 : W.n300,
-            position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
-            flexShrink: 0,
-          }}>
-            <div style={{
-              position: 'absolute', top: 3, left: alertOn ? 21 : 3,
-              width: 20, height: 20, borderRadius: 10, background: '#fff',
-              transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-            }}/>
+            <WIcon kind="chart" size={12} color={W.primary500} />
+            <span>ต้องออม </span>
+            <b style={{ color: W.n900, fontVariantNumeric: 'tabular-nums' }}>{monthlyHint}</b>
           </div>
         </div>
 
@@ -692,9 +568,9 @@ function StepThree() {
           display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
         }}>
           <div style={{
-            width: 36, height: 36, borderRadius: 10, background: INK.surface,
+            width: 40, height: 40, borderRadius: 12, background: INK.surface,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, flexShrink: 0,
+            fontSize: 20, flexShrink: 0,
           }}>{currency.flag}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <Eyebrow>สกุลเงิน</Eyebrow>
@@ -704,31 +580,82 @@ function StepThree() {
           </div>
           <WIcon kind="arrow" size={16} color={INK.faint} />
         </div>
+
+        {/* DATES — spec list (3 rows: start / target / duration).
+            Label left muted, value right bold. Hairline divider between rows.
+            Top 2 rows tappable (✎ unicode = edit hint, no icon chip).
+            Last row is computed read-only summary. */}
+        <div style={{
+          margin: '0 16px 12px', background: '#fff', borderRadius: 16,
+          boxShadow: cardShadow, padding: '14px 16px 4px',
+        }}>
+          <Eyebrow>กำหนดเวลา</Eyebrow>
+          <div style={{ marginTop: 10 }}>
+            {/* Row 1 — start date (tappable) */}
+            <div style={{
+              padding: '12px 0', display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', gap: 12, cursor: 'pointer',
+              borderTop: `1px solid ${INK.hairline}`,
+            }}>
+              <div style={{ fontSize: 13, color: INK.muted, fontWeight: 500 }}>วันเริ่มต้น</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: W.n900 }}>{startDate}</div>
+                <span style={{ fontSize: 13, color: INK.faint, lineHeight: 1 }}>✎</span>
+              </div>
+            </div>
+            {/* Row 2 — target date (tappable) */}
+            <div style={{
+              padding: '12px 0', display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', gap: 12, cursor: 'pointer',
+              borderTop: `1px solid ${INK.hairline}`,
+            }}>
+              <div style={{ fontSize: 13, color: INK.muted, fontWeight: 500 }}>วันที่ตั้งเป้า</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: W.n900 }}>{targetDate}</div>
+                <span style={{ fontSize: 13, color: INK.faint, lineHeight: 1 }}>✎</span>
+              </div>
+            </div>
+            {/* Row 3 — duration (computed, read-only) */}
+            <div style={{
+              padding: '12px 0', display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', gap: 12,
+              borderTop: `1px solid ${INK.hairline}`,
+            }}>
+              <div style={{ fontSize: 13, color: INK.muted, fontWeight: 500 }}>ระยะเวลา</div>
+              <div style={{
+                fontSize: 15, fontWeight: 700, color: W.n900,
+                fontVariantNumeric: 'tabular-nums',
+              }}>8 เดือน</div>
+            </div>
+          </div>
+        </div>
       </div>
       <StickyCta label="ถัดไป" />
     </div>
   );
 }
 
-// ─── Step 4 — AI goal (required, CC-specific examples) ───
-const CC_GOAL_EXAMPLES = [
-  { text: 'ใช้เท่าที่จำเป็น · เก็บไว้ใช้ตอนฉุกเฉิน', ic: 'piggy' },
-  { text: 'ปิดยอดเต็มทุกเดือน · ไม่ให้เกิดดอกเบี้ย',  ic: 'check' },
-  { text: 'เก็บแต้ม cashback / ไมล์',                ic: 'gift' },
-  { text: 'แยกค่าใช้จ่ายธุรกิจจากส่วนตัว',           ic: 'envelope' },
-  { text: 'ใช้เฉพาะค่าน้ำมัน',                      ic: 'gas' },
-  { text: 'ผ่อน 0% เครื่องใช้ในบ้าน',                ic: 'home' },
+// ─── Step 4 — Motivation / why behind the goal (required) ───
+// Captures the *reason*, not the goal itself. AI uses this to frame nudges:
+//   "เก็บไปเที่ยวกับครอบครัวนะ — ลดค่ากาแฟวันนี้ดีมั้ย?"
+const MOTIVATION_EXAMPLES = [
+  { text: 'อยากไปเที่ยวกับครอบครัวให้ได้สักครั้ง',  ic: 'plane' },
+  { text: 'เก็บไว้ดาวน์บ้านหลังแรกของตัวเอง',       ic: 'home' },
+  { text: 'เพราะตอนนี้ไม่มีเงินสำรองเลย',           ic: 'piggy' },
+  { text: 'อยากเรียนต่อต่างประเทศ',                ic: 'calc' },
+  { text: 'ให้รางวัลตัวเองหลังทำงานหนัก',          ic: 'gift' },
+  { text: 'เก็บไว้ใช้ตอนเกษียณ',                   ic: 'savings' },
 ];
 
 function StepFour() {
-  const [goal, setGoal] = React.useState('');
-  const goalValid = goal.trim().length > 0;
+  const [why, setWhy] = React.useState('');
+  const valid = why.trim().length > 0;
   return (
     <div style={{ background: INK.surface, height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <MintStatusBar time="12:03" />
-      <Header step={4} title="สร้างบัตรเครดิต" onBack />
+      <Header step={4} title="สร้างเป้าหมายออมเงิน" onBack />
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        <StepIntro title="ตั้งเป้าหมายบัตรนี้" sub="ให้ AI ช่วยเตือนและแนะนำเมื่อใกล้เกินวงเงิน" />
+        <StepIntro title="ทำไมถึงตั้งเป้าหมายนี้?" sub="ให้ AI ช่วยกระตุ้นและแนะนำเวลาที่ใจสั่น — ยิ่งบอกชัดยิ่งช่วยดี" />
 
         <div style={{
           margin: '8px 16px 12px', background: '#fff', borderRadius: 16,
@@ -745,7 +672,7 @@ function StepFour() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: W.n900, letterSpacing: -0.1 }}>
-                  เป้าหมายของบัตร
+                  เหตุผล / แรงจูงใจ
                 </div>
                 <div style={{
                   padding: '2px 6px', borderRadius: 6,
@@ -763,11 +690,11 @@ function StepFour() {
           <div style={{
             margin: '0 16px 14px', padding: '12px 14px',
             background: INK.surface, borderRadius: 12,
-            boxShadow: goalValid ? `inset 0 0 0 1.5px ${W.walletViolet}` : 'none',
+            boxShadow: valid ? `inset 0 0 0 1.5px ${W.walletViolet}` : 'none',
             transition: 'box-shadow 0.15s',
           }}>
-            <input value={goal} onChange={e => setGoal(e.target.value)}
-              placeholder="พิมพ์เป้าหมายของบัตรนี้..."
+            <input value={why} onChange={e => setWhy(e.target.value)}
+              placeholder="เช่น อยากไปเที่ยวกับครอบครัว..."
               style={{
                 width: '100%', border: 'none', outline: 'none',
                 fontSize: 14, fontWeight: 500, color: W.n900,
@@ -780,10 +707,10 @@ function StepFour() {
             <Eyebrow>ตัวอย่างยอดนิยม</Eyebrow>
           </div>
           <div>
-            {CC_GOAL_EXAMPLES.map((ex, i) => {
-              const selected = goal === ex.text;
+            {MOTIVATION_EXAMPLES.map((ex, i) => {
+              const selected = why === ex.text;
               return (
-                <div key={ex.text} onClick={() => setGoal(ex.text)} style={{
+                <div key={ex.text} onClick={() => setWhy(ex.text)} style={{
                   padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 12,
                   borderTop: i ? `1px solid ${INK.hairline}` : 'none',
                   cursor: 'pointer',
@@ -817,14 +744,13 @@ function StepFour() {
           </div>
         </div>
       </div>
-      <StickyCta label="สร้างบัตร" disabled={!goalValid} />
+      <StickyCta label="สร้างเป้าหมาย" disabled={!valid} />
     </div>
   );
 }
 
-// Export 4 step screens — render side-by-side in canvas
-window.CreateCreditWizard_Step1 = StepOne;
-window.CreateCreditWizard_Step2 = StepTwo;
-window.CreateCreditWizard_Step3 = StepThree;
-window.CreateCreditWizard_Step4 = StepFour;
+window.CreateGoalWizard_Step1 = StepOne;
+window.CreateGoalWizard_Step2 = StepTwo;
+window.CreateGoalWizard_Step3 = StepThree;
+window.CreateGoalWizard_Step4 = StepFour;
 })();
