@@ -36,9 +36,17 @@
 <script type="text/babel" src="v3-ai-chat.jsx"></script>
 <script type="text/babel" src="v3-home-temp.jsx"></script>
 <script type="text/babel" src="v3-wallets.jsx"></script>
+<script type="text/babel" src="v4-wallets.jsx"></script>
 <script type="text/babel" src="v4-add-transaction.jsx"></script>
-<script type="text/babel" src="v4-add-transaction-d-numpad.jsx"></script>
-<script type="text/babel" src="v4-add-transaction-e-improved.jsx"></script>
+<script type="text/babel" src="transaction_shared.jsx"></script>
+<script type="text/babel" src="transaction_1.jsx"></script>
+<script type="text/babel" src="transaction_2.jsx"></script>
+<script type="text/babel" src="transaction_3.jsx"></script>
+<script type="text/babel" src="transaction_4.jsx"></script>
+<script type="text/babel" src="transaction_5.jsx"></script>
+<script type="text/babel" src="transaction_6.jsx"></script>
+<script type="text/babel" src="transaction_7.jsx"></script>
+<script type="text/babel" src="transaction_8.jsx"></script>
 
 <script type="text/babel">
 const TWEAKS = /*EDITMODE-BEGIN*/{
@@ -247,6 +255,24 @@ function App() {
           </DCArtboard>
           <DCArtboard label="04 · Wallets v3 · งบประมาณ" width={390} height={844}>
             <WalletsV3_Budget />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Wallets Redesign"
+          subtitle="ต่อยอดจาก v3 · iterate การจัด layout / สี / typography ของ Money Map และ drill pages"
+        >
+          <DCArtboard label="01 · Wallets v4 · กระเป๋า" width={390} height={844}>
+            <WalletsV4_Accounts />
+          </DCArtboard>
+          <DCArtboard label="02 · Wallets v4 · บัตรเครดิต" width={390} height={844}>
+            <WalletsV4_Credit />
+          </DCArtboard>
+          <DCArtboard label="03 · Wallets v4 · เป้าหมาย" width={390} height={844}>
+            <WalletsV4_Goals />
+          </DCArtboard>
+          <DCArtboard label="04 · Wallets v4 · งบประมาณ" width={390} height={844}>
+            <WalletsV4_Budget />
           </DCArtboard>
         </DCSection>
       </DesignCanvas>
