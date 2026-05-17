@@ -2,7 +2,7 @@
 const H3 = window.MINT;
 
 
-function HomeV3() {
+function HomeV3({ hideStatusBar = false } = {}) {
   const [insightIdx] = React.useState(0);
   const [nwExpanded, setNwExpanded] = React.useState(false);
   const [nwHidden, setNwHidden] = React.useState(false);
@@ -23,13 +23,18 @@ function HomeV3() {
     return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
   }).join(' ');
 
+  // When embedded under RootPager (hideStatusBar=true), the compact segment sits directly above.
+  // 32px = Apple HIG large-title spacing — clearly separates Net Worth (hero) from segment (tab control).
+  // Standalone HomeV3 keeps its original 0px top — status bar already gives air.
+  const topPad = hideStatusBar ? 32 : 0;
+
   return (
     <div style={{ background: H3.n200, height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <MintStatusBarV2 time="21:29" />
+      {!hideStatusBar && <MintStatusBarV2 time="21:29" />}
 
       {!nwExpanded ? (
         /* Compact Net Worth anchor — top-left, bell on right · tap to expand */
-        <div style={{ padding: '0 16px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ padding: `${topPad}px 16px 16px`, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div onClick={() => setNwExpanded(true)} style={{ cursor: 'pointer' }}>
             <div style={{ fontSize: 11, color: H3.n400, fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.6 }}>Net Worth</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 2 }}>
@@ -37,19 +42,22 @@ function HomeV3() {
               <span style={{ fontSize: 12, color: H3.primary500, fontWeight: 700 }}>↑ 2.4%</span>
             </div>
           </div>
-          <div style={{ position: 'relative', marginTop: 6 }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path d="M12 3a6 6 0 00-6 6v3l-2 3v1h16v-1l-2-3V9a6 6 0 00-6-6zM9 18a3 3 0 006 0" stroke={H3.n700} strokeWidth="1.8" strokeLinejoin="round"/>
-            </svg>
-            <div style={{ position:'absolute', top:-1, right:-1, width:7, height:7, borderRadius:4, background: H3.error400, border:'1.5px solid #fff' }} />
-          </div>
+          {/* Bell only renders standalone — RootPager moves it to segment header */}
+          {!hideStatusBar && (
+            <div style={{ position: 'relative', marginTop: 6 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3a6 6 0 00-6 6v3l-2 3v1h16v-1l-2-3V9a6 6 0 00-6-6zM9 18a3 3 0 006 0" stroke={H3.n700} strokeWidth="1.8" strokeLinejoin="round"/>
+              </svg>
+              <div style={{ position:'absolute', top:-1, right:-1, width:7, height:7, borderRadius:4, background: H3.error400, border:'1.5px solid #fff' }} />
+            </div>
+          )}
         </div>
       ) : (
         /* Expanded Net Worth card — full breakdown · tap chevron to collapse */
         <div
           onClick={() => setNwExpanded(false)}
           style={{
-            margin: '0 16px 12px',
+            margin: `${topPad}px 16px 12px`,
             background: '#fff', borderRadius: 18,
             padding: '14px 16px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',

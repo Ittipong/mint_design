@@ -47,6 +47,8 @@
 <script type="text/babel" src="v4-icon-library-manager.jsx"></script>
 <script type="text/babel" src="v4-icon-add-custom.jsx"></script>
 <script type="text/babel" src="v4-color-palette-compare.jsx"></script>
+<script type="text/babel" src="v4-melon-chat.jsx"></script>
+<script type="text/babel" src="v4-root-pager.jsx"></script>
 <script type="text/babel" src="transaction_shared.jsx"></script>
 <script type="text/babel" src="transaction_1.jsx"></script>
 <script type="text/babel" src="transaction_2.jsx"></script>
@@ -363,6 +365,30 @@ function App() {
           </DCArtboard>
           <DCArtboard label="03c · Color Picker · Preview = EMOJI" width={390} height={844}>
             <ColorPickerEmoji />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Melon Chat (AI assistant)"
+          subtitle="หน้า chat สำหรับ AI Melon · 2 state · (1) เปิดมาครั้งแรกยังไม่มีบทสนทนา — โชว์ greeting + suggested questions แบ่งกลุ่ม (ถาม Melon / ลัดบันทึก) + shortcut tile 4 ปุ่ม · (2) มี chat แล้ว — long-form AI reply พร้อม bullet, divider, recommendation และ quick replies follow-up · ทั้ง 2 หน้าใช้ wallet selector chip + input bar (cam/gallery/mic) + bottom nav 5 ปุ่ม (Ai กลาง)"
+        >
+          <DCArtboard label="01 · Melon Chat · Init (suggestions + shortcuts)" width={390} height={844}>
+            <MelonChatInit />
+          </DCArtboard>
+          <DCArtboard label="02 · Melon Chat · Active (ตามรูป screenshot)" width={390} height={844}>
+            <MelonChatActive />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Root Pager (Chat ↔ Finance)"
+          subtitle="หน้า root ใหม่ของ app · pager 2 หน้า ใช้ compact segment เป็น header (แทน title bar) · Chat = Melon Chat (embedded) · Finance = Home v3 + tabbar · swipe เปลี่ยน page ได้ทั้ง 2 ทิศ · segment กดเลือกได้ → animated indicator slide"
+        >
+          <DCArtboard label="01 · Pager · Chat tab" width={390} height={844}>
+            <RootPagerChat />
+          </DCArtboard>
+          <DCArtboard label="02 · Pager · Finance tab" width={390} height={844}>
+            <RootPagerFinance />
           </DCArtboard>
         </DCSection>
 
