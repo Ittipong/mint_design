@@ -148,15 +148,16 @@ function BudgetHero({ b }) {
         </div>
         <div style={{ textAlign: 'right' }}>
           {/* Spent — #1 hero of this screen. 800 → 700 (Sarabun-friendly). */}
-          <div style={{ fontSize: 26, fontWeight: 700, color: W3.n900, letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: W3.n900, letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>
             {fmt(b.spent)}
           </div>
           <div style={{ fontSize: 11, color: INK.faint, marginTop: 2, letterSpacing: 0.3 }}>THB</div>
         </div>
       </div>
-      <div style={{ height: 1, borderTop: `1px dashed ${INK.divider}`, margin: '14px 0 12px' }} />
+      {/* Divider: dashed → solid hairline — one calm separator instead of a dotted strip */}
+      <div style={{ height: 1, background: INK.divider, margin: '14px 0 12px' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ fontSize: 12, color: INK.muted, flexShrink: 0, fontWeight: 500 }}>งบ</div>
+        <div style={{ fontSize: 13, color: INK.muted, flexShrink: 0, fontWeight: 500 }}>งบ</div>
         <div style={{ flex: 1, textAlign: 'right', fontSize: 13, fontWeight: 600, color: W3.n800, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
           ฿ {b.limit.toLocaleString()} <span style={{ color: INK.faint, fontWeight: 500 }}>· {pct}%</span>
         </div>
@@ -226,7 +227,8 @@ function PaceCard({ b, c }) {
     }}>
       <div style={{ flexShrink: 0, display: 'flex' }}>{icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: tone || INK.muted, fontWeight: 600 }}>{label}</div>
+        {/* label 12 → 13 to sit on the shared ramp (26/20/14/13/11) */}
+        <div style={{ fontSize: 13, color: tone || INK.muted, fontWeight: 600 }}>{label}</div>
         <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900, marginTop: 2, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', letterSpacing: -0.1 }}>
           {value}
         </div>
@@ -237,9 +239,10 @@ function PaceCard({ b, c }) {
     <div style={{ margin: '0 16px 14px', ...card(1), padding: '16px 18px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: 13, color: INK.muted, fontWeight: 600 }}>เหลือใช้เดือนนี้</div>
+        {/* days-left pill 12 → 13 to sit on the shared ramp (26/18/14/13/11) */}
         <div style={{
           padding: '6px 12px', borderRadius: 999,
-          background: W3.n200, fontSize: 12, fontWeight: 700, color: W3.n800,
+          background: W3.n200, fontSize: 13, fontWeight: 700, color: W3.n800,
           display: 'flex', alignItems: 'center', gap: 5,
         }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -250,12 +253,13 @@ function PaceCard({ b, c }) {
         </div>
       </div>
 
-      {/* Hero = remaining — answers "เหลือใช้กี่บาท". 800 → 700, size 30 → 28
-          so it sits below BudgetHero's 26+suffix without competing. */}
+      {/* Card metric = remaining — answers "เหลือใช้กี่บาท". DROPPED 28 → 20 so it sits
+          clearly below BudgetHero's 26px spent figure. 28 > 26 had inverted the hierarchy
+          and made the two numbers tie. One protagonist (spent), one subordinate card metric. */}
       <div style={{
-        fontSize: 28, fontWeight: 700,
+        fontSize: 18, fontWeight: 700,
         color: overBudget ? INK.negSoft : W3.n900,
-        letterSpacing: -0.3, marginTop: 8, lineHeight: 1.1,
+        letterSpacing: -0.2, marginTop: 6, lineHeight: 1.15,
         fontVariantNumeric: 'tabular-nums',
       }}>
         ฿ {remaining.toLocaleString()}
@@ -267,9 +271,10 @@ function PaceCard({ b, c }) {
       {/* progress bar */}
       <div style={{ marginTop: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <div style={{ fontSize: 12, color: INK.muted, fontWeight: 600 }}>การใช้จ่าย</div>
+          {/* progress label + status 12 → 13 to sit on the shared ramp */}
+          <div style={{ fontSize: 13, color: INK.muted, fontWeight: 600 }}>การใช้จ่าย</div>
           <div style={{
-            fontSize: 12, fontWeight: 700, color: statusColor,
+            fontSize: 13, fontWeight: 700, color: statusColor,
             display: 'flex', alignItems: 'center', gap: 5,
           }}>
             <div style={{ width: 6, height: 6, borderRadius: 3, background: statusColor }} />
@@ -289,12 +294,14 @@ function PaceCard({ b, c }) {
             width: 2, background: INK.muted, borderRadius: 1, transform: 'translateX(-1px)',
           }} />
         </div>
-        <div style={{ fontSize: 11.5, color: INK.faint, marginTop: 6, lineHeight: 1.3 }}>
+        {/* marker hint 11.5 ad-hoc → 13 on-ramp; color faint → muted for AA at small size */}
+        <div style={{ fontSize: 13, color: INK.muted, marginTop: 6, lineHeight: 1.3 }}>
           ขีดเทา = เดือนผ่านไป {timePct}%
         </div>
       </div>
 
-      <div style={{ height: 1, borderTop: `1px dashed ${INK.divider}`, margin: '14px 0 12px' }} />
+      {/* Divider: dashed → solid hairline; 8pt rhythm (16/14) */}
+      <div style={{ height: 1, background: INK.divider, margin: '16px 0 14px' }} />
 
       {/* avg / recommended — side-by-side stat chips. Actual avg tinted negSoft
           when over-pace so the user sees "current behavior" as the lever to fix. */}

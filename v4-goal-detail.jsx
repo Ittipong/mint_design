@@ -112,15 +112,16 @@ function GoalHero({ g }) {
         </div>
         <div style={{ textAlign: 'right' }}>
           {/* Saved — #1 hero of this screen. 800 → 700 (Sarabun-friendly). */}
-          <div style={{ fontSize: 26, fontWeight: 700, color: W3.n900, letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: W3.n900, letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>
             {fmt(g.saved)}
           </div>
           <div style={{ fontSize: 11, color: INK.faint, marginTop: 2, letterSpacing: 0.3 }}>THB</div>
         </div>
       </div>
-      <div style={{ height: 1, borderTop: `1px dashed ${INK.divider}`, margin: '14px 0 12px' }} />
+      {/* Divider: dashed → solid hairline — one calm separator instead of a dotted strip */}
+      <div style={{ height: 1, background: INK.divider, margin: '14px 0 12px' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ fontSize: 12, color: INK.muted, flexShrink: 0, fontWeight: 500 }}>เป้าหมาย</div>
+        <div style={{ fontSize: 13, color: INK.muted, flexShrink: 0, fontWeight: 500 }}>เป้าหมาย</div>
         <div style={{ flex: 1, textAlign: 'right', fontSize: 13, fontWeight: 600, color: W3.n800, fontVariantNumeric: 'tabular-nums', lineHeight: 1.4 }}>
           ฿ {g.target.toLocaleString()} <span style={{ color: INK.faint, fontWeight: 500 }}>· {pct}%</span>
         </div>
@@ -181,7 +182,8 @@ function PlanCard({ g, p }) {
     }}>
       <div style={{ flexShrink: 0, display: 'flex' }}>{icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: INK.muted, fontWeight: 600 }}>{label}</div>
+        {/* label 12 → 13 to sit on the shared ramp (26/20/14/13/11) */}
+        <div style={{ fontSize: 13, color: INK.muted, fontWeight: 600 }}>{label}</div>
         <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900, marginTop: 2, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', letterSpacing: -0.1 }}>
           {value}
         </div>
@@ -193,9 +195,10 @@ function PlanCard({ g, p }) {
       {/* header — title + ETA chip (chip type 11 → 12 so the date is readable) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: 13, color: INK.muted, fontWeight: 600 }}>แผนการออม</div>
+        {/* ETA pill 12 → 13 to sit on the shared ramp (26/18/14/13/11) */}
         <div style={{
           padding: '6px 12px', borderRadius: 999,
-          background: W3.n200, fontSize: 12, fontWeight: 700, color: W3.n800,
+          background: W3.n200, fontSize: 13, fontWeight: 700, color: W3.n800,
           display: 'flex', alignItems: 'center', gap: 5,
         }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -210,11 +213,12 @@ function PlanCard({ g, p }) {
           Reason: when reopening this sheet, the user's first question is
           "ขาดอีกเท่าไหร่ถึงจะถึงเป้า?" — that's the gap-closing number.
           perMonth becomes a sub-line answer to "แล้วต้องเก็บเดือนละเท่าไหร่?".
-          Sized 28 (not 30) to stay below GoalHero's 26 + suffix, preventing
-          two competing hero numbers on the same screen. */}
+          DROPPED 28 → 20 so it sits clearly below GoalHero's 26px saved figure.
+          28 vs 26 had been a near-tie (two competing heroes); now there is one
+          protagonist (saved) and one clearly-subordinate card metric. */}
       <div style={{
-        fontSize: 28, fontWeight: 700, color: W3.n900,
-        letterSpacing: -0.3, marginTop: 8, lineHeight: 1.1,
+        fontSize: 18, fontWeight: 700, color: W3.n900,
+        letterSpacing: -0.2, marginTop: 6, lineHeight: 1.15,
         fontVariantNumeric: 'tabular-nums',
       }}>
         ฿ {remaining.toLocaleString()}
@@ -226,9 +230,10 @@ function PlanCard({ g, p }) {
       {/* progress bar */}
       <div style={{ marginTop: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <div style={{ fontSize: 12, color: INK.muted, fontWeight: 600 }}>ความคืบหน้า</div>
+          {/* progress label + track status 12 → 13 to sit on the shared ramp */}
+          <div style={{ fontSize: 13, color: INK.muted, fontWeight: 600 }}>ความคืบหน้า</div>
           <div style={{
-            fontSize: 12, fontWeight: 700, color: trackColor,
+            fontSize: 13, fontWeight: 700, color: trackColor,
             display: 'flex', alignItems: 'center', gap: 5,
           }}>
             <div style={{ width: 6, height: 6, borderRadius: 3, background: trackColor }} />
@@ -243,7 +248,8 @@ function PlanCard({ g, p }) {
         </div>
       </div>
 
-      <div style={{ height: 1, borderTop: `1px dashed ${INK.divider}`, margin: '14px 0 12px' }} />
+      {/* Divider: dashed → solid hairline; 8pt rhythm (16/14) */}
+      <div style={{ height: 1, background: INK.divider, margin: '16px 0 14px' }} />
 
       {/* saved / monthly contribution as stat chips. Swap "เหลืออีก" → "เดือนละ"
           to avoid duplicating the new hero. */}

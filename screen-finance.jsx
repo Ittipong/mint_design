@@ -1,30 +1,11 @@
 // Finance screen — wallets/cards/goals/budget tabs
 const MF = window.MINT;
 
-function FinanceHeader() {
+function FinanceHeader({ hideStatusBar = false } = {}) {
+  if (hideStatusBar) return null;
   return (
     <div>
       <MintStatusBar time="21:37" />
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '4px 16px 12px',
-      }}>
-        <div style={{ fontSize: 24, fontWeight: 700, color: MF.n900 }}>การเงิน</div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M12 5v14M5 12h14" stroke={MF.primary500} strokeWidth="2.2" strokeLinecap="round"/>
-          </svg>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" stroke={MF.n700} strokeWidth="1.8"/>
-            <path d="M12 7v5l3 2" stroke={MF.n700} strokeWidth="1.8" strokeLinecap="round"/>
-          </svg>
-          <svg width="18" height="22" viewBox="0 0 24 24">
-            <circle cx="12" cy="5" r="1.8" fill={MF.n700}/>
-            <circle cx="12" cy="12" r="1.8" fill={MF.n700}/>
-            <circle cx="12" cy="19" r="1.8" fill={MF.n700}/>
-          </svg>
-        </div>
-      </div>
     </div>
   );
 }
@@ -119,14 +100,14 @@ function WalletRow({ icon, bg, name, type, amount, amountColor }) {
   );
 }
 
-function FinanceScreen() {
+function FinanceScreen({ hideStatusBar = false } = {}) {
   return (
     <div style={{
       background: MF.n200, height: '100%', display: 'flex', flexDirection: 'column',
       position: 'relative', overflow: 'hidden',
     }}>
       <div style={{ flex: 1, overflow: 'hidden', paddingBottom: 84, paddingTop: 2 }}>
-        <FinanceHeader />
+        <FinanceHeader hideStatusBar={hideStatusBar} />
         <FinanceTabs />
         <TotalCard />
 

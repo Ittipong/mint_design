@@ -11,30 +11,23 @@ function TxAvatar({ emoji, bg }) {
   );
 }
 
+// Wallet filter chip — pill-shaped tappable: piggy + name + balance + chevron.
+// Pill bg makes the "filter" affordance obvious; left-aligned to keep the
+// row scannable. Action icons (🔍 ⏱ ⋮) live in the pager's segment rightSlot.
 function TxHeader() {
   return (
-    <div style={{ padding: '2px 16px 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
-      <PiggyAvatar size={34} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: MT.n900 }}>ครอบครัว</span>
+    <div style={{ padding: '2px 16px 8px', display: 'flex', alignItems: 'center' }}>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        padding: '5px 12px 5px 5px',
+        background: MT.n200, borderRadius: 999,
+        cursor: 'pointer',
+      }}>
+        <PiggyAvatar size={28} />
+        <span style={{ fontSize: 14, fontWeight: 600, color: MT.n900 }}>ครอบครัว</span>
         <span style={{ fontSize: 13, color: MT.n400 }}>· 2,531.23 ฿</span>
         <svg width="12" height="12" viewBox="0 0 12 12" style={{ marginLeft: 2 }}>
           <path d="M3 4.5l3 3 3-3" stroke={MT.n400} strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-      <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <circle cx="11" cy="11" r="7" stroke={MT.n700} strokeWidth="1.8"/>
-          <path d="M16 16l4 4" stroke={MT.n700} strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="9" stroke={MT.n700} strokeWidth="1.8"/>
-          <path d="M12 7v5l3 2" stroke={MT.n700} strokeWidth="1.8" strokeLinecap="round"/>
-        </svg>
-        <svg width="18" height="22" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="5" r="1.8" fill={MT.n700}/>
-          <circle cx="12" cy="12" r="1.8" fill={MT.n700}/>
-          <circle cx="12" cy="19" r="1.8" fill={MT.n700}/>
         </svg>
       </div>
     </div>
@@ -163,13 +156,13 @@ function DateGroup({ day, weekday, month, total, children }) {
   );
 }
 
-function TransactionScreen() {
+function TransactionScreen({ hideStatusBar = false } = {}) {
   return (
     <div style={{
       background: MT.n200, height: '100%', display: 'flex', flexDirection: 'column',
       position: 'relative',
     }}>
-      <MintStatusBar time="21:29" />
+      {!hideStatusBar && <MintStatusBar time="21:29" />}
       <TxHeader />
       <MonthTabs active="มีนาคม" />
       <div style={{ height: 1, background: MT.n300, opacity: 0.6 }} />

@@ -25,27 +25,32 @@ function HeaderBell() {
 }
 
 // ─── Compact segmented control (iOS-style) ───────────────────────────
-// Acts as the screen's only header (no title bar). 3-column layout keeps
-// segment optically centered while bell sits at right (global notif action).
-function CompactSegment({ active }) {
+// Acts as the screen's only header (no title bar). flex:1 wrappers on
+// both sides keep the pill optically centered regardless of how many
+// icons sit in rightSlot (1 bell ↔ 3 page actions).
+function CompactSegment({ active, leftSlot, rightSlot }) {
   const items = [
     { key: 'chat',    label: 'Chat' },
     { key: 'finance', label: 'Finance' },
   ];
+  const right = rightSlot !== undefined ? rightSlot : <HeaderBell />;
   return (
     <div style={{
       padding: '8px 16px 12px',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      display: 'flex', alignItems: 'center',
       background: 'transparent',
     }}>
-      {/* Left spacer — equals bell width to keep segment optically centered */}
-      <div style={{ width: 22 }} />
+      {/* Left slot — page-specific actions (e.g. Transaction's 🔍); mirror keeps pill centered */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 14 }}>
+        {leftSlot}
+      </div>
 
       <div style={{
         display: 'inline-flex',
         background: 'rgba(118,118,128,0.12)',
         padding: 3,
         borderRadius: 9,
+        flexShrink: 0,
       }}>
         {items.map(it => {
           const isActive = it.key === active;
@@ -68,8 +73,10 @@ function CompactSegment({ active }) {
         })}
       </div>
 
-      {/* Right action — notification bell + unread dot */}
-      <HeaderBell />
+      {/* Right slot — bell by default, or page-specific actions (e.g. Transaction's 🔍 ⏱ ⋮) */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
+        {right}
+      </div>
     </div>
   );
 }
@@ -78,7 +85,7 @@ function CompactSegment({ active }) {
 // headerBg = สีของ status bar + segment area (white = ให้ pill contrast ชัด)
 // contentBg = สีของ content area (ตามแต่ละ tab — Chat=white, Finance=grey)
 // 2 zones นี้ทำให้ segment อ่านเป็น "header" ไม่ใช่ floating control
-function RootPagerShell({ active, headerBg = '#fff', contentBg = '#fff', children }) {
+function RootPagerShell({ active, headerBg = '#fff', contentBg = '#fff', leftSlot, rightSlot, children }) {
   return (
     <div style={{
       background: headerBg, height: '100%',
@@ -86,7 +93,7 @@ function RootPagerShell({ active, headerBg = '#fff', contentBg = '#fff', childre
       fontFamily: 'Sarabun, -apple-system, system-ui, sans-serif',
     }}>
       <MintStatusBarV2 time="10:13" />
-      <CompactSegment active={active} />
+      <CompactSegment active={active} leftSlot={leftSlot} rightSlot={rightSlot} />
       <div style={{ flex: 1, overflow: 'hidden', position: 'relative', background: contentBg }}>
         {children}
       </div>
@@ -119,6 +126,84 @@ function RootPagerFinance() {
   );
 }
 
+// ────────────────────────────────────────────────────────────────────
+// Page 2 (sub) — Finance · กระเป๋า (bottom-tab = Wallets)
+//   User เปิด Finance segment แล้วกดที่ bottom tab "Wallets" → FinanceScreen
+// ────────────────────────────────────────────────────────────────────
+// Right-side action for Wallets page — plain "+" icon (matches TxRightActions style)
+function WalletsRightActions() {
+  return (
+    <div style={{ cursor: 'pointer', display: 'flex' }}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 5v14M5 12h14" stroke={RP.n700} strokeWidth="2.2" strokeLinecap="round"/>
+      </svg>
+    </div>
+  );
+}
+
+function RootPagerWallets() {
+  return (
+    <RootPagerShell active="finance" headerBg="#fff" contentBg={RP.n200}
+      rightSlot={<WalletsRightActions />}>
+      <FinanceScreen hideStatusBar />
+    </RootPagerShell>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Page 2 (sub) — Finance · Transaction (bottom-tab = Activity)
+//   User เปิด Finance segment แล้วกดที่ bottom tab "Activity" → TransactionScreen
+//   Bell ของ default shell ถูกแทนด้วยปุ่มของหน้า Transaction:
+//     left  → 🔍 search (primary discovery action)
+//     right → ⏱ upcoming, ⋮ more
+//   วาง search ฝั่งซ้ายช่วยให้นิ้วโป้งขวาเข้าถึง ⋮ ได้ง่ายขึ้น และ
+//   ให้ search ไม่ปนกับ overflow menu
+// ────────────────────────────────────────────────────────────────────
+function TxSearchAction() {
+  return (
+    <div style={{ cursor: 'pointer', display: 'flex' }}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke={RP.n700} strokeWidth="1.8"/>
+        <path d="M16 16l4 4" stroke={RP.n700} strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>
+    </div>
+  );
+}
+
+function TxRightActions() {
+  return (
+    <>
+      {/* upcoming/scheduled */}
+      <div style={{ cursor: 'pointer', display: 'flex' }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9" stroke={RP.n700} strokeWidth="1.8"/>
+          <path d="M12 7v5l3 2" stroke={RP.n700} strokeWidth="1.8" strokeLinecap="round"/>
+        </svg>
+      </div>
+      {/* more */}
+      <div style={{ cursor: 'pointer', display: 'flex' }}>
+        <svg width="18" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="5" r="1.8" fill={RP.n700}/>
+          <circle cx="12" cy="12" r="1.8" fill={RP.n700}/>
+          <circle cx="12" cy="19" r="1.8" fill={RP.n700}/>
+        </svg>
+      </div>
+    </>
+  );
+}
+
+function RootPagerTransaction() {
+  return (
+    <RootPagerShell active="finance" headerBg="#fff" contentBg={RP.n200}
+      leftSlot={<TxSearchAction />}
+      rightSlot={<TxRightActions />}>
+      <TransactionScreen hideStatusBar />
+    </RootPagerShell>
+  );
+}
+
 window.RootPagerChat = RootPagerChat;
 window.RootPagerFinance = RootPagerFinance;
+window.RootPagerWallets = RootPagerWallets;
+window.RootPagerTransaction = RootPagerTransaction;
 })();

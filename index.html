@@ -40,6 +40,8 @@
 <script type="text/babel" src="v4-goal-detail.jsx"></script>
 <script type="text/babel" src="v4-budget-detail.jsx"></script>
 <script type="text/babel" src="v4-create-wallet-a-wizard.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-a1-single.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-b1-single.jsx"></script>
 <script type="text/babel" src="v4-create-credit-wizard.jsx"></script>
 <script type="text/babel" src="v4-create-goal-wizard.jsx"></script>
 <script type="text/babel" src="v4-create-budget-wizard.jsx"></script>
@@ -49,6 +51,8 @@
 <script type="text/babel" src="v4-color-palette-compare.jsx"></script>
 <script type="text/babel" src="v4-melon-chat.jsx"></script>
 <script type="text/babel" src="v4-root-pager.jsx"></script>
+<script type="text/babel" src="v4-nav-options-lofi.jsx"></script>
+<script type="text/babel" src="v4-grok-style-lofi.jsx"></script>
 <script type="text/babel" src="transaction_shared.jsx"></script>
 <script type="text/babel" src="transaction_1.jsx"></script>
 <script type="text/babel" src="transaction_2.jsx"></script>
@@ -271,7 +275,7 @@ function App() {
 
         <DCSection
           title="v4 — Create Wallet · 3 design options"
-          subtitle="ออกแบบใหม่จาก old design (ฟอร์มยาว · chips 3 แถว · icon/สีแยก · AI goal ไม่ชัด optional) · เลือก 1 จาก 3 approach ก่อนทำ Flutter"
+          subtitle="ออกแบบใหม่จาก old design (ฟอร์มยาว · chips 3 แถว · icon/สีแยก · AI goal ไม่ชัด optional) · เลือก 1 จาก 3 approach ก่อนทำ Flutter · v4.1 = single page (sticky preview + compact rows) รองรับทั้ง create และ edit ในหน้าเดียว — แก้ไขเร็วกว่า wizard ที่ต้องคลิกผ่านทุก step"
         >
           <DCArtboard label="A1 · Wizard · เลือกประเภท" width={390} height={844}>
             <CreateWalletA_Step1 />
@@ -284,6 +288,18 @@ function App() {
           </DCArtboard>
           <DCArtboard label="A4 · Wizard · เป้าหมาย AI (required)" width={390} height={844}>
             <CreateWalletA_Step4 />
+          </DCArtboard>
+          <DCArtboard label="A1.1 · Single page · สร้างใหม่" width={390} height={844}>
+            <CreateWalletA1_Create />
+          </DCArtboard>
+          <DCArtboard label="A1.2 · Single page · แก้ไข (edit mode)" width={390} height={844}>
+            <CreateWalletA1_Edit />
+          </DCArtboard>
+          <DCArtboard label="B1.1 · Single · form sections · สร้างใหม่" width={390} height={844}>
+            <CreateWalletB1_Create />
+          </DCArtboard>
+          <DCArtboard label="B1.2 · Single · form sections · แก้ไข (edit)" width={390} height={844}>
+            <CreateWalletB1_Edit />
           </DCArtboard>
         </DCSection>
 
@@ -389,6 +405,54 @@ function App() {
           </DCArtboard>
           <DCArtboard label="02 · Pager · Finance tab" width={390} height={844}>
             <RootPagerFinance />
+          </DCArtboard>
+          <DCArtboard label="03 · Pager · Finance → Wallets (กระเป๋า)" width={390} height={844}>
+            <RootPagerWallets />
+          </DCArtboard>
+          <DCArtboard label="04 · Pager · Finance → Transaction (มีนาคม)" width={390} height={844}>
+            <RootPagerTransaction />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="Navigation Options — Lo-fi Comparison"
+          subtitle="เปรียบเทียบโครงสร้าง nav 5 แบบ · grayscale + dashed box เพื่อ focus ที่ 'nav อยู่ที่ไหน · มีกี่ชั้น' · 00 Current · A แก้เฉพาะจุด · B AI-first · C FAB กลาง · D ChatGPT-style sidebar"
+        >
+          <DCArtboard label="00 · Current (v4 Root Pager)" width={390} height={844}>
+            <NavLoFi_Current />
+          </DCArtboard>
+          <DCArtboard label="A · Keep 2-pager + fix" width={390} height={844}>
+            <NavLoFi_A />
+          </DCArtboard>
+          <DCArtboard label="B · AI-first (chat = root)" width={390} height={844}>
+            <NavLoFi_B />
+          </DCArtboard>
+          <DCArtboard label="C · Finance-first + AI FAB" width={390} height={844}>
+            <NavLoFi_C />
+          </DCArtboard>
+          <DCArtboard label="D · ChatGPT-style sidebar" width={390} height={844}>
+            <NavLoFi_D />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="Grok-style Navigation — Lo-fi"
+          subtitle="3 horizontal pages · MENU (full) ← Chat ↔ Transaction · top segment 2 tabs · swipe ขวาจาก Chat = เปิด Menu · ขอบสีแดงคือ gesture boundary"
+        >
+          <DCArtboard label="1 · MENU (profile + history)" width={390} height={844}>
+            <GrokNav_Menu />
+          </DCArtboard>
+          <DCArtboard label="2 · Chat (default landing)" width={390} height={844}>
+            <GrokNav_Chat />
+          </DCArtboard>
+          <DCArtboard label="3 · Transaction" width={390} height={844}>
+            <GrokNav_Tx />
+          </DCArtboard>
+          <DCArtboard label="4 · Interactive prototype (กดเล่นได้)" width={390} height={844}>
+            <GrokNav_Prototype />
+          </DCArtboard>
+          <DCArtboard label="5 · Flow + gesture rules (diagram)" width={390} height={844}>
+            <GrokNav_Flow />
           </DCArtboard>
         </DCSection>
 

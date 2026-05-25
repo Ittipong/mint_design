@@ -1,0 +1,61 @@
+{
+  "dart.flutterSdkPath": "mobile/.fvm/versions/3.41.9",
+  "dart.projectSearchDepth": 3,
+  "dart.previewFlutterUiGuides": true,
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.rulers": [100],
+    "editor.defaultFormatter": "Dart-Code.dart-code"
+  },
+  "go.goroot": "/opt/homebrew/opt/go/libexec",
+  "go.toolsManagement.autoUpdate": true,
+  "go.lintOnSave": "package",
+  "go.lintTool": "golangci-lint",
+  "go.formatTool": "goimports",
+  "go.useLanguageServer": true,
+  "gopls": {
+    "ui.semanticTokens": true,
+    "formatting.gofumpt": true,
+    "analyses": {
+      "shadow": true,
+      "unusedparams": true
+    }
+  },
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.rulers": [120],
+    "editor.defaultFormatter": "golang.go"
+  },
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.trimAutoWhitespace": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "editor.minimap.enabled": false,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "mobile/.dart_tool": true,
+    "mobile/build": true,
+    "mobile/.fvm": true,
+    "backend/vendor": true,
+    "mint_agnetic/financial-chat/.venv": true,
+    "mint_agnetic/financial-chat/__pycache__": true
+  },
+  "search.exclude": {
+    "mobile/build/**": true,
+    "mobile/.dart_tool/**": true,
+    "mobile/.fvm/**": true,
+    "backend/vendor/**": true,
+    "mint_agnetic/financial-chat/.venv/**": true
+  },
+  "liveServer.settings.port": 5501,
+  "workbench.activityBar.location": "default",
+  "workbench.sideBar.location": "left",
+  "workbench.activityBar.iconClickBehavior": "toggle",
+  "workbench.secondarySideBar.showLabels": false
+}

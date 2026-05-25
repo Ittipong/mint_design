@@ -131,15 +131,16 @@ function HeroCard({ a }) {
         </div>
         <div style={{ textAlign: 'right' }}>
           {/* Wallet balance — this is the #1 number on this screen; sized larger than monthly net below */}
-          <div style={{ fontSize: 26, fontWeight: 700, color: W3.n900, letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: W3.n900, letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>
             {fmt(a.amt)}
           </div>
           <div style={{ fontSize: 11, color: INK.faint, marginTop: 2, letterSpacing: 0.3 }}>THB</div>
         </div>
       </div>
-      <div style={{ height: 1, borderTop: `1px dashed ${INK.divider}`, margin: '14px 0 12px' }} />
+      {/* Divider: dashed → solid hairline. One calm separator, not a dotted strip-line. */}
+      <div style={{ height: 1, background: INK.divider, margin: '14px 0 12px' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ fontSize: 12, color: INK.muted, flexShrink: 0, fontWeight: 500 }}>เป้าหมาย</div>
+        <div style={{ fontSize: 13, color: INK.muted, flexShrink: 0, fontWeight: 500 }}>เป้าหมาย</div>
         <div style={{ flex: 1, textAlign: 'right', fontSize: 13, fontWeight: 600, color: W3.n800, lineHeight: 1.4 }}>{a.purpose}</div>
       </div>
     </div>);
@@ -196,7 +197,8 @@ function MonthSummary({ m }) {
     }}>
       <div style={{ flexShrink: 0, display: 'flex' }}>{icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: INK.muted, fontWeight: 600 }}>{label}</div>
+        {/* label 12 → 13 to collapse onto the shared ramp (26/20/14/13/11), no ad-hoc sizes */}
+        <div style={{ fontSize: 13, color: INK.muted, fontWeight: 600 }}>{label}</div>
         <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900, marginTop: 2, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', letterSpacing: -0.1 }}>
           ฿ {amount.toLocaleString()}
         </div>
@@ -211,19 +213,21 @@ function MonthSummary({ m }) {
           <div style={{ fontSize: 13, color: INK.muted, fontWeight: 600 }}>กระแสเงินสุทธิ · เดือนนี้</div>
           <MonthPickerChip />
         </div>
-        {/* Monthly net — sized smaller than wallet balance (26px) so it doesn't compete with the hero.
-            fontWeight stepped down 800 → 700 — Sarabun at 800 reads too dense and tires eyes on numbers. */}
+        {/* Monthly net — DROPPED 28 → 20 so it sits clearly below the wallet balance (26px hero).
+            Previously 28 > 26 inverted the hierarchy and made the two numbers tie/compete.
+            Now there is one protagonist (balance) and a clearly-subordinate card metric. */}
         <div style={{
-          fontSize: 28, fontWeight: 700,
+          fontSize: 18, fontWeight: 700,
           color: netGood ? W3.n900 : INK.negSoft,
-          letterSpacing: -0.3, marginTop: 8,
-          fontVariantNumeric: 'tabular-nums', lineHeight: 1.1,
+          letterSpacing: -0.2, marginTop: 6,
+          fontVariantNumeric: 'tabular-nums', lineHeight: 1.15,
         }}>
           {netGood ? '+' : '−'}฿ {Math.abs(net).toLocaleString()}
         </div>
 
-        {/* in/out as side-by-side stat chips — mirrors BillingCard's timeline-chip badge */}
-        <div style={{ height: 1, borderTop: `1px dashed ${INK.divider}`, margin: '14px 0 12px' }} />
+        {/* in/out as side-by-side stat chips — mirrors BillingCard's timeline-chip badge.
+            Divider dashed → solid hairline; spacing tightened to an 8pt rhythm (16/12). */}
+        <div style={{ height: 1, background: INK.divider, margin: '16px 0 12px' }} />
         <div style={{ display: 'flex', gap: 8 }}>
           <StatChip
             label="เข้า"
@@ -245,9 +249,9 @@ function MonthSummary({ m }) {
           />
         </div>
 
-        {/* pace as a single line, no extra card */}
+        {/* pace as a single line, no extra card (marginTop 14 → 16 for 8pt rhythm) */}
         <div style={{
-          marginTop: 14, fontSize: 13, color: INK.muted,
+          marginTop: 16, fontSize: 13, color: INK.muted,
           display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1.4,
         }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>

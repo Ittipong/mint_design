@@ -135,15 +135,16 @@ function CreditHero({ a }) {
         <div style={{ textAlign: 'right' }}>
           {/* Card balance (used) — #1 number on this screen; sized larger than monthSpent
               inside BillingCard so the two don't compete. 800 → 700 (Sarabun-friendly). */}
-          <div style={{ fontSize: 26, fontWeight: 700, color: W3.n900, letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: W3.n900, letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>
             {fmt(a.used)}
           </div>
           <div style={{ fontSize: 11, color: INK.faint, marginTop: 2, letterSpacing: 0.3 }}>THB</div>
         </div>
       </div>
-      <div style={{ height: 1, borderTop: `1px dashed ${INK.divider}`, margin: '14px 0 12px' }} />
+      {/* Divider: dashed → solid hairline — one calm separator instead of a dotted strip */}
+      <div style={{ height: 1, background: INK.divider, margin: '14px 0 12px' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ fontSize: 12, color: INK.muted, flexShrink: 0, fontWeight: 500 }}>เป้าหมาย</div>
+        <div style={{ fontSize: 13, color: INK.muted, flexShrink: 0, fontWeight: 500 }}>เป้าหมาย</div>
         {hasGoal ? (
           <div style={{ flex: 1, textAlign: 'right', fontSize: 13, fontWeight: 600, color: W3.n800, lineHeight: 1.4 }}>
             {a.goal}
@@ -220,7 +221,8 @@ function BillingCard({ b, a }) {
     }}>
       <div style={{ flexShrink: 0, display: 'flex' }}>{icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: urgent ? INK.negSoft : INK.muted, fontWeight: 600 }}>{label}</div>
+        {/* label 12 → 13 to sit on the shared ramp (26/20/14/13/11) */}
+        <div style={{ fontSize: 13, color: urgent ? INK.negSoft : INK.muted, fontWeight: 600 }}>{label}</div>
         <div style={{ fontSize: 14, fontWeight: 700, color: W3.n900, marginTop: 2, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', letterSpacing: -0.1 }}>
           {date}<span style={{ fontWeight: 500, color: urgent ? INK.negSoft : INK.faint }}> · อีก {days} วัน</span>
         </div>
@@ -245,30 +247,21 @@ function BillingCard({ b, a }) {
         </div>
       </div>
 
-      {/* hero row — utilization (used / limit) dominant left, % anchor right.
-          Bump 800 → 700 (Sarabun 800 reads too dense at large sizes), letter-spacing
-          softened -0.5 → -0.3 so Thai/Latin digit mix doesn't crowd. */}
-      <div style={{ marginTop: 8, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{
-            fontSize: 28, fontWeight: 700, color: W3.n900,
-            letterSpacing: -0.3, lineHeight: 1.1,
-            fontVariantNumeric: 'tabular-nums',
-          }}>
-            ฿ {a.used.toLocaleString()}
-            <span style={{ fontSize: 15, fontWeight: 600, color: INK.faint, letterSpacing: -0.1 }}>
-              {' '}/ {a.limit.toLocaleString()}
-            </span>
-          </div>
-        </div>
+      {/* Card metric = utilization % (NOT a second baht number).
+          The `used` baht figure already lives in the Hero above — repeating it here
+          at 28px created two competing giant numbers. The card's unique job is the
+          *ratio* (how close to the limit), so % becomes the single card protagonist
+          at 20px — clearly subordinate to the 26px Hero balance. */}
+      <div style={{ marginTop: 6, display: 'flex', alignItems: 'baseline', gap: 8 }}>
         <div style={{
           fontSize: 18, fontWeight: 700,
           color: pctHigh ? INK.negSoft : W3.n900,
-          letterSpacing: -0.3, fontVariantNumeric: 'tabular-nums',
-          flexShrink: 0,
+          letterSpacing: -0.2, lineHeight: 1.15,
+          fontVariantNumeric: 'tabular-nums',
         }}>
           {pct}%
         </div>
+        <div style={{ fontSize: 13, color: INK.muted, fontWeight: 500 }}>ของวงเงิน</div>
       </div>
 
       {/* progress bar */}
@@ -279,21 +272,20 @@ function BillingCard({ b, a }) {
         }} />
       </div>
 
-      {/* slice relationship — frames monthSpent as a *portion* of utilization.
-          Type bumped 11/13 → 12/14 so the "of that…" stat is actually readable. */}
+      {/* Supporting caption — used / limit as small reference text under the bar,
+          where the % anchors it. No longer a headline number, so it informs without
+          competing. monthSpent moved out of this chunk to reduce simultaneous data points. */}
       <div style={{
-        marginTop: 10, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8,
+        marginTop: 8, fontSize: 13, color: INK.muted, lineHeight: 1.4,
+        fontVariantNumeric: 'tabular-nums',
       }}>
-        <div style={{ fontSize: 12, color: INK.muted }}>ในนั้นเป็นยอดที่บันทึกเดือนนี้</div>
-        <div style={{
-          fontSize: 14, fontWeight: 700, color: W3.n800,
-          fontVariantNumeric: 'tabular-nums', letterSpacing: -0.1,
-        }}>
-          ฿ {b.monthSpent.toLocaleString()}
-        </div>
+        <b style={{ color: W3.n800, fontWeight: 700 }}>฿ {a.used.toLocaleString()}</b>
+        {' '}จาก ฿ {a.limit.toLocaleString()}
+        <span style={{ color: INK.faint }}> · บันทึกเดือนนี้ ฿ {b.monthSpent.toLocaleString()}</span>
       </div>
 
-      <div style={{ height: 1, borderTop: `1px dashed ${INK.divider}`, margin: '14px 0 12px' }} />
+      {/* Divider: dashed → solid hairline; 8pt rhythm (16/14) */}
+      <div style={{ height: 1, background: INK.divider, margin: '16px 0 14px' }} />
 
       {/* timeline — ตัดรอบ + กำหนดชำระ side-by-side */}
       <div style={{ display: 'flex', gap: 8 }}>
@@ -324,16 +316,18 @@ function BillingCard({ b, a }) {
         />
       </div>
 
-      {/* trust disclaimer — footnote (10 → 11.5 for AA; uses INK.faint, not error red) */}
+      {/* Trust disclaimer — kept visible (deliberate honesty signal: no bank API), but calmed.
+          11.5 ad-hoc → 13 on-ramp; color INK.faint → INK.muted so the footnote passes
+          WCAG AA at small size yet still reads quieter than headline text via no bg / thin icon. */}
       <div style={{
-        marginTop: 12,
+        marginTop: 14,
         display: 'flex', alignItems: 'flex-start', gap: 6,
       }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ marginTop: 2, flexShrink: 0 }}>
-          <circle cx="12" cy="12" r="9" stroke={INK.faint} strokeWidth="2" />
-          <path d="M12 8v.01M12 11v5" stroke={INK.faint} strokeWidth="2" strokeLinecap="round" />
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ marginTop: 2, flexShrink: 0 }}>
+          <circle cx="12" cy="12" r="9" stroke={INK.muted} strokeWidth="1.8" />
+          <path d="M12 8v.01M12 11v5" stroke={INK.muted} strokeWidth="1.8" strokeLinecap="round" />
         </svg>
-        <div style={{ fontSize: 11.5, color: INK.faint, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 13, color: INK.muted, lineHeight: 1.4 }}>
           ยอดจริงจากธนาคารอาจต่างจากที่บันทึก — เช็คใบแจ้งหนี้ก่อนชำระ
         </div>
       </div>

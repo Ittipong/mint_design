@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Mint Money — Prototype</title>
+<!-- viewport-fit=cover lets content extend into notch / home indicator area;
+     env(safe-area-inset-*) inside the prototype handles the actual padding -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<!-- iOS PWA-ish behavior: hide Safari chrome when added to home screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mint Money">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff;
+    font-family: 'Sarabun', -apple-system, system-ui, sans-serif;
+    height: 100%;
+    /* prevent native overscroll bounce so swipe gestures feel native */
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  * { box-sizing: border-box; }
+  /* 100dvh handles mobile-Safari URL bar resize; fall back to 100vh */
+  #root {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="v4-grok-style-lofi.jsx"></script>
+
+<script type="text/babel">
+  // Render only the Grok-style prototype, in bare mode (no dev chrome,
+  // uses safe-area-inset for notch / home indicator). Component is exposed
+  // on `window.GrokNav_Prototype` by the IIFE in v4-grok-style-lofi.jsx.
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <GrokNav_Prototype bare />
+  );
+</script>
+</body>
+</html>
