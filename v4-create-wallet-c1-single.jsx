@@ -1,14 +1,19 @@
-// Create Wallet — Design B.1 · "Single page · form sections"
+// Create Wallet — Design C.1 · "Single page · essentials-first (progressive disclosure)"
 //
-// Sibling to A.1. Shares A1's sticky preview bar at the top (icon · name+type ·
-// ยอด) so both feel like one family, but DIFFERS below the fold:
-//   - A1: one combined card, compact rows that hug the right edge.
-//   - B1: clearly-labeled form sections (ประเภท / รายละเอียด / เป้าหมาย AI) and
-//         type as a dropdown FIELD, not a chip rail — a more "form-like" shape.
+// Third single-page sibling to A.1 / B.1. Shares the same sticky preview bar so
+// the trio reads as one family, but its information architecture is the point:
 //
-// One component, two modes (same contract as A1):
-//   create → empty defaults, "สร้างกระเป๋าใหม่", CTA "สร้างกระเป๋า"
-//   edit   → prefilled, "แก้ไขกระเป๋า", CTA "บันทึกการแก้ไข", + delete row
+//   UX basis (ui-ux-pro-max form rules):
+//     • progressive-disclosure — show only what's needed; reveal the rest on demand
+//     • primary-action — one CTA per screen
+//     • "fields ≤ 3–4 for best completion"
+//
+//   So C1 shows ONLY the essentials up front — ประเภท · ชื่อ · ไอคอน&สี · ยอด —
+//   and tucks สกุลเงิน + เป้าหมาย AI under a collapsible "ตั้งค่าเพิ่มเติม".
+//   First-time create feels effortless; power users expand for more.
+//
+//   create → advanced collapsed (fast path), CTA "สร้างกระเป๋า"
+//   edit   → advanced expanded (data already exists), CTA "บันทึกการแก้ไข", + delete
 (function () {
 const W = window.MINT;
 
@@ -31,7 +36,7 @@ function Eyebrow({ children }) {
   );
 }
 
-// ─── Wallet icons (inline svg) — self-contained, mirrors A1 ───
+// ─── Wallet icons (inline svg) — self-contained, mirrors A1/B1 ───
 function WIcon({ kind, size = 24, color = '#fff' }) {
   const s = { width: size, height: size };
   switch (kind) {
@@ -57,7 +62,6 @@ function WIcon({ kind, size = 24, color = '#fff' }) {
     case 'plane': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M21 11l-9 4-2 5-2-3-3-2 5-2 4-9 7 7z" fill={color}/></svg>;
     case 'check': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5 9-10" stroke={color} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>;
     case 'chev': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-    case 'pencil': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 19l1-4L16 5l3 3L9 18l-4 1z" fill={color}/></svg>;
     case 'trash': return <svg style={s} viewBox="0 0 24 24" fill="none"><path d="M5 7h14M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2M6 7l1 13a1 1 0 001 1h8a1 1 0 001-1l1-13" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>;
     default: return null;
   }
@@ -113,18 +117,15 @@ function Header({ title, saveEnabled }) {
   );
 }
 
-// ─── Preview bar — sticky horizontal card, mirrors A1.1 (icon · name+type · ยอด) ───
-function Hero({ name, type, color, icon, amount }) {
+// ─── Sticky preview bar — shared family look with A1/B1 ───
+function PreviewBar({ name, type, color, icon, amount }) {
   const t = typeOf(type);
   return (
     <div style={{ position: 'sticky', top: 0, zIndex: 5, background: INK.surface, padding: '8px 16px 12px' }}>
       <div style={{
         background: '#fff', borderRadius: 16, padding: '14px 16px',
         display: 'flex', alignItems: 'center', gap: 14, boxShadow: cardShadow,
-        // tinted ring picks up the chosen color so the preview feels "live"
         outline: `1.5px solid ${color.bg}`,
-        // nudge the preview card up so it overlaps the sticky header edge
-        position: 'relative', top: -24,
       }}>
         <div style={{
           width: 52, height: 52, borderRadius: 14, background: color.bg,
@@ -152,22 +153,7 @@ function Hero({ name, type, color, icon, amount }) {
   );
 }
 
-// Labeled section card — title row (14/700) then children rows.
-function Section({ title, children }) {
-  return (
-    <div style={{
-      margin: '0 16px 12px', background: '#fff', borderRadius: 16,
-      boxShadow: cardShadow, overflow: 'hidden',
-    }}>
-      <div style={{ padding: '14px 16px 8px' }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: W.n900, letterSpacing: -0.1 }}>{title}</div>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-// Form row chrome — divider + optional chevron tap target.
+// Form row chrome.
 function Row({ children, divider, onClick }) {
   return (
     <div onClick={onClick} style={{
@@ -178,48 +164,43 @@ function Row({ children, divider, onClick }) {
   );
 }
 
-// ─── ประเภท — dropdown-style field (distinct from A1's chip rail) ───
-function TypeSection({ type, onPick }) {
+// ─── Essentials — the only thing shown up front: type · name · icon&color · amount ───
+function Essentials({ state, set }) {
+  const { type, name, color, icon, amount } = state;
   const t = typeOf(type);
-  const col = colorOf(t.color);
+  const tcol = colorOf(t.color);
   return (
-    <Section title="ประเภทกระเป๋า">
-      <div style={{ padding: '0 16px 14px' }}>
-        <div onClick={() => {}} style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '10px 12px', borderRadius: 12,
-          background: INK.surface, boxShadow: `inset 0 0 0 1px ${INK.divider}`,
-          cursor: 'pointer',
+    <div style={{
+      margin: '0 16px 12px', background: '#fff', borderRadius: 16,
+      boxShadow: cardShadow, overflow: 'hidden',
+    }}>
+      {/* TYPE — dropdown-style row → opens type menu */}
+      <Row onClick={() => {}}>
+        <div style={{
+          width: 36, height: 36, borderRadius: 10, background: tcol.bg,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: 8, background: col.bg,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <WIcon kind={t.ic} size={17} color={col.c} />
-          </div>
-          <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: W.n900 }}>{t.label}</div>
-          <WIcon kind="chev" size={18} color={INK.faint} />
+          <WIcon kind={t.ic} size={20} color={tcol.c} />
         </div>
-      </div>
-    </Section>
-  );
-}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Eyebrow>ประเภท</Eyebrow>
+          <div style={{ fontSize: 14, fontWeight: 600, color: W.n900, marginTop: 1 }}>{t.label}</div>
+        </div>
+        <WIcon kind="chev" size={18} color={INK.faint} />
+      </Row>
 
-// ─── รายละเอียด — name · icon&color · amount · currency ───
-function DetailsSection({ state, set }) {
-  const { name, color, icon, amount } = state;
-  return (
-    <Section title="รายละเอียด">
-      {/* NAME — label left, input fills */}
+      {/* NAME */}
       <Row divider>
-        <div style={{ fontSize: 14, fontWeight: 600, color: INK.muted, width: 52, flexShrink: 0 }}>ชื่อ</div>
-        <input value={name} onChange={e => set({ name: e.target.value })}
-          placeholder="เช่น ออมทรัพย์ KBank"
-          style={{
-            flex: 1, border: 'none', outline: 'none',
-            fontSize: 15, fontWeight: 600, color: W.n900,
-            fontFamily: 'inherit', background: 'transparent', padding: 0,
-          }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Eyebrow>ชื่อกระเป๋า</Eyebrow>
+          <input value={name} onChange={e => set({ name: e.target.value })}
+            placeholder="เช่น ออมทรัพย์ KBank"
+            style={{
+              width: '100%', border: 'none', outline: 'none',
+              fontSize: 15, fontWeight: 600, color: W.n900,
+              fontFamily: 'inherit', background: 'transparent', padding: 0, marginTop: 2,
+            }} />
+        </div>
       </Row>
 
       {/* ICON & COLOR — tappable → picker sheet */}
@@ -235,7 +216,7 @@ function DetailsSection({ state, set }) {
         <WIcon kind="chev" size={16} color={INK.faint} />
       </Row>
 
-      {/* AMOUNT — ฿ hugs the digits */}
+      {/* AMOUNT */}
       <Row divider>
         <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: INK.muted }}>ยอดเงิน</div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
@@ -249,105 +230,119 @@ function DetailsSection({ state, set }) {
             }} />
         </div>
       </Row>
-
-      {/* CURRENCY — tappable → currency sheet */}
-      <Row divider onClick={() => {}}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10, background: INK.surface,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 18, flexShrink: 0,
-        }}>🇹🇭</div>
-        <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: W.n900 }}>สกุลเงิน</div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: INK.muted }}>THB — บาทไทย</div>
-        <WIcon kind="chev" size={16} color={INK.faint} />
-      </Row>
-    </Section>
+    </div>
   );
 }
 
-// ─── เป้าหมาย AI — optional; vertical example list (parity with A1) ───
-function GoalSection({ goal, set }) {
+// ─── Advanced — collapsed by default; holds currency + AI goal ───
+function Advanced({ open, onToggle, goal, set }) {
   const valid = goal.trim().length > 0;
   return (
     <div style={{
       margin: '0 16px 12px', background: '#fff', borderRadius: 16,
       boxShadow: cardShadow, overflow: 'hidden',
     }}>
-      <div style={{ padding: '14px 16px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: `linear-gradient(135deg, ${W.walletViolet}, ${W.primary400})`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontSize: 16, flexShrink: 0,
-        }}>✦</div>
+      {/* toggle header */}
+      <div onClick={onToggle} style={{
+        padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
+      }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: W.n900, letterSpacing: -0.1 }}>
-              เป้าหมายของกระเป๋า
-            </div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: W.n900, letterSpacing: -0.1 }}>ตั้งค่าเพิ่มเติม</div>
             <div style={{
               padding: '2px 6px', borderRadius: 6, background: INK.surface,
               color: INK.muted, fontSize: 9, fontWeight: 800, letterSpacing: 0.5,
             }}>ไม่บังคับ</div>
           </div>
           <div style={{ fontSize: 11, fontWeight: 500, color: INK.muted, marginTop: 2 }}>
-            ให้ AI ช่วยติดตามและแนะนำการใช้จ่าย
+            สกุลเงิน · เป้าหมาย AI
           </div>
+        </div>
+        <div style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', display: 'flex' }}>
+          <WIcon kind="chev" size={18} color={INK.faint} />
         </div>
       </div>
 
-      <div style={{
-        margin: '0 16px 12px', padding: '12px 14px',
-        background: INK.surface, borderRadius: 12,
-        boxShadow: valid ? `inset 0 0 0 1.5px ${W.walletViolet}` : 'none',
-        transition: 'box-shadow 0.15s',
-      }}>
-        <input value={goal} onChange={e => set({ goal: e.target.value })}
-          placeholder="พิมพ์เป้าหมายของคุณ..."
-          style={{
-            width: '100%', border: 'none', outline: 'none',
-            fontSize: 14, fontWeight: 500, color: W.n900,
-            fontFamily: 'inherit', background: 'transparent', padding: 0,
-          }} />
-      </div>
+      {open && (
+        <div>
+          {/* CURRENCY */}
+          <Row divider onClick={() => {}}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10, background: INK.surface,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18, flexShrink: 0,
+            }}>🇹🇭</div>
+            <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: W.n900 }}>สกุลเงิน</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: INK.muted }}>THB — บาทไทย</div>
+            <WIcon kind="chev" size={16} color={INK.faint} />
+          </Row>
 
-      <div style={{ padding: '0 16px 8px' }}><Eyebrow>ตัวอย่างยอดนิยม</Eyebrow></div>
-      <div>
-        {GOAL_CHIPS.map((ex, i) => {
-          const sel = goal === ex.text;
-          return (
-            <div key={ex.text} onClick={() => set({ goal: ex.text })} style={{
-              padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 12,
-              borderTop: i ? `1px solid ${INK.hairline}` : 'none',
-              cursor: 'pointer',
-              background: sel ? W.walletViolet100 : 'transparent',
-              transition: 'background 0.15s',
-            }}>
+          {/* AI GOAL */}
+          <div style={{ borderTop: `1px solid ${INK.hairline}`, padding: '14px 16px 4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: sel ? W.walletViolet : INK.surface,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                transition: 'background 0.15s',
-              }}>
-                <WIcon kind={ex.ic} size={16} color={sel ? '#fff' : W.n700} />
-              </div>
-              <div style={{
-                flex: 1, minWidth: 0, fontSize: 13,
-                fontWeight: sel ? 700 : 500,
-                color: sel ? W.n900 : W.n800,
-              }}>{ex.text}</div>
-              {sel && (
-                <div style={{
-                  width: 20, height: 20, borderRadius: 10, background: W.walletViolet,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <WIcon kind="check" size={12} color="#fff" />
-                </div>
-              )}
+                width: 28, height: 28, borderRadius: 8,
+                background: `linear-gradient(135deg, ${W.walletViolet}, ${W.primary400})`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontSize: 14, flexShrink: 0,
+              }}>✦</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: W.n900, letterSpacing: -0.1 }}>เป้าหมายของกระเป๋า</div>
             </div>
-          );
-        })}
-      </div>
+            <div style={{
+              margin: '10px 0 12px', padding: '12px 14px',
+              background: INK.surface, borderRadius: 12,
+              boxShadow: valid ? `inset 0 0 0 1.5px ${W.walletViolet}` : 'none',
+              transition: 'box-shadow 0.15s',
+            }}>
+              <input value={goal} onChange={e => set({ goal: e.target.value })}
+                placeholder="พิมพ์เป้าหมายของคุณ..."
+                style={{
+                  width: '100%', border: 'none', outline: 'none',
+                  fontSize: 14, fontWeight: 500, color: W.n900,
+                  fontFamily: 'inherit', background: 'transparent', padding: 0,
+                }} />
+            </div>
+          </div>
+
+          <div style={{ padding: '0 16px 8px' }}><Eyebrow>ตัวอย่างยอดนิยม</Eyebrow></div>
+          <div>
+            {GOAL_CHIPS.map((ex, i) => {
+              const sel = goal === ex.text;
+              return (
+                <div key={ex.text} onClick={() => set({ goal: ex.text })} style={{
+                  padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 12,
+                  borderTop: `1px solid ${INK.hairline}`,
+                  cursor: 'pointer',
+                  background: sel ? W.walletViolet100 : 'transparent',
+                  transition: 'background 0.15s',
+                }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 10,
+                    background: sel ? W.walletViolet : INK.surface,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    transition: 'background 0.15s',
+                  }}>
+                    <WIcon kind={ex.ic} size={16} color={sel ? '#fff' : W.n700} />
+                  </div>
+                  <div style={{
+                    flex: 1, minWidth: 0, fontSize: 13,
+                    fontWeight: sel ? 700 : 500,
+                    color: sel ? W.n900 : W.n800,
+                  }}>{ex.text}</div>
+                  {sel && (
+                    <div style={{
+                      width: 20, height: 20, borderRadius: 10, background: W.walletViolet,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}>
+                      <WIcon kind="check" size={12} color="#fff" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -387,20 +382,17 @@ function StickyCta({ label, disabled }) {
 }
 
 // ─── Page — one component, two modes ───
-function CreateWalletB1({ mode = 'create' }) {
+function CreateWalletC1({ mode = 'create' }) {
   const isEdit = mode === 'edit';
   const seed = isEdit
     ? { name: 'KBank ออมทรัพย์', type: 'savings', colorKey: 'green', icon: 'piggy', amount: '15,000', goal: 'เก็บฉุกเฉิน 6 เดือน' }
     : { name: '', type: 'savings', colorKey: 'green', icon: 'piggy', amount: '', goal: '' };
 
   const [state, setState] = React.useState(seed);
+  // advanced starts expanded only when editing (data already exists there)
+  const [openAdvanced, setOpenAdvanced] = React.useState(isEdit);
   const set = (patch) => setState(s => ({ ...s, ...patch }));
   const color = colorOf(state.colorKey);
-
-  const pickType = (k) => {
-    const t = typeOf(k);
-    set({ type: k, icon: t.ic, colorKey: t.color });
-  };
 
   const canSave = state.name.trim().length > 0;
 
@@ -409,10 +401,9 @@ function CreateWalletB1({ mode = 'create' }) {
       <MintStatusBar time="12:03" />
       <Header title={isEdit ? 'แก้ไขกระเป๋า' : 'สร้างกระเป๋าใหม่'} saveEnabled={canSave} />
       <div style={{ flex: 1, overflow: 'auto', paddingBottom: 100 }}>
-        <Hero name={state.name} type={state.type} color={color} icon={state.icon} amount={state.amount} />
-        <TypeSection type={state.type} onPick={pickType} />
-        <DetailsSection state={{ ...state, color }} set={set} />
-        <GoalSection goal={state.goal} set={set} />
+        <PreviewBar name={state.name} type={state.type} color={color} icon={state.icon} amount={state.amount} />
+        <Essentials state={{ ...state, color }} set={set} />
+        <Advanced open={openAdvanced} onToggle={() => setOpenAdvanced(o => !o)} goal={state.goal} set={set} />
         {isEdit && <DeleteRow />}
       </div>
       <StickyCta label={isEdit ? 'บันทึกการแก้ไข' : 'สร้างกระเป๋า'} disabled={!canSave} />
@@ -420,6 +411,6 @@ function CreateWalletB1({ mode = 'create' }) {
   );
 }
 
-window.CreateWalletB1_Create = () => <CreateWalletB1 mode="create" />;
-window.CreateWalletB1_Edit   = () => <CreateWalletB1 mode="edit" />;
+window.CreateWalletC1_Create = () => <CreateWalletC1 mode="create" />;
+window.CreateWalletC1_Edit   = () => <CreateWalletC1 mode="edit" />;
 })();

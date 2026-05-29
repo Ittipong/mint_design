@@ -42,6 +42,7 @@
 <script type="text/babel" src="v4-create-wallet-a-wizard.jsx"></script>
 <script type="text/babel" src="v4-create-wallet-a1-single.jsx"></script>
 <script type="text/babel" src="v4-create-wallet-b1-single.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-c1-single.jsx"></script>
 <script type="text/babel" src="v4-create-credit-wizard.jsx"></script>
 <script type="text/babel" src="v4-create-goal-wizard.jsx"></script>
 <script type="text/babel" src="v4-create-budget-wizard.jsx"></script>
@@ -62,6 +63,7 @@
 <script type="text/babel" src="transaction_6.jsx"></script>
 <script type="text/babel" src="transaction_7.jsx"></script>
 <script type="text/babel" src="transaction_8.jsx"></script>
+<script type="text/babel" src="transaction_review_compare.jsx"></script>
 
 <script type="text/babel">
 const TWEAKS = /*EDITMODE-BEGIN*/{
@@ -235,6 +237,18 @@ function App() {
         </DCSection>
 
         <DCSection
+          title="Add Transaction · Before / After (UX review)"
+          subtitle="Production-tuned (ไม่ใช้ numpad · ไม่มีช่องร้านค้า · มี note): F1 ยอดเงินแตะได้ เริ่ม 0.00 + quick chips · F2 split CTA · F3 contrast ≥4.5:1 · F4 touch target ≥44 ทุกจุด · F5 frequent-category chips 1-tap · F6 note inline · F7 title ตาม type · F8 สแกนจุดเดียว · F9 progressive disclosure (tags/report) · F10 บันทึก primary600 · F11 บันทึก disable ตอนยอด=0 · F12 footer expand ได้จริง · F13 toggle/disclosure ใช้งานได้ · F14 ปุ่มล้างเป็น ×"
+        >
+          <DCArtboard label="BEFORE · รายจ่าย (ปัจจุบัน)" width={390} height={844}>
+            <AddTxnE_Expense />
+          </DCArtboard>
+          <DCArtboard label="AFTER · รายจ่าย (improved)" width={390} height={844}>
+            <AddTxnE_Expense_After />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
           title="v3 — Wallets Redesign (4 types)"
           subtitle="เรียบง่ายแบบ v2 + improvements รอบ 2 · กระเป๋า: sign logic + chevron + currency hint · บัตรเครดิต: status pill เปลี่ยนสีตาม utilization + countdown ตัดรอบ + ขั้นต่ำต้องจ่าย · เป้าหมาย: ออมเดือนละ X ฿ + on-track badge (เร็ว/ตามแผน/ช้า) · งบประมาณ: เหลือใช้วันละ X + sub-category mini bars + Today marker"
         >
@@ -300,6 +314,12 @@ function App() {
           </DCArtboard>
           <DCArtboard label="B1.2 · Single · form sections · แก้ไข (edit)" width={390} height={844}>
             <CreateWalletB1_Edit />
+          </DCArtboard>
+          <DCArtboard label="C1.1 · Single · essentials-first · สร้างใหม่" width={390} height={844}>
+            <CreateWalletC1_Create />
+          </DCArtboard>
+          <DCArtboard label="C1.2 · Single · essentials-first · แก้ไข (edit)" width={390} height={844}>
+            <CreateWalletC1_Edit />
           </DCArtboard>
         </DCSection>
 
