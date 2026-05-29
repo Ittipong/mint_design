@@ -64,6 +64,11 @@
 <script type="text/babel" src="transaction_7.jsx"></script>
 <script type="text/babel" src="transaction_8.jsx"></script>
 <script type="text/babel" src="transaction_review_compare.jsx"></script>
+<script type="text/babel" src="v5-transaction-shared.jsx"></script>
+<script type="text/babel" src="v5-transaction-a-cards.jsx"></script>
+<script type="text/babel" src="v5-transaction-b-timeline.jsx"></script>
+<script type="text/babel" src="v5-transaction-c-insight.jsx"></script>
+<script type="text/babel" src="v5-transaction-d-refined.jsx"></script>
 
 <script type="text/babel">
 const TWEAKS = /*EDITMODE-BEGIN*/{
@@ -473,6 +478,24 @@ function App() {
           </DCArtboard>
           <DCArtboard label="5 · Flow + gesture rules (diagram)" width={390} height={844}>
             <GrokNav_Flow />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v5 — Transaction Redesign · 3 versions"
+          subtitle="ปรับจากหน้า Transaction จริง (screenshot) · แก้ pain: การ์ดต่อวันเปลืองที่ + เลขวันตัวใหญ่แย่ง hierarchy + ยอดวัน/ยอดรายการซ้ำซ้อนตอนมีรายการเดียว + ยอดสีดำหมด scan ยาก + ตัวเลขไม่ tabular · ทุก version: tabular numbers ชิดขวา · เงินเข้า=teal เงินออก=ดำ (คง 'ลดสีแดง') · ไอคอน SVG ไม่ใช้ emoji · touch target ≥44 · A=ต่อยอดการ์ดเดิม · B=timeline list density สูงสุด · C=insight-first premium"
+        >
+          <DCArtboard label="A · Refined Cards (การ์ดกระชับ + in/out bar)" width={390} height={844}>
+            <TransactionV5A />
+          </DCArtboard>
+          <DCArtboard label="B · Timeline List (sticky header + flat rows)" width={390} height={844}>
+            <TransactionV5B />
+          </DCArtboard>
+          <DCArtboard label="C · Insight-first (gradient hero + timeline rail)" width={390} height={844}>
+            <TransactionV5C />
+          </DCArtboard>
+          <DCArtboard label="D · Refined (ปรับจาก design ล่าสุด · 3-col + budget + collapsible + rail + เวลา)" width={390} height={844}>
+            <TransactionV5D />
           </DCArtboard>
         </DCSection>
 
