@@ -55,6 +55,7 @@
 <script type="text/babel" src="v4-nav-options-lofi.jsx"></script>
 <script type="text/babel" src="v4-grok-style-lofi.jsx"></script>
 <script type="text/babel" src="transaction_shared.jsx"></script>
+<script type="text/babel" src="transaction_ai.jsx"></script>
 <script type="text/babel" src="transaction_1.jsx"></script>
 <script type="text/babel" src="transaction_2.jsx"></script>
 <script type="text/babel" src="transaction_3.jsx"></script>
@@ -69,6 +70,7 @@
 <script type="text/babel" src="v5-transaction-b-timeline.jsx"></script>
 <script type="text/babel" src="v5-transaction-c-insight.jsx"></script>
 <script type="text/babel" src="v5-transaction-d-refined.jsx"></script>
+<script type="text/babel" src="v5-networth-detail.jsx"></script>
 
 <script type="text/babel">
 const TWEAKS = /*EDITMODE-BEGIN*/{
@@ -217,6 +219,9 @@ function App() {
         >
 <DCArtboard label="01′ · รายจ่าย (improved)" width={390} height={844}>
             <AddTxnE_Expense />
+          </DCArtboard>
+          <DCArtboard label="00 · ✦ AI · เพิ่มด้วย AI (empty)" width={390} height={844}>
+            <AddTxnAI_Empty />
           </DCArtboard>
           <DCArtboard label="02 · รายรับ" width={390} height={844}>
             <AddTxnD_Income />
@@ -496,6 +501,18 @@ function App() {
           </DCArtboard>
           <DCArtboard label="D · Refined (ปรับจาก design ล่าสุด · 3-col + budget + collapsible + rail + เวลา)" width={390} height={844}>
             <TransactionV5D />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v5 — สรุปการเงิน (Financial Health · bottom sheet)"
+          subtitle="กด Net Worth header บนหน้า Home → เปิด bottom sheet 'สรุปการเงิน' เพื่อให้ user เข้าใจสถานะความมั่งคั่ง/หนี้สินในพริบตา (ไม่ใช่ลิสต์บัญชี) · Hero (net + trend + ซ่อนยอด) → Health Score 72/100 + ตัวชี้วัด (หนี้ต่อสินทรัพย์ · สภาพคล่อง · อัตราออม) → 2 การ์ดสรุป สินทรัพย์↑/หนี้สิน↓ → องค์ประกอบสินทรัพย์ + utilization หนี้ → คำแนะนำ actionable (หนี้ลดลง · ครบกำหนดจ่ายบัตร) · ตัวเลข reconcile: 460,473 − 335,043 = 125,430"
+        >
+          <DCArtboard label="01 · Home (ปกติ · กด Net Worth)" width={390} height={844}>
+            <HomeScreen />
+          </DCArtboard>
+          <DCArtboard label="02 · Net Worth Detail · sheet เปิดทับ" width={390} height={844}>
+            <NetWorthDetailV5 />
           </DCArtboard>
         </DCSection>
 

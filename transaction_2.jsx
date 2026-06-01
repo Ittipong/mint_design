@@ -34,7 +34,6 @@ function AddTxnD_Income() {
       <EAmountHero amount="35,000" sign="+" />
 
       <div style={{ padding: '0 16px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <ECategoryChips value={cat} onChange={setCat} />
         <EFieldRow
           icon={<div style={{
             width: 36, height: 36, borderRadius: 12, background: TC.walletPink100,
@@ -46,6 +45,7 @@ function AddTxnD_Income() {
           value="ครอบครัว"
           hint="คงเหลือ 34,368฿"
         />
+        <ECategoryChips value={cat} onChange={setCat} />
       </div>
 
       <EMetaRow />
