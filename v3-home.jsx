@@ -117,50 +117,48 @@ function HomeV3({ hideStatusBar = false } = {}) {
         </div>
       )}
 
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingBottom: 190 }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingTop: 14, paddingBottom: 190 }}>
 
-        {/* HERO AI INSIGHT CARD — anchored, heavier presence */}
+        {/* HERO AI INSIGHT CARD — Apple Intelligence animated gradient border */}
         <div style={{ margin: '0 16px 12px' }}>
-          <div style={{
-            background: '#fff',
-            borderRadius: 20,
-            padding: '32px 24px 24px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.03), 0 12px 32px rgba(0,0,0,0.06)',
-            border: `1px solid ${H3.n200}`,
-            minHeight: 340,
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            {/* stronger gradient ring top */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 120,
-              background: `radial-gradient(ellipse at top left, ${H3.walletPink100} 0%, transparent 65%)`,
-              pointerEvents: 'none', opacity: 0.85,
-            }}/>
+          <div style={{ position: 'relative' }}>
+            {/* Blurred glow halo behind the card — the "intelligence" aura */}
+            <div className="ai-hero-halo" aria-hidden="true" />
 
-            {/* Lightbulb icon — bigger focal */}
-            <div style={{ fontSize: 64, marginTop: 48, marginBottom: 24, lineHeight: 1, position: 'relative' }}>💡</div>
+            {/* Flowing gradient ring = the animated border */}
+            <div className="ai-hero-ring">
+              <div style={{
+                background: '#fff',
+                borderRadius: 18.4,
+                padding: '32px 24px 24px',
+                minHeight: 340,
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                position: 'relative', overflow: 'hidden',
+              }}>
+                {/* Lightbulb icon — bigger focal */}
+                <div style={{ fontSize: 64, marginTop: 48, marginBottom: 24, lineHeight: 1, position: 'relative' }}>💡</div>
 
-            {/* Quote — larger, tighter line-height */}
-            <div style={{
-              fontSize: 18, color: H3.n900, textAlign: 'center',
-              lineHeight: 1.5, fontWeight: 500, padding: '0 8px',
-              maxWidth: 290, letterSpacing: -0.1,
-            }}>
-              {ins.quote}
-            </div>
+                {/* Quote — larger, tighter line-height */}
+                <div style={{
+                  fontSize: 18, color: H3.n900, textAlign: 'center',
+                  lineHeight: 1.5, fontWeight: 500, padding: '0 8px',
+                  maxWidth: 290, letterSpacing: -0.1,
+                }}>
+                  {ins.quote}
+                </div>
 
-            {/* Divider + read more */}
-            <div style={{
-              marginTop: 32, display: 'flex', alignItems: 'center', gap: 12,
-              width: '100%', justifyContent: 'center',
-            }}>
-              <div style={{ flex: 1, maxWidth: 60, height: 1, background: H3.n300 }}/>
-              <div style={{ fontSize: 12, color: H3.n600, fontWeight: 600, cursor: 'pointer', letterSpacing: 0.2 }}>อ่านเพิ่ม</div>
-              <div style={{ flex: 1, maxWidth: 60, height: 1, background: H3.n300 }}/>
+                {/* Divider + read more */}
+                <div style={{
+                  marginTop: 32, display: 'flex', alignItems: 'center', gap: 12,
+                  width: '100%', justifyContent: 'center',
+                }}>
+                  <div style={{ flex: 1, maxWidth: 60, height: 1, background: H3.n300 }}/>
+                  <div style={{ fontSize: 12, color: H3.n600, fontWeight: 600, cursor: 'pointer', letterSpacing: 0.2 }}>อ่านเพิ่ม</div>
+                  <div style={{ flex: 1, maxWidth: 60, height: 1, background: H3.n300 }}/>
+                </div>
+              </div>
             </div>
           </div>
-
         </div>
 
         {/* Upcoming bill — inline alert */}
@@ -222,6 +220,43 @@ function HomeV3({ hideStatusBar = false } = {}) {
       </div>
 
       <BottomNavV2 active="home" />
+
+      {/* Apple Intelligence-style flowing gradient border + glow halo */}
+      <style>{`
+        @keyframes aiFlow {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .ai-hero-ring {
+          position: relative;
+          border-radius: 20px;
+          padding: 1.6px;
+          background: linear-gradient(120deg,
+            ${H3.primary400}, ${H3.primary300}, ${H3.walletViolet},
+            ${H3.walletPink}, ${H3.info400}, ${H3.primary400});
+          background-size: 300% 300%;
+          /* animation: aiFlow 8s ease-in-out infinite; */ /* re-enable to flow */
+          background: ${H3.n200}; /* HIDE apple-intel border — delete this line to restore gradient */
+        }
+        .ai-hero-halo {
+          display: none; /* HIDE apple-intel glow — delete this line to restore halo */
+          position: absolute;
+          inset: -4px;
+          border-radius: 24px;
+          background: linear-gradient(120deg,
+            ${H3.primary400}, ${H3.primary300}, ${H3.walletViolet},
+            ${H3.walletPink}, ${H3.info400}, ${H3.primary400});
+          background-size: 300% 300%;
+          filter: blur(10px);
+          opacity: 0.28;
+          /* animation: aiFlow 8s ease-in-out infinite; */ /* hidden for now — re-enable to flow */
+          pointer-events: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ai-hero-ring, .ai-hero-halo { animation: none; }
+        }
+      `}</style>
     </div>
   );
 }

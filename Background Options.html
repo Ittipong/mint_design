@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Mint Money — Background Options</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+  html,body{min-height:100%;}
+  body{
+    font-family:'Sarabun',-apple-system,system-ui,sans-serif;
+    background:#0e0f12;
+    color:#e9eaee;
+    padding:56px 40px 80px;
+  }
+  .page-head{max-width:1200px;margin:0 auto 44px;}
+  .page-head h1{font-size:22px;font-weight:700;letter-spacing:.2px;}
+  .page-head p{font-size:15px;color:#9a9ca6;margin-top:6px;}
+
+  .grid{
+    display:flex;flex-wrap:wrap;gap:56px 48px;
+    justify-content:center;max-width:1300px;margin:0 auto;
+  }
+  .opt{display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .opt .meta{text-align:center;}
+  .opt .meta .tag{
+    font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;
+    color:#6f717c;
+  }
+  .opt .meta .name{font-size:17px;font-weight:700;color:#f1f2f6;margin-top:4px;}
+  .opt .meta .desc{font-size:13px;color:#8a8c96;margin-top:3px;max-width:240px;line-height:1.45;}
+
+  /* ── Phone ── */
+  .bezel{
+    position:relative;width:300px;height:630px;border-radius:48px;
+    background:linear-gradient(150deg,#3a3a3d 0%,#1c1c1e 38%,#2b2b2e 100%);
+    padding:10px;
+    box-shadow:0 40px 70px rgba(0,0,0,.5),0 0 0 1.5px #0d0d0e,
+               inset 0 0 0 1.5px rgba(255,255,255,.06);
+  }
+  .screen{
+    position:relative;width:280px;height:610px;border-radius:38px;overflow:hidden;
+  }
+  .island{
+    position:absolute;top:11px;left:50%;transform:translateX(-50%);
+    width:92px;height:27px;border-radius:16px;background:#000;z-index:60;
+  }
+  .home-ind{
+    position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+    width:104px;height:4px;border-radius:100px;z-index:70;
+  }
+
+  /* ── Status bar ── */
+  .status{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 26px 0;height:42px;position:relative;z-index:20;
+    font-family:-apple-system,'SF Pro Text',system-ui;
+  }
+  .status .t{font-size:14px;font-weight:600;letter-spacing:-.3px;}
+  .status .g{display:flex;align-items:center;gap:6px;}
+
+  /* glyph + indicator color per theme */
+  .dark-ui .status .t,.dark-ui .status .g svg [data-c]{color:#fff;}
+  .light-ui .home-ind{background:rgba(20,20,30,.28);}
+  .dark-ui .home-ind{background:rgba(240,245,250,.42);}
+
+  /* ════════ BACKGROUNDS ════════ */
+
+  /* A · Aurora Mint (image) */
+  .bg-aurora{
+    background:
+      linear-gradient(180deg, rgba(56,178,172,.26) 0%, rgba(56,178,172,0) 22%, rgba(56,178,172,0) 80%, rgba(45,160,154,.30) 100%),
+      url('assets/aurora.png') no-repeat center top, #ffffff;
+    background-size:auto,175% auto,auto;
+  }
+
+  /* B · Mesh Bloom — soft multi-color blobs */
+  .bg-mesh{
+    background:
+      radial-gradient(38% 30% at 18% 14%, rgba(129,230,217,.85) 0%, rgba(129,230,217,0) 60%),
+      radial-gradient(42% 32% at 88% 8%, rgba(160,196,255,.80) 0%, rgba(160,196,255,0) 62%),
+      radial-gradient(46% 36% at 80% 92%, rgba(255,206,178,.70) 0%, rgba(255,206,178,0) 60%),
+      radial-gradient(40% 34% at 10% 88%, rgba(193,168,255,.62) 0%, rgba(193,168,255,0) 62%),
+      linear-gradient(180deg,#f7fbfa,#ffffff);
+  }
+
+  /* C · Silk Minimal — calm single-hue sheen */
+  .bg-silk{
+    background:
+      linear-gradient(125deg, rgba(255,255,255,0) 38%, rgba(56,178,172,.10) 50%, rgba(255,255,255,0) 62%),
+      linear-gradient(180deg,#ffffff 0%,#f2f8f6 58%,#e8f4f0 100%);
+  }
+  .bg-silk::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(70% 45% at 50% 0%, rgba(56,178,172,.16) 0%, rgba(56,178,172,0) 60%);
+  }
+
+  /* D · Midnight Teal — dark luxe glow */
+  .bg-midnight{
+    background:
+      radial-gradient(80% 50% at 50% -8%, rgba(45,150,140,.55) 0%, rgba(45,150,140,0) 58%),
+      radial-gradient(70% 44% at 84% 108%, rgba(60,120,150,.40) 0%, rgba(60,120,150,0) 60%),
+      linear-gradient(180deg,#0b1620 0%,#0a121a 46%,#080d13 100%);
+  }
+  .bg-midnight::after{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:radial-gradient(rgba(255,255,255,.35) 1px, transparent 1px);
+    background-size:46px 46px;background-position:8px 12px;
+    -webkit-mask:radial-gradient(75% 55% at 50% 8%, #000 0%, transparent 70%);
+            mask:radial-gradient(75% 55% at 50% 8%, #000 0%, transparent 70%);
+  }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>เลือก Background — Mint Money</h1>
+    <p>หน้าเปล่า 4 สไตล์ ลองดูแล้วเลือกแนวที่ชอบได้เลย เดี๋ยวผมเอาไปทำต่อทั้งแอป</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- A -->
+    <div class="opt">
+      <div class="bezel">
+        <div class="island"></div>
+        <div class="screen light-ui bg-aurora" data-screen-label="BG A · Aurora">
+          <div class="status">
+            <span class="t" data-c style="color:#1a1d28">09:44</span>
+            <span class="g">
+              <svg width="16" height="11" viewBox="0 0 19 13"><g data-c fill="#1a1d28"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5.5" width="3" height="7.5" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0.5" width="3" height="12.5" rx="1"/></g></svg>
+              <svg width="15" height="11" viewBox="0 0 18 13" data-c fill="#1a1d28"><path d="M9 2.4c2.6 0 5 1 6.8 2.7l1.1-1.2C14.8 1.7 12 .4 9 .4S3.2 1.7 1.1 3.9l1.1 1.2C4 3.4 6.4 2.4 9 2.4z"/><path d="M9 6.3c1.5 0 2.9.6 3.9 1.6l1.1-1.2C12.8 5.4 11 4.6 9 4.6s-3.8.8-5 2.1l1.1 1.2C6.1 6.9 7.5 6.3 9 6.3z"/><circle cx="9" cy="10.6" r="1.7"/></svg>
+              <svg width="24" height="12" viewBox="0 0 28 14"><rect x="0.6" y="0.6" width="23" height="12.8" rx="3.6" fill="none" stroke="#1a1d28" stroke-opacity=".4"/><rect x="2.1" y="2.1" width="17" height="9.8" rx="2" fill="#1a1d28"/><path d="M25 4.6v4.8c.9-.4 1.6-1.3 1.6-2.4S25.9 5 25 4.6z" fill="#1a1d28" fill-opacity=".4"/></svg>
+            </span>
+          </div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="tag">Option A</div>
+        <div class="name">Aurora Mint</div>
+        <div class="desc">เส้นซิลค์เทียลไหลนุ่ม พร้อมประกายดาว โทนสว่างพรีเมียม</div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="opt">
+      <div class="bezel">
+        <div class="island"></div>
+        <div class="screen light-ui bg-mesh" data-screen-label="BG B · Mesh">
+          <div class="status">
+            <span class="t" data-c style="color:#1a1d28">09:44</span>
+            <span class="g">
+              <svg width="16" height="11" viewBox="0 0 19 13"><g data-c fill="#1a1d28"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5.5" width="3" height="7.5" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0.5" width="3" height="12.5" rx="1"/></g></svg>
+              <svg width="15" height="11" viewBox="0 0 18 13" data-c fill="#1a1d28"><path d="M9 2.4c2.6 0 5 1 6.8 2.7l1.1-1.2C14.8 1.7 12 .4 9 .4S3.2 1.7 1.1 3.9l1.1 1.2C4 3.4 6.4 2.4 9 2.4z"/><path d="M9 6.3c1.5 0 2.9.6 3.9 1.6l1.1-1.2C12.8 5.4 11 4.6 9 4.6s-3.8.8-5 2.1l1.1 1.2C6.1 6.9 7.5 6.3 9 6.3z"/><circle cx="9" cy="10.6" r="1.7"/></svg>
+              <svg width="24" height="12" viewBox="0 0 28 14"><rect x="0.6" y="0.6" width="23" height="12.8" rx="3.6" fill="none" stroke="#1a1d28" stroke-opacity=".4"/><rect x="2.1" y="2.1" width="17" height="9.8" rx="2" fill="#1a1d28"/><path d="M25 4.6v4.8c.9-.4 1.6-1.3 1.6-2.4S25.9 5 25 4.6z" fill="#1a1d28" fill-opacity=".4"/></svg>
+            </span>
+          </div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="tag">Option B</div>
+        <div class="name">Mesh Bloom</div>
+        <div class="desc">ก้อนสีเบลอนุ่ม มินต์–ฟ้า–พีช สดใสมีชีวิตชีวา</div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="opt">
+      <div class="bezel">
+        <div class="island"></div>
+        <div class="screen light-ui bg-silk" data-screen-label="BG C · Silk">
+          <div class="status">
+            <span class="t" data-c style="color:#1a1d28">09:44</span>
+            <span class="g">
+              <svg width="16" height="11" viewBox="0 0 19 13"><g data-c fill="#1a1d28"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5.5" width="3" height="7.5" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0.5" width="3" height="12.5" rx="1"/></g></svg>
+              <svg width="15" height="11" viewBox="0 0 18 13" data-c fill="#1a1d28"><path d="M9 2.4c2.6 0 5 1 6.8 2.7l1.1-1.2C14.8 1.7 12 .4 9 .4S3.2 1.7 1.1 3.9l1.1 1.2C4 3.4 6.4 2.4 9 2.4z"/><path d="M9 6.3c1.5 0 2.9.6 3.9 1.6l1.1-1.2C12.8 5.4 11 4.6 9 4.6s-3.8.8-5 2.1l1.1 1.2C6.1 6.9 7.5 6.3 9 6.3z"/><circle cx="9" cy="10.6" r="1.7"/></svg>
+              <svg width="24" height="12" viewBox="0 0 28 14"><rect x="0.6" y="0.6" width="23" height="12.8" rx="3.6" fill="none" stroke="#1a1d28" stroke-opacity=".4"/><rect x="2.1" y="2.1" width="17" height="9.8" rx="2" fill="#1a1d28"/><path d="M25 4.6v4.8c.9-.4 1.6-1.3 1.6-2.4S25.9 5 25 4.6z" fill="#1a1d28" fill-opacity=".4"/></svg>
+            </span>
+          </div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="tag">Option C</div>
+        <div class="name">Silk Minimal</div>
+        <div class="desc">ขาวสะอาดไล่เฉดมินต์อ่อน มีแสงเฉียงบางๆ เรียบหรู</div>
+      </div>
+    </div>
+
+    <!-- D -->
+    <div class="opt">
+      <div class="bezel">
+        <div class="island"></div>
+        <div class="screen dark-ui bg-midnight" data-screen-label="BG D · Midnight">
+          <div class="status">
+            <span class="t" data-c>09:44</span>
+            <span class="g">
+              <svg width="16" height="11" viewBox="0 0 19 13"><g data-c fill="#fff"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5.5" width="3" height="7.5" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0.5" width="3" height="12.5" rx="1"/></g></svg>
+              <svg width="15" height="11" viewBox="0 0 18 13" data-c fill="#fff"><path d="M9 2.4c2.6 0 5 1 6.8 2.7l1.1-1.2C14.8 1.7 12 .4 9 .4S3.2 1.7 1.1 3.9l1.1 1.2C4 3.4 6.4 2.4 9 2.4z"/><path d="M9 6.3c1.5 0 2.9.6 3.9 1.6l1.1-1.2C12.8 5.4 11 4.6 9 4.6s-3.8.8-5 2.1l1.1 1.2C6.1 6.9 7.5 6.3 9 6.3z"/><circle cx="9" cy="10.6" r="1.7"/></svg>
+              <svg width="24" height="12" viewBox="0 0 28 14"><rect x="0.6" y="0.6" width="23" height="12.8" rx="3.6" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2.1" y="2.1" width="17" height="9.8" rx="2" fill="#fff"/><path d="M25 4.6v4.8c.9-.4 1.6-1.3 1.6-2.4S25.9 5 25 4.6z" fill="#fff" fill-opacity=".5"/></svg>
+            </span>
+          </div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="tag">Option D</div>
+        <div class="name">Midnight Teal</div>
+        <div class="desc">ดาร์กลักซ์ แสงเทียลเรืองด้านบน จุดดาวจางๆ ดูพรีเมียม</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
