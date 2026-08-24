@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Mint Money — UI Recreation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; font-family: 'Sarabun', -apple-system, system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  #root { width: 100vw; height: 100vh; }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="tokens.js"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="primitives.jsx"></script>
+<script type="text/babel" src="screen-home.jsx"></script>
+<script type="text/babel" src="screen-home-scrolled.jsx"></script>
+<script type="text/babel" src="screen-transaction.jsx"></script>
+<script type="text/babel" src="screen-finance.jsx"></script>
+<script type="text/babel" src="screen-report.jsx"></script>
+<script type="text/babel" src="screen-report-charts.jsx"></script>
+<script type="text/babel" src="v2-primitives.jsx"></script>
+<script type="text/babel" src="v2-screens.jsx"></script>
+<script type="text/babel" src="v3-home.jsx"></script>
+<script type="text/babel" src="v3-ai-chat.jsx"></script>
+<script type="text/babel" src="v3-wallets.jsx"></script>
+<script type="text/babel" src="v4-wallet-detail.jsx"></script>
+<script type="text/babel" src="v4-credit-card-detail.jsx"></script>
+<script type="text/babel" src="v4-goal-detail.jsx"></script>
+<script type="text/babel" src="v4-budget-detail.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-a-wizard.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-a1-single.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-b1-single.jsx"></script>
+<script type="text/babel" src="v4-create-wallet-c1-single.jsx"></script>
+<script type="text/babel" src="v4-create-credit-wizard.jsx"></script>
+<script type="text/babel" src="v4-create-goal-wizard.jsx"></script>
+<script type="text/babel" src="v4-create-budget-wizard.jsx"></script>
+<script type="text/babel" src="v4-icon-color-picker.jsx"></script>
+<script type="text/babel" src="v4-icon-library-manager.jsx"></script>
+<script type="text/babel" src="v4-icon-add-custom.jsx"></script>
+<script type="text/babel" src="v4-color-palette-compare.jsx"></script>
+<script type="text/babel" src="v4-melon-chat.jsx"></script>
+<script type="text/babel" src="v4-root-pager.jsx"></script>
+<script type="text/babel" src="v4-nav-options-lofi.jsx"></script>
+<script type="text/babel" src="v4-grok-style-lofi.jsx"></script>
+<script type="text/babel" src="transaction_shared.jsx"></script>
+<script type="text/babel" src="transaction_ai.jsx"></script>
+<script type="text/babel" src="transaction_1.jsx"></script>
+<script type="text/babel" src="transaction_2.jsx"></script>
+<script type="text/babel" src="transaction_3.jsx"></script>
+<script type="text/babel" src="transaction_4.jsx"></script>
+<script type="text/babel" src="transaction_5.jsx"></script>
+<script type="text/babel" src="transaction_6.jsx"></script>
+<script type="text/babel" src="transaction_7.jsx"></script>
+<script type="text/babel" src="transaction_8.jsx"></script>
+<script type="text/babel" src="transaction_review_compare.jsx"></script>
+<script type="text/babel" src="v5-transaction-shared.jsx"></script>
+<script type="text/babel" src="v5-transaction-a-cards.jsx"></script>
+<script type="text/babel" src="v5-transaction-b-timeline.jsx"></script>
+<script type="text/babel" src="v5-transaction-c-insight.jsx"></script>
+<script type="text/babel" src="v5-transaction-d-refined.jsx"></script>
+<script type="text/babel" src="v5-networth-detail.jsx"></script>
+
+<script type="text/babel">
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "primaryColor": "#38B2AC"
+}/*EDITMODE-END*/;
+
+function applyTweaks(tweaks) {
+  // Recolor teal tokens based on primary color input
+  const base = tweaks.primaryColor || '#38B2AC';
+  // Create a scale by tinting/shading
+  const hexToRgb = h => {
+    const n = parseInt(h.slice(1), 16);
+    return [n >> 16 & 255, n >> 8 & 255, n & 255];
+  };
+  const rgbToHex = ([r,g,b]) => '#' + [r,g,b].map(x => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2,'0')).join('');
+  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+  const [r,g,b] = hexToRgb(base);
+  window.MINT.primary400 = base;
+  window.MINT.primary500 = rgbToHex(mix([r,g,b],[0,0,0],0.15));
+  window.MINT.primary600 = rgbToHex(mix([r,g,b],[0,0,0],0.3));
+  window.MINT.primary300 = rgbToHex(mix([r,g,b],[255,255,255],0.25));
+  window.MINT.primary200 = rgbToHex(mix([r,g,b],[255,255,255],0.55));
+  window.MINT.primary100 = rgbToHex(mix([r,g,b],[255,255,255],0.75));
+  window.MINT.gradStart = rgbToHex(mix([r,g,b],[255,255,255],0.88));
+  window.MINT.gradEnd = rgbToHex(mix([r,g,b],[255,255,255],0.9));
+}
+
+function TweakPanel({ tweaks, setTweaks, visible }) {
+  if (!visible) return null;
+  return (
+    <div style={{
+      position: 'fixed', bottom: 20, right: 20, zIndex: 1000,
+      width: 280, background: '#fff', borderRadius: 14,
+      boxShadow: '0 10px 40px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.1)',
+      padding: '14px 16px',
+      fontFamily: '-apple-system, system-ui, sans-serif',
+    }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: '#333', marginBottom: 10 }}>Tweaks</div>
+      <label style={{ display: 'block', fontSize: 11, color: '#666', marginBottom: 4 }}>Primary color</label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <input
+          type="color"
+          value={tweaks.primaryColor}
+          onChange={e => setTweaks({ ...tweaks, primaryColor: e.target.value })}
+          style={{ width: 40, height: 30, border: 'none', cursor: 'pointer', background: 'transparent' }}
+        />
+        <div style={{ fontSize: 12, fontFamily: 'monospace', color: '#333' }}>{tweaks.primaryColor}</div>
+      </div>
+      <div style={{ marginTop: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {['#38B2AC','#319795','#14B8A6','#0D9488','#6366F1','#EC4899','#F59E0B','#10B981'].map(c => (
+          <div key={c} onClick={() => setTweaks({ ...tweaks, primaryColor: c })}
+            style={{
+              width: 24, height: 24, borderRadius: 12, background: c, cursor: 'pointer',
+              border: tweaks.primaryColor === c ? '2px solid #000' : '2px solid rgba(0,0,0,0.1)',
+            }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [tweaks, setTweaks] = React.useState(TWEAKS);
+  const [tweaksVisible, setTweaksVisible] = React.useState(false);
+  const [version, setVersion] = React.useState(0);
+
+  // Apply tweaks whenever they change
+  React.useEffect(() => {
+    applyTweaks(tweaks);
+    setVersion(v => v + 1);
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: tweaks }, '*');
+  }, [tweaks]);
+
+  // Edit-mode wiring
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      if (!e.data || typeof e.data !== 'object') return;
+      if (e.data.type === '__activate_edit_mode') setTweaksVisible(true);
+      if (e.data.type === '__deactivate_edit_mode') setTweaksVisible(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  return (
+    <>
+      <DesignCanvas key={version}>
+        <DCSection
+          title="Mint Money — UI Recreation"
+          subtitle="Pixel-faithful recreation of the current app, built from real theme tokens in the repo. Each artboard is a 390×844 iPhone 16 Pro viewport."
+        >
+          <DCArtboard label="01 · Home (top)" width={390} height={844}>
+            <HomeScreen />
+          </DCArtboard>
+          <DCArtboard label="02 · Home (scrolled)" width={390} height={844}>
+            <HomeScrolledScreen />
+          </DCArtboard>
+          <DCArtboard label="03 · Finance · กระเป๋า" width={390} height={844}>
+            <FinanceScreen />
+          </DCArtboard>
+          <DCArtboard label="04 · Transaction · มีนาคม" width={390} height={844}>
+            <TransactionScreen />
+          </DCArtboard>
+          <DCArtboard label="05 · Report · สรุป + Pie" width={390} height={844}>
+            <ReportScreen />
+          </DCArtboard>
+          <DCArtboard label="06 · Report · Charts" width={390} height={844}>
+            <ReportChartsScreen />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v2 — After UX Review"
+          subtitle="P0: ลดสีแดง · Reorg Home (wallets/budget อยู่บน) · Rename nav (Home/Wallets/Activity/Insights/More) · P1: ปี พ.ศ. เต็ม · Currency flags · Custom SVG icons · Elevation hierarchy · ไม่มี DEBUG ribbon"
+        >
+          <DCArtboard label="01 · Home v2" width={390} height={844}>
+            <HomeV2 />
+          </DCArtboard>
+          <DCArtboard label="02 · Wallets v2" width={390} height={844}>
+            <WalletsV2 />
+          </DCArtboard>
+          <DCArtboard label="03 · Activity v2" width={390} height={844}>
+            <ActivityV2 />
+          </DCArtboard>
+          <DCArtboard label="04 · Insights v2" width={390} height={844}>
+            <InsightsV2 />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v3 — Home Redesign (AI-first + Action-first)"
+          subtitle="ตามโครงสร้างเดิม: Quick Add ล่าง (กดง่าย) · AI Chat entry ชัด · AI Insight 2×2 grid สีเหลือง มี CTA ทุกอัน · Net Worth ย่อเป็น 1 บรรทัด · เพิ่ม streak counter + upcoming alert"
+        >
+          <DCArtboard label="Home v3 · AI-first" width={390} height={844}>
+            <HomeV3 />
+          </DCArtboard>
+          <DCArtboard label="AI Chat · สอบถาม AI" width={390} height={844}>
+            <AIChatScreen />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="Add Transaction Bottom Sheet"
+          subtitle="Smart Bottom Sheet theme แบบ Variation C · ครบทุก transaction type 8 หน้าจอ"
+        >
+<DCArtboard label="01′ · รายจ่าย (improved)" width={390} height={844}>
+            <AddTxnE_Expense />
+          </DCArtboard>
+          <DCArtboard label="00 · ✦ AI · เพิ่มด้วย AI (empty)" width={390} height={844}>
+            <AddTxnAI_Empty />
+          </DCArtboard>
+          <DCArtboard label="02 · รายรับ" width={390} height={844}>
+            <AddTxnD_Income />
+          </DCArtboard>
+          <DCArtboard label="03 · บัตรเครดิต · จ่ายบัตร" width={390} height={844}>
+            <AddTxnD_CreditPay />
+          </DCArtboard>
+          <DCArtboard label="04 · บัตรเครดิต · รับ Cashback" width={390} height={844}>
+            <AddTxnD_CreditCashback />
+          </DCArtboard>
+          <DCArtboard label="05 · บัตรเครดิต · กดเงินสด" width={390} height={844}>
+            <AddTxnD_CreditWithdraw />
+          </DCArtboard>
+          <DCArtboard label="06 · โอนเงิน" width={390} height={844}>
+            <AddTxnD_Transfer />
+          </DCArtboard>
+          <DCArtboard label="07 · ออมเงิน · ออม" width={390} height={844}>
+            <AddTxnD_SavingDeposit />
+          </DCArtboard>
+          <DCArtboard label="08 · ออมเงิน · ถอน" width={390} height={844}>
+            <AddTxnD_SavingWithdraw />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="Add Transaction · Before / After (UX review)"
+          subtitle="Production-tuned (ไม่ใช้ numpad · ไม่มีช่องร้านค้า · มี note): F1 ยอดเงินแตะได้ เริ่ม 0.00 + quick chips · F2 split CTA · F3 contrast ≥4.5:1 · F4 touch target ≥44 ทุกจุด · F5 frequent-category chips 1-tap · F6 note inline · F7 title ตาม type · F8 สแกนจุดเดียว · F9 progressive disclosure (tags/report) · F10 บันทึก primary600 · F11 บันทึก disable ตอนยอด=0 · F12 footer expand ได้จริง · F13 toggle/disclosure ใช้งานได้ · F14 ปุ่มล้างเป็น ×"
+        >
+          <DCArtboard label="BEFORE · รายจ่าย (ปัจจุบัน)" width={390} height={844}>
+            <AddTxnE_Expense />
+          </DCArtboard>
+          <DCArtboard label="AFTER · รายจ่าย (improved)" width={390} height={844}>
+            <AddTxnE_Expense_After />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v3 — Wallets Redesign (4 types)"
+          subtitle="เรียบง่ายแบบ v2 + improvements รอบ 2 · กระเป๋า: sign logic + chevron + currency hint · บัตรเครดิต: status pill เปลี่ยนสีตาม utilization + countdown ตัดรอบ + ขั้นต่ำต้องจ่าย · เป้าหมาย: ออมเดือนละ X ฿ + on-track badge (เร็ว/ตามแผน/ช้า) · งบประมาณ: เหลือใช้วันละ X + sub-category mini bars + Today marker"
+        >
+          <DCArtboard label="01 · Wallets v3 · กระเป๋า" width={390} height={844}>
+            <WalletsV3_Accounts />
+          </DCArtboard>
+          <DCArtboard label="02 · Wallets v3 · บัญชี list" width={390} height={844}>
+            <WalletsV3_AccountsList />
+          </DCArtboard>
+          <DCArtboard label="03 · Wallets v3 · บัตรเครดิต" width={390} height={844}>
+            <WalletsV3_Credit />
+          </DCArtboard>
+          <DCArtboard label="04 · Wallets v3 · เป้าหมาย" width={390} height={844}>
+            <WalletsV3_Goals />
+          </DCArtboard>
+          <DCArtboard label="05 · Wallets v3 · งบประมาณ" width={390} height={844}>
+            <WalletsV3_Budget />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Wallet Detail (bottom sheet)"
+          subtitle="หน้ารายละเอียดของกระเป๋าเดียว · เปิดเป็น bottom sheet จากแถวบัญชีในหน้า Wallets · Hero snapshot → Quick Actions → เดือนนี้ (เข้า/ออก) → top categories → ผูกกับเป้าหมาย/งบ → transactions 20 รายการ (group by date)"
+        >
+          <DCArtboard label="01 · Wallet Detail · kbank" width={390} height={844}>
+            <WalletDetailV4 />
+          </DCArtboard>
+          <DCArtboard label="02 · Credit Card Detail · KBank" width={390} height={844}>
+            <CreditCardDetailV4 />
+          </DCArtboard>
+          <DCArtboard label="03 · Goal Detail · เที่ยวญี่ปุ่น" width={390} height={844}>
+            <GoalDetailV4 />
+          </DCArtboard>
+          <DCArtboard label="04 · Budget Detail · งบใช้จ่ายรายเดือน" width={390} height={844}>
+            <BudgetDetailV4 />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Create Wallet · 3 design options"
+          subtitle="ออกแบบใหม่จาก old design (ฟอร์มยาว · chips 3 แถว · icon/สีแยก · AI goal ไม่ชัด optional) · เลือก 1 จาก 3 approach ก่อนทำ Flutter · v4.1 = single page (sticky preview + compact rows) รองรับทั้ง create และ edit ในหน้าเดียว — แก้ไขเร็วกว่า wizard ที่ต้องคลิกผ่านทุก step"
+        >
+          <DCArtboard label="A1 · Wizard · เลือกประเภท" width={390} height={844}>
+            <CreateWalletA_Step1 />
+          </DCArtboard>
+          <DCArtboard label="A2 · Wizard · ตั้งชื่อ + icon + สี (live preview)" width={390} height={844}>
+            <CreateWalletA_Step2 />
+          </DCArtboard>
+          <DCArtboard label="A3 · Wizard · ยอดเริ่มต้น + สกุลเงิน" width={390} height={844}>
+            <CreateWalletA_Step3 />
+          </DCArtboard>
+          <DCArtboard label="A4 · Wizard · เป้าหมาย AI (required)" width={390} height={844}>
+            <CreateWalletA_Step4 />
+          </DCArtboard>
+          <DCArtboard label="A1.1 · Single page · สร้างใหม่" width={390} height={844}>
+            <CreateWalletA1_Create />
+          </DCArtboard>
+          <DCArtboard label="A1.2 · Single page · แก้ไข (edit mode)" width={390} height={844}>
+            <CreateWalletA1_Edit />
+          </DCArtboard>
+          <DCArtboard label="B1.1 · Single · form sections · สร้างใหม่" width={390} height={844}>
+            <CreateWalletB1_Create />
+          </DCArtboard>
+          <DCArtboard label="B1.2 · Single · form sections · แก้ไข (edit)" width={390} height={844}>
+            <CreateWalletB1_Edit />
+          </DCArtboard>
+          <DCArtboard label="C1.1 · Single · essentials-first · สร้างใหม่" width={390} height={844}>
+            <CreateWalletC1_Create />
+          </DCArtboard>
+          <DCArtboard label="C1.2 · Single · essentials-first · แก้ไข (edit)" width={390} height={844}>
+            <CreateWalletC1_Edit />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Create Credit Card · Wizard"
+          subtitle="4-step wizard เฉพาะบัตรเครดิต — แก้ pain ของฟอร์มเดิมที่ยัด 10+ fields ในหน้าเดียว · Step 1: เลือกธนาคาร (สี+ไอคอนเริ่มต้น auto) · Step 2: ตั้งชื่อ+เลข 4 หลักท้าย+icon/สี · Step 3: วงเงิน+ยอดค้าง+รอบบิล+กำหนดชำระ+แจ้งเตือน · Step 4: เป้าหมาย AI (required)"
+        >
+          <DCArtboard label="CC1 · Wizard · เลือกธนาคาร" width={390} height={844}>
+            <CreateCreditWizard_Step1 />
+          </DCArtboard>
+          <DCArtboard label="CC2 · Wizard · ตั้งชื่อ + เลข 4 หลัก + icon + สี" width={390} height={844}>
+            <CreateCreditWizard_Step2 />
+          </DCArtboard>
+          <DCArtboard label="CC3 · Wizard · วงเงินและรอบบิล" width={390} height={844}>
+            <CreateCreditWizard_Step3 />
+          </DCArtboard>
+          <DCArtboard label="CC4 · Wizard · เป้าหมาย AI (required)" width={390} height={844}>
+            <CreateCreditWizard_Step4 />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Create Goal Wallet · Wizard"
+          subtitle="4-step wizard เฉพาะเป้าหมายออมเงิน — Step 1: เลือกประเภทเป้าหมาย (เที่ยว/บ้าน/รถ/ฉุกเฉิน/ฯลฯ) · Step 2: ตั้งชื่อ + icon + สี · Step 3: ยอดเป้าหมาย + สกุลเงิน + วันเริ่ม + วันที่ตั้งเป้า + คำนวณ ออม/เดือน · Step 4: เหตุผล/แรงจูงใจ AI (required) — เก็บ 'ทำไม' เพื่อให้ AI เตือนแบบตรงใจ"
+        >
+          <DCArtboard label="G1 · Wizard · เลือกประเภทเป้าหมาย" width={390} height={844}>
+            <CreateGoalWizard_Step1 />
+          </DCArtboard>
+          <DCArtboard label="G2 · Wizard · ตั้งชื่อ + icon + สี" width={390} height={844}>
+            <CreateGoalWizard_Step2 />
+          </DCArtboard>
+          <DCArtboard label="G3 · Wizard · ยอด + สกุลเงิน + วันที่" width={390} height={844}>
+            <CreateGoalWizard_Step3 />
+          </DCArtboard>
+          <DCArtboard label="G4 · Wizard · เหตุผล AI (required)" width={390} height={844}>
+            <CreateGoalWizard_Step4 />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Create Budget · Wizard"
+          subtitle="5-step wizard เฉพาะงบประมาณ (เพิ่มอีก 1 step เพราะ wallet+category selection ซับซ้อนกว่า) · Step 1: เลือกประเภทงบ (อาหาร/เดินทาง/ฯลฯ) · Step 2: ตั้งชื่อ + icon + สี · Step 3: ยอดงบ + สกุลเงิน + ช่วงเวลา + ทำซ้ำ · Step 4: เลือกกระเป๋า + หมวดหมู่ (multi-wallet nested) · Step 5: เป้าหมาย AI (required)"
+        >
+          <DCArtboard label="B1 · Wizard · เลือกประเภทงบ" width={390} height={844}>
+            <CreateBudgetWizard_Step1 />
+          </DCArtboard>
+          <DCArtboard label="B2 · Wizard · ตั้งชื่อ + icon + สี" width={390} height={844}>
+            <CreateBudgetWizard_Step2 />
+          </DCArtboard>
+          <DCArtboard label="B3 · Wizard · ยอด + ช่วงเวลา + ทำซ้ำ" width={390} height={844}>
+            <CreateBudgetWizard_Step3 />
+          </DCArtboard>
+          <DCArtboard label="B4 · Wizard · กระเป๋า + หมวดหมู่" width={390} height={844}>
+            <CreateBudgetWizard_Step4 />
+          </DCArtboard>
+          <DCArtboard label="B5 · Wizard · เป้าหมาย AI (required)" width={390} height={844}>
+            <CreateBudgetWizard_Step5 />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Icon & Color Picker Redesign"
+          subtitle="Pain ของ picker เดิม: icon+สี เปิด 2 sheets · pack มี broken icons · color 24 ตัวไม่มี group · tab 'แพ็คเกจ' ปนกับ picker · ของใหม่: รวมในแผ่นเดียว + live preview + library manager แยกใน More menu"
+        >
+          <DCArtboard label="01 · Unified Picker · icon + color + preview" width={390} height={844}>
+            <IconColorPickerUnified />
+          </DCArtboard>
+          <DCArtboard label="02 · Library Manager · เปิดจาก More menu" width={390} height={844}>
+            <IconLibraryManager />
+          </DCArtboard>
+          <DCArtboard label="02b · Add Custom Icon · scroll continuous, ไม่มี tabs" width={390} height={844}>
+            <IconAddCustom />
+          </DCArtboard>
+          <DCArtboard label="03a · Color Picker · Preview = TINT (SVG paired)" width={390} height={844}>
+            <ColorPickerTint />
+          </DCArtboard>
+          <DCArtboard label="03b · Color Picker · Preview = ASSET (flat 3D)" width={390} height={844}>
+            <ColorPickerAsset />
+          </DCArtboard>
+          <DCArtboard label="03c · Color Picker · Preview = EMOJI" width={390} height={844}>
+            <ColorPickerEmoji />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Melon Chat (AI assistant)"
+          subtitle="หน้า chat สำหรับ AI Melon · 2 state · (1) เปิดมาครั้งแรกยังไม่มีบทสนทนา — โชว์ greeting + suggested questions แบ่งกลุ่ม (ถาม Melon / ลัดบันทึก) + shortcut tile 4 ปุ่ม · (2) มี chat แล้ว — long-form AI reply พร้อม bullet, divider, recommendation และ quick replies follow-up · ทั้ง 2 หน้าใช้ wallet selector chip + input bar (cam/gallery/mic) + bottom nav 5 ปุ่ม (Ai กลาง)"
+        >
+          <DCArtboard label="01 · Melon Chat · Init (suggestions + shortcuts)" width={390} height={844}>
+            <MelonChatInit />
+          </DCArtboard>
+          <DCArtboard label="02 · Melon Chat · Active (ตามรูป screenshot)" width={390} height={844}>
+            <MelonChatActive />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v4 — Root Pager (Chat ↔ Finance)"
+          subtitle="หน้า root ใหม่ของ app · pager 2 หน้า ใช้ compact segment เป็น header (แทน title bar) · Chat = Melon Chat (embedded) · Finance = Home v3 + tabbar · swipe เปลี่ยน page ได้ทั้ง 2 ทิศ · segment กดเลือกได้ → animated indicator slide"
+        >
+          <DCArtboard label="01 · Pager · Chat tab" width={390} height={844}>
+            <RootPagerChat />
+          </DCArtboard>
+          <DCArtboard label="02 · Pager · Finance tab" width={390} height={844}>
+            <RootPagerFinance />
+          </DCArtboard>
+          <DCArtboard label="03 · Pager · Finance → Wallets (กระเป๋า)" width={390} height={844}>
+            <RootPagerWallets />
+          </DCArtboard>
+          <DCArtboard label="04 · Pager · Finance → Transaction (มีนาคม)" width={390} height={844}>
+            <RootPagerTransaction />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="Navigation Options — Lo-fi Comparison"
+          subtitle="เปรียบเทียบโครงสร้าง nav 5 แบบ · grayscale + dashed box เพื่อ focus ที่ 'nav อยู่ที่ไหน · มีกี่ชั้น' · 00 Current · A แก้เฉพาะจุด · B AI-first · C FAB กลาง · D ChatGPT-style sidebar"
+        >
+          <DCArtboard label="00 · Current (v4 Root Pager)" width={390} height={844}>
+            <NavLoFi_Current />
+          </DCArtboard>
+          <DCArtboard label="A · Keep 2-pager + fix" width={390} height={844}>
+            <NavLoFi_A />
+          </DCArtboard>
+          <DCArtboard label="B · AI-first (chat = root)" width={390} height={844}>
+            <NavLoFi_B />
+          </DCArtboard>
+          <DCArtboard label="C · Finance-first + AI FAB" width={390} height={844}>
+            <NavLoFi_C />
+          </DCArtboard>
+          <DCArtboard label="D · ChatGPT-style sidebar" width={390} height={844}>
+            <NavLoFi_D />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="Grok-style Navigation — Lo-fi"
+          subtitle="3 horizontal pages · MENU (full) ← Chat ↔ Transaction · top segment 2 tabs · swipe ขวาจาก Chat = เปิด Menu · ขอบสีแดงคือ gesture boundary"
+        >
+          <DCArtboard label="1 · MENU (profile + history)" width={390} height={844}>
+            <GrokNav_Menu />
+          </DCArtboard>
+          <DCArtboard label="2 · Chat (default landing)" width={390} height={844}>
+            <GrokNav_Chat />
+          </DCArtboard>
+          <DCArtboard label="3 · Transaction" width={390} height={844}>
+            <GrokNav_Tx />
+          </DCArtboard>
+          <DCArtboard label="4 · Interactive prototype (กดเล่นได้)" width={390} height={844}>
+            <GrokNav_Prototype />
+          </DCArtboard>
+          <DCArtboard label="5 · Flow + gesture rules (diagram)" width={390} height={844}>
+            <GrokNav_Flow />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v5 — Transaction Redesign · 3 versions"
+          subtitle="ปรับจากหน้า Transaction จริง (screenshot) · แก้ pain: การ์ดต่อวันเปลืองที่ + เลขวันตัวใหญ่แย่ง hierarchy + ยอดวัน/ยอดรายการซ้ำซ้อนตอนมีรายการเดียว + ยอดสีดำหมด scan ยาก + ตัวเลขไม่ tabular · ทุก version: tabular numbers ชิดขวา · เงินเข้า=teal เงินออก=ดำ (คง 'ลดสีแดง') · ไอคอน SVG ไม่ใช้ emoji · touch target ≥44 · A=ต่อยอดการ์ดเดิม · B=timeline list density สูงสุด · C=insight-first premium"
+        >
+          <DCArtboard label="A · Refined Cards (การ์ดกระชับ + in/out bar)" width={390} height={844}>
+            <TransactionV5A />
+          </DCArtboard>
+          <DCArtboard label="B · Timeline List (sticky header + flat rows)" width={390} height={844}>
+            <TransactionV5B />
+          </DCArtboard>
+          <DCArtboard label="C · Insight-first (gradient hero + timeline rail)" width={390} height={844}>
+            <TransactionV5C />
+          </DCArtboard>
+          <DCArtboard label="D · Refined (ปรับจาก design ล่าสุด · 3-col + budget + collapsible + rail + เวลา)" width={390} height={844}>
+            <TransactionV5D />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          title="v5 — สรุปการเงิน (Financial Health · bottom sheet)"
+          subtitle="กด Net Worth header บนหน้า Home → เปิด bottom sheet 'สรุปการเงิน' เพื่อให้ user เข้าใจสถานะความมั่งคั่ง/หนี้สินในพริบตา (ไม่ใช่ลิสต์บัญชี) · Hero (net + trend + ซ่อนยอด) → Health Score 72/100 + ตัวชี้วัด (หนี้ต่อสินทรัพย์ · สภาพคล่อง · อัตราออม) → 2 การ์ดสรุป สินทรัพย์↑/หนี้สิน↓ → องค์ประกอบสินทรัพย์ + utilization หนี้ → คำแนะนำ actionable (หนี้ลดลง · ครบกำหนดจ่ายบัตร) · ตัวเลข reconcile: 460,473 − 335,043 = 125,430"
+        >
+          <DCArtboard label="01 · Home (ปกติ · กด Net Worth)" width={390} height={844}>
+            <HomeScreen />
+          </DCArtboard>
+          <DCArtboard label="02 · Net Worth Detail · sheet เปิดทับ" width={390} height={844}>
+            <NetWorthDetailV5 />
+          </DCArtboard>
+        </DCSection>
+
+      </DesignCanvas>
+
+      <App.TweakPanel {...{ tweaks, setTweaks, visible: tweaksVisible }} />≠
+    </>
+  );
+}
+App.TweakPanel = TweakPanel;
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
